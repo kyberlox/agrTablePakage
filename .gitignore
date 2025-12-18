@@ -1,6 +1,7 @@
 .idea
 .vscode
 .env
+.gigaide
 */__pycache__/*
 /app_logs
 /postgresql
