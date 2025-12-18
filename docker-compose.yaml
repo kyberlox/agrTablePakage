@@ -1,0 +1,68 @@
+services:
+
+  nginx:
+    image: nginx:alpine
+    container_name: nginx_app
+    depends_on:
+      - fastapi
+      #- frontend
+    ports:
+      - "80:80"
+      #- "443:443"
+    environment:
+      - NGINX_HOST=${DOMAIN}
+    volumes:
+      - ./nginx/:/etc/nginx/conf.d/
+      - ./app_logs/nginx:/var/log/nginx  # Логи nginx
+    networks:
+      - app-network
+
+  postgres:
+    image: postgres:18.1
+    container_name: postgres
+    environment:
+      POSTGRES_DB: "pdb"
+      POSTGRES_USER: ${user}
+      POSTGRES_PASSWORD: ${pswd}
+    volumes:
+      - ./postgresql/data:/var/lib/postgresql
+      - ./app_logs/postgres:/var/log/postgresql  # Логи PostgreSQL
+    ports:
+      #- "127.0.0.1:5432:5432"
+      - 5432:5432
+    networks:
+      - app-network
+
+  fastapi:
+    build: ./app
+    container_name: fastapi
+    volumes:
+      - ./app:/data/app
+      - ./app_logs/fastapi:/etc/loggs/fastapi  # Добавляем том для логов FastAPI
+    env_file:
+      - .env
+    ports:
+      #- "127.0.0.1:8000:8000"
+      - "8000:8000"
+    depends_on:
+      - postgres
+    networks:
+      - app-network
+
+#  frontend:
+#    container_name: vue
+#    build: ./front
+#    volumes:
+#      #- ./front/:/app/
+#      - ./app_logs/frontend:/app/logs  # Логи фронтенда
+#    ports:
+#      #- "127.0.0.1:5173:5173"
+#      - "5173:5173"
+#    networks:
+#      - app-network
+
+
+
+networks:
+  app-network:
+    driver: bridge

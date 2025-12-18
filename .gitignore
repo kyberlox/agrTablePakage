@@ -1,0 +1,8 @@
+.idea
+.vscode
+.env
+*/__pycache__/*
+/app_logs
+/postgresql
+/nginx/ssl
+/app/static
