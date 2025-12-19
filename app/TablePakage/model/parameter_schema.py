@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, Fore
 from sqlalchemy.orm import relationship
 from .database import Base
 
+
 class ParameterSchema(Base):
     __tablename__ = "parameter_schemas"
 

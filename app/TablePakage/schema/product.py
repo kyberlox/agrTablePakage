@@ -3,17 +3,25 @@ from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
+
 class ProductBase(BaseModel):
     name: str
     description: Optional[str] = None
     manufacturer: Optional[str] = None
     image_url: Optional[str] = None  # ← новое поле
 
+
 class ProductCreate(ProductBase):
-    pass
+    name: str
+    description: Optional[str] = None
+    manufacturer: Optional[str] = None
+
 
 class ProductUpdate(ProductBase):
-    pass
+    name: str
+    description: Optional[str] = None
+    manufacturer: Optional[str] = None
+
 
 class ProductResponse(ProductBase):
     id: int
