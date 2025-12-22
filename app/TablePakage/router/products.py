@@ -104,7 +104,7 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
     return product
 
 
-@router.post("/", description="Запрос на добавление товара.")
+@router.post("/", response_model=ProductResponse, description="Запрос на добавление товара.")
 async def create_product(data: ProductCreate = Body(...),
                          db: AsyncSession = Depends(get_db)
                          ):
@@ -119,7 +119,7 @@ async def create_product(data: ProductCreate = Body(...),
     return product
 
 
-@router.put("/", description="Запрос на изменение товара.")
+@router.put("/", response_model=ProductUpdate, description="Запрос на изменение товара.")
 async def edit_product(data: ProductUpdate = Body(...), db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Product).where(Product.id == data.id)
@@ -137,7 +137,7 @@ async def edit_product(data: ProductUpdate = Body(...), db: AsyncSession = Depen
     return product
 
 
-@router.delete("/{product_id}", description="Запрос на удаление товара.")
+@router.delete("/{product_id}", response_model=ProductUpdate, description="Запрос на удаление товара.")
 async def delete_product(product_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Product).where(Product.id == product_id))
     product = result.scalar_one_or_none()
@@ -180,7 +180,7 @@ async def create_parameter_schema(
     return db_schema
 
 
-@router.get("/parameters/{param_id}", response_model=ParameterSchemaResponse)
+@router.get("/parameters/{param_id}", response_model=ParameterSchemaResponse,description="Выведение информации по параметру по его {ID}.")
 async def get_parameter(param_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
     param = result.scalar_one_or_none()
@@ -189,7 +189,7 @@ async def get_parameter(param_id: int, db: AsyncSession = Depends(get_db)):
     return param
 
 
-@router.put("/parameters/{param_id}", response_model=ParameterSchemaResponse)
+@router.put("/parameters/{param_id}", response_model=ParameterSchemaUpdate, description="Запрос на изменение полей параметра.")
 async def update_parameter(
         param_id: int,
         schema_update: ParameterSchemaUpdate,
@@ -203,6 +203,23 @@ async def update_parameter(
     for key, value in schema_update.dict(exclude_unset=True).items():
         setattr(param, key, value)
 
-    await db.commit()
     await db.refresh(param)
+    await db.commit()
+    return param
+
+
+@router.delete("/parameters/{param_id", response_model=ParameterSchemaUpdate, description="Запрос на удаление полей параметра.")
+async def delete_parameter(
+        param_id: int,
+        schema_update: ParameterSchemaUpdate,
+        db: AsyncSession = Depends(get_db)
+):
+    result = await db.execute(select(Product).where(ParameterSchema.id == param_id))
+    param = result.scalar_one_or_none()
+
+    if result is None:
+        return HTTPException(status_code=404, detail="Parameter not found")
+
+    await db.delete(param)
+    await db.commit()
     return param

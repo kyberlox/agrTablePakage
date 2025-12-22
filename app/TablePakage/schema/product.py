@@ -13,14 +13,10 @@ class ProductBase(BaseModel):
 
 class ProductCreate(ProductBase):
     name: str
-    description: Optional[str] = None
-    manufacturer: Optional[str] = None
 
 
 class ProductUpdate(ProductBase):
-    name: str
-    description: Optional[str] = None
-    manufacturer: Optional[str] = None
+    pass
 
 
 class ProductResponse(ProductBase):
