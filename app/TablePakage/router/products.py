@@ -8,6 +8,7 @@ from sqlalchemy.future import select
 import uuid
 from pathlib import Path
 import imghdr
+import pandas as pd
 
 from ..model.database import get_db
 from ..model.product import Product
@@ -104,22 +105,22 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
     return product
 
 
-@router.post("/", response_model=ProductResponse, description="Запрос на добавление товара.")
-async def create_product(data: ProductCreate = Body(...),
-                         db: AsyncSession = Depends(get_db)
-                         ):
-    product = Product(
-        name=data.name,
-        description=data.description,
-        params=data.params
-    )
-    db.add(product)
-    await db.commit()
-    await db.refresh(product)
-    return product
+# @router.post("/", response_model=ProductResponse, description="Запрос на добавление товара.")
+# async def create_product(data: ProductCreate = Body(...),
+#                          db: AsyncSession = Depends(get_db)
+#                          ):
+#     product = Product(
+#         name=data.name,
+#         description=data.description,
+#         params=data.params
+#     )
+#     db.add(product)
+#     await db.commit()
+#     await db.refresh(product)
+#     return product
 
 
-@router.put("/", response_model=ProductUpdate, description="Запрос на изменение товара.")
+@router.put("/{product_id}", response_model=ProductResponse, description="Запрос на изменение товара.")
 async def edit_product(data: ProductUpdate = Body(...), db: AsyncSession = Depends(get_db)):
     result = await db.execute(
         select(Product).where(Product.id == data.id)
@@ -137,12 +138,12 @@ async def edit_product(data: ProductUpdate = Body(...), db: AsyncSession = Depen
     return product
 
 
-@router.delete("/{product_id}", response_model=ProductUpdate, description="Запрос на удаление товара.")
+@router.delete("/{product_id}", response_model=ProductResponse, description="Запрос на удаление товара.")
 async def delete_product(product_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Product).where(Product.id == product_id))
     product = result.scalar_one_or_none()
 
-    if result is None:
+    if product is None:
         return HTTPException(status_code=404, detail="Product not found")
 
     await db.delete(product)
@@ -180,7 +181,8 @@ async def create_parameter_schema(
     return db_schema
 
 
-@router.get("/parameters/{param_id}", response_model=ParameterSchemaResponse,description="Выведение информации по параметру по его {ID}.")
+@router.get("/parameters/{param_id}", response_model=ParameterSchemaResponse,
+            description="Выведение информации по параметру по его {ID}.")
 async def get_parameter(param_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
     param = result.scalar_one_or_none()
@@ -189,7 +191,48 @@ async def get_parameter(param_id: int, db: AsyncSession = Depends(get_db)):
     return param
 
 
-@router.put("/parameters/{param_id}", response_model=ParameterSchemaUpdate, description="Запрос на изменение полей параметра.")
+# @router.post("/parameters/xlsx", description="Запрос на добавление параметров из XLSX-файла.")
+# def upload_parameters(uploaded_file: UploadFile = File(...), db: AsyncSession = Depends(get_db)):
+#     if not uploaded_file.filename.endswith(".xlsx"):
+#         raise HTTPException(status_code=400, detail="Требуется XLSX-файл")
+#
+#     df = pd.read_excel(uploaded_file.file)
+#     descriptions = df.iloc[0]
+#     dimensions = df.iloc[1]
+#     values_rows = df.iloc[2:]
+#
+#     df = df.drop(df.columns[0], axis=1)
+#
+#     params_to_add = []
+#
+#     for col_name in df.columns:
+#         name = col_name.strip()
+#         description = str(descriptions[col_name])
+#         dimension = str(dimensions[col_name])
+#         raw_values = values_rows[col_name].dropna().tolist()
+#         processed_values = []
+#         for v in raw_values:
+#             try:
+#                 processed_values.append(float(v))
+#             except (ValueError, TypeError):
+#                 processed_values.append(str(v))
+#
+#         param = Params(
+#             name=name,
+#             description=description,
+#             dimension=dimension,
+#             values=processed_values
+#         )
+#         params_to_add.append(param)
+#
+#     db.add_all(params_to_add)
+#     db.commit()
+#
+#     return {"Сообщение": "Записи из XLSX-файла добавлены в БД."}
+
+
+@router.put("/parameters/{param_id}", response_model=ParameterSchemaResponse,
+            description="Запрос на изменение полей параметра.")
 async def update_parameter(
         param_id: int,
         schema_update: ParameterSchemaUpdate,
@@ -208,13 +251,13 @@ async def update_parameter(
     return param
 
 
-@router.delete("/parameters/{param_id", response_model=ParameterSchemaUpdate, description="Запрос на удаление полей параметра.")
+@router.delete("/parameters/{param_id}", response_model=ParameterSchemaResponse,
+               description="Запрос на удаление полей параметра.")
 async def delete_parameter(
         param_id: int,
-        schema_update: ParameterSchemaUpdate,
         db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(Product).where(ParameterSchema.id == param_id))
+    result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
     param = result.scalar_one_or_none()
 
     if result is None:
