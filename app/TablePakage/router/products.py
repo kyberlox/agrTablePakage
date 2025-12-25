@@ -1,8 +1,11 @@
 # app/products/router/products.py
 import os
+import tempfile
+from fastapi.responses import FileResponse
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Form, Body
 from fastapi import UploadFile
-from sqlalchemy import text
+
+from sqlalchemy import text, create_engine
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -58,10 +61,17 @@ def generate_unique_filename(original_filename: str) -> str:
     return unique_name
 
 
-def to_sql_name(name: str) -> str:
+def to_sql_name_lat(name: str) -> str:
     # Замена кириллицы на латиницу транслитом
     return translit(name.lower(), 'ru', reversed=True).replace(" ", "_")
 
+
+def to_sql_name_kir(name: str) -> str:
+    # Замена латиницы на кириллицу транслитом
+    return translit(name.lower(), 'ru').replace("_", " ")
+
+
+# === Product Schema Endpoints ===
 
 @router.post("/", response_model=ProductResponse, status_code=201)
 async def create_product(
@@ -91,9 +101,6 @@ async def create_product(
     await db.commit()
     await db.refresh(db_product)
     return db_product
-
-
-# === Product Schema Endpoints ===
 
 
 @router.get("/", response_model=list[ProductResponse], description="Выведение всей продукции из БД.")
@@ -166,8 +173,8 @@ async def create_parameter_schema(
     if schema.type == "Table":
         if not schema.table_name:
             raise HTTPException(status_code=400, detail="table_name is required for type 'Table'")
-        await create_or_alter_table(db, to_sql_name(schema.table_name) + "_table",
-                                    to_sql_name(schema.name))
+        await create_or_alter_table(db, to_sql_name_lat(schema.table_name) + "_table",
+                                    to_sql_name_lat(schema.name))
 
     await db.commit()
     await db.refresh(db_schema)
@@ -182,64 +189,6 @@ async def get_parameter(param_id: int, db: AsyncSession = Depends(get_db)):
     if not param:
         raise HTTPException(status_code=404, detail="Parameter not found")
     return param
-
-
-@router.post("/parameters/xlsx", description="Импорт параметров из XLSX")
-async def import_excel(
-        product_name: str,
-        file: UploadFile = File(...),
-        db: AsyncSession = Depends(get_db)
-):
-    table_name = f"{to_sql_name(product_name)}_table"
-
-    # 1. Читаем Excel
-    df = pd.read_excel(file.file)
-
-    # 2. Получаем колонки таблицы
-    result = await db.execute(
-        text("""
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_name = :table_name
-        """),
-        {"table_name": table_name}
-    )
-
-    db_columns = {row[0] for row in result.fetchall()}
-
-    # 3. Колонки Excel
-    excel_columns_kirr = set(df.columns)
-    excel_columns = set()
-    for i in excel_columns_kirr:
-        excel_columns.add(i)
-
-    # 4. Пересечение
-    common_columns = db_columns & excel_columns
-
-    if not common_columns:
-        return {"message": "Нет совпадающих колонок"}
-
-    # 5. Формируем INSERT
-    columns_sql = ", ".join(common_columns)
-    values_sql = ", ".join(f":{col}" for col in common_columns)
-
-    insert_sql = text(f"""
-        INSERT INTO {table_name} ({columns_sql})
-        VALUES ({values_sql})
-    """)
-
-    # 6. Вставляем все строки Excel
-    for _, row in df.iterrows():
-        values = {col: row[col] for col in common_columns}
-        await db.execute(insert_sql, values)
-
-    await db.commit()
-
-    return {
-        "table": table_name,
-        "inserted_rows": len(df),
-        "used_columns": list(common_columns)
-    }
 
 
 @router.put("/parameters/{param_id}", response_model=ParameterSchemaResponse,
@@ -277,3 +226,124 @@ async def delete_parameter(
     await db.delete(param)
     await db.commit()
     return param
+
+
+# === Product Schema Endpoints ===
+
+@router.post("/upload_xlsx", description="Импорт параметров из XLSX.")
+async def import_excel(
+        product_name: str,
+        file: UploadFile = File(...),
+        db: AsyncSession = Depends(get_db)
+):
+    table_name = f"{to_sql_name_lat(product_name)}_table"
+
+    # 1. Читаем Excel
+    df = pd.read_excel(file.file)
+    df = df.where(pd.notnull(df), None)
+
+    # 2. Получаем колонки БД (без id)
+    result = await db.execute(
+        text("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = :table_name
+              AND column_name != 'id'
+        """),
+        {"table_name": table_name}
+    )
+    db_columns = {row[0] for row in result.fetchall()}
+
+    # 3. Сопоставление: транслит → оригинальное имя из Excel
+    excel_map = {
+        to_sql_name_lat(col): col for col in df.columns
+    }
+
+    # 4. Пересечение
+    common_columns = db_columns & excel_map.keys()
+
+    if not common_columns:
+        return {"message": "Нет совпадающих колонок"}
+
+    # 5. Формируем INSERT
+    columns_sql = ", ".join(common_columns)
+    values_sql = ", ".join(f":{col}" for col in common_columns)
+
+    insert_sql = text(f"""
+        INSERT INTO {table_name} ({columns_sql})
+        VALUES ({values_sql})
+    """)
+
+    # 6. Вставляем строки
+    for _, row in df.iterrows():
+        values = {
+            col: str(row[excel_map[col]]) if row[excel_map[col]] is not None else None
+            for col in common_columns
+        }
+        await db.execute(insert_sql, values)
+
+    await db.commit()
+
+    return {
+        "table": table_name,
+        "inserted_rows": len(df),
+        "used_columns": list(common_columns)
+    }
+
+
+@router.post("/download_xlsx", description="Выгрузка параметров из БД в XLSX.")
+async def download_xlsx(
+        product_name: str,
+        db: AsyncSession = Depends(get_db)
+):
+    table_name = f"{to_sql_name_lat(product_name)}_table"
+
+    # 1. Проверяем, что таблица существует
+    exists = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_name = :table_name
+            )
+        """),
+        {"table_name": table_name}
+    )
+
+    if not exists.scalar():
+        raise HTTPException(status_code=404, detail="Table not found")
+
+    # 2. Получаем данные таблицы
+    result = await db.execute(text(f"SELECT * FROM {table_name}"))
+    rows = result.fetchall()
+    columns = result.keys()
+
+    if not rows:
+        raise HTTPException(status_code=400, detail="Table is empty")
+
+    # 3. DataFrame
+    df = pd.DataFrame(rows, columns=columns)
+
+    # 4. Переводим названия колонок и значения с латиницы на кириллицу, кроме названия колонок из SYSTEM_COLUMNS
+    SYSTEM_COLUMNS = {"id"}
+
+    df.columns = [
+        to_sql_name_kir(col) if col not in SYSTEM_COLUMNS else col
+        for col in df.columns
+    ]
+    df = df.applymap(
+        lambda x: to_sql_name_kir(x) if isinstance(x, str) else x
+    )
+
+    # 5. Создаём временный XLSX
+    tmp_dir = tempfile.gettempdir()
+    file_path = os.path.join(tmp_dir, f"{table_name}_params.xlsx")
+
+    df.to_excel(file_path, index=False, sheet_name="Parameters")
+
+    # 6. Отдаём файл
+    return FileResponse(
+        path=file_path,
+        filename=f"{table_name}_params.xlsx",
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
