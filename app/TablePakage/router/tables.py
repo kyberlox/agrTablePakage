@@ -9,7 +9,6 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import pandas as pd
-from transliterate import translit
 
 from ..model.database import get_db
 from ..utils.router_utils import to_sql_name_kir, to_sql_name_lat
@@ -36,11 +35,11 @@ async def import_excel(
     if product_id is None:
         return {"message": f"Продукция '{product_name}' не найдена."}
 
-    # 1. Читаем Excel
+    # Читаем Excel
     df = pd.read_excel(file.file)
     df = df.where(pd.notnull(df), None)
 
-    # 2. Получаем колонки БД (без id)
+    # Получаем колонки БД (без id)
     result = await db.execute(
         text("""
             SELECT column_name
@@ -53,21 +52,21 @@ async def import_excel(
 
     db_columns = {row[0] for row in result.fetchall()}
 
-    # 3. Сопоставление: транслит → оригинальное имя из Excel
+    # Сопоставление: транслит → оригинальное имя из Excel
     excel_map = {
         to_sql_name_lat(col): col
         for col in df.columns
         if col.lower() != "id"
     }
 
-    common_columns =set(excel_map.keys())
+    common_columns = set(excel_map.keys())
 
     if not common_columns:
         return {"message": "Нет колонок для вставки"}
 
     missing = common_columns - db_columns
 
-    # создаём недостающие
+    # Создаём недостающие
     for col in missing:
         await db.execute(
             text(f'ALTER TABLE {table_name} ADD COLUMN "{col}" TEXT')
@@ -96,7 +95,7 @@ async def import_excel(
 
     await db.commit()
 
-    # 4. Формируем INSERT
+    # Формируем INSERT
     columns_sql = ", ".join(common_columns)
     values_sql = ", ".join(f":{col}" for col in common_columns)
 
@@ -105,7 +104,7 @@ async def import_excel(
         VALUES ({values_sql})
     """)
 
-    # 5. Вставляем строки
+    # Вставляем строки
     for _, row in df.iterrows():
         values = {
             col: str(row[excel_map[col]]) if row[excel_map[col]] is not None else None
@@ -121,6 +120,7 @@ async def import_excel(
         "used_columns": list(common_columns)
     }
 
+
 @router.post("/upload_matched_params_xlsx", description="Импорт параметров из XLSX, которые уже есть в базе данных.")
 async def import_excel(
         product_name: str,
@@ -129,11 +129,11 @@ async def import_excel(
 ):
     table_name = f"{to_sql_name_lat(product_name)}_table"
 
-    # 1. Читаем Excel
+    # Читаем Excel
     df = pd.read_excel(file.file)
     df = df.where(pd.notnull(df), None)
 
-    # 2. Получаем колонки БД (без id)
+    # Получаем колонки БД (без id)
     result = await db.execute(
         text("""
             SELECT column_name
@@ -145,19 +145,19 @@ async def import_excel(
     )
     db_columns = {row[0] for row in result.fetchall()}
 
-    # 3. Сопоставление: транслит → оригинальное имя из Excel
+    # Сопоставление: транслит → оригинальное имя из Excel
     excel_map = {
         to_sql_name_lat(col): col
         for col in df.columns
     }
 
-    # 4. Пересечение
+    # Пересечение
     common_columns = db_columns & excel_map.keys()
 
     if not common_columns:
         return {"message": "Нет совпадающих колонок"}
 
-    # 5. Формируем INSERT
+    # Формируем INSERT
     columns_sql = ", ".join(common_columns)
     values_sql = ", ".join(f":{col}" for col in common_columns)
 
@@ -166,7 +166,7 @@ async def import_excel(
         VALUES ({values_sql})
     """)
 
-    # 6. Вставляем строки
+    # Вставляем строки
     for _, row in df.iterrows():
         values = {
             col: str(row[excel_map[col]]) if row[excel_map[col]] is not None else None
@@ -190,7 +190,7 @@ async def download_xlsx(
 ):
     table_name = f"{to_sql_name_lat(product_name)}_table"
 
-    # 1. Проверяем, что таблица существует
+    # Проверяем, что таблица существует
     exists = await db.execute(
         text("""
             SELECT EXISTS (
@@ -205,7 +205,7 @@ async def download_xlsx(
     if not exists.scalar():
         raise HTTPException(status_code=404, detail="Table not found")
 
-    # 2. Получаем данные таблицы
+    # Получаем данные таблицы
     result = await db.execute(text(f"SELECT * FROM {table_name}"))
     rows = result.fetchall()
     columns = result.keys()
@@ -213,10 +213,10 @@ async def download_xlsx(
     if not rows:
         raise HTTPException(status_code=400, detail="Table is empty")
 
-    # 3. DataFrame
+    # DataFrame
     df = pd.DataFrame(rows, columns=columns)
 
-    # 4. Переводим названия колонок и значения с латиницы на кириллицу, кроме названия колонок из SYSTEM_COLUMNS
+    # Переводим названия колонок и значения с латиницы на кириллицу, кроме названия колонок из SYSTEM_COLUMNS
     SYSTEM_COLUMNS = {"id"}
 
     df.columns = [
@@ -227,15 +227,71 @@ async def download_xlsx(
         lambda x: x if isinstance(x, str) else x
     )
 
-    # 5. Создаём временный XLSX
+    # Создаём временный XLSX
     tmp_dir = tempfile.gettempdir()
     file_path = os.path.join(tmp_dir, f"{table_name}_params.xlsx")
 
     df.to_excel(file_path, index=False, sheet_name="Parameters")
 
-    # 6. Отдаём файл
+    # Отдаём файл
     return FileResponse(
         path=file_path,
         filename=f"{table_name}_params.xlsx",
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
+
+@router.get("/get_unique_param", description="Получение уникальных значений выбранного параметра из БД.")
+async def get_unique_param(
+        product_name: str,
+        param_name: str,
+        db: AsyncSession = Depends(get_db)
+):
+    table_name = f"{to_sql_name_lat(product_name)}_table"
+    param_name = to_sql_name_lat(param_name)
+
+    # Проверяем, что таблица существует
+    exists = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_name = :table_name
+            )
+        """),
+        {"table_name": table_name}
+    )
+
+    if not exists.scalar():
+        raise HTTPException(status_code=404, detail="Table not found")
+
+    # Проверяем, что колонка существует
+    column_exists = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = :table_name
+                  AND column_name = :column_name
+            )
+        """),
+        {
+            "table_name": table_name,
+            "column_name": param_name
+        }
+    )
+
+    if not column_exists.scalar():
+        raise HTTPException(status_code=404, detail="Column not found")
+
+    # Получаем данные таблицы
+    result = await db.execute(text(f"SELECT {param_name} FROM {table_name}"))
+    values = set([row[0] for row in result.fetchall()])
+
+    if not values:
+        raise HTTPException(status_code=400, detail="Table is empty")
+
+    return {
+        "parameter": param_name,
+        "values": values
+    }
