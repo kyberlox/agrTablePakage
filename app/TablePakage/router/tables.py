@@ -1,6 +1,8 @@
 # app/products/router/tables.py
 import os
 import tempfile
+from typing import Optional
+
 from fastapi.responses import FileResponse
 from fastapi import APIRouter, Depends, File, HTTPException
 from fastapi import UploadFile
@@ -294,4 +296,71 @@ async def get_unique_param(
     return {
         "parameter": param_name,
         "values": values
+    }
+
+@router.post("/delete_selected_value_of_param", description="Удаление выбранного значения из параметра в БД.")
+async def get_unique_param(
+        product_name: str,
+        param_name: str,
+        value: Optional[str] = None,
+        db: AsyncSession = Depends(get_db)
+):
+    table_name = f"{to_sql_name_lat(product_name)}_table"
+    param_name = to_sql_name_lat(param_name)
+
+    # Проверяем, что таблица существует
+    exists = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_name = :table_name
+            )
+        """),
+        {"table_name": table_name}
+    )
+
+    if not exists.scalar():
+        raise HTTPException(status_code=404, detail="Table not found")
+
+    # Проверяем, что колонка существует
+    column_exists = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = :table_name
+                  AND column_name = :column_name
+            )
+        """),
+        {
+            "table_name": table_name,
+            "column_name": param_name
+        }
+    )
+
+    if not column_exists.scalar():
+        raise HTTPException(status_code=404, detail="Column not found")
+
+    # Удаляем данные таблицы
+    if value is None:
+        delete_sql = text(f"""
+                DELETE FROM "{table_name}"
+                WHERE "{param_name}" IS NULL
+            """)
+        params = {}
+    else:
+        delete_sql = text(f"""
+                DELETE FROM "{table_name}"
+                WHERE "{param_name}" = :value
+            """)
+        params = {"value": value}
+
+    result = await db.execute(delete_sql, params)
+    await db.commit()
+
+    return {
+        "table": table_name,
+        "parameter": param_name,
+        "deleted_value": value,
     }
