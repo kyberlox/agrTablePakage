@@ -298,6 +298,7 @@ async def get_unique_param(
         "values": values
     }
 
+
 @router.post("/delete_selected_value_of_param", description="Удаление выбранного значения из параметра в БД.")
 async def get_unique_param(
         product_name: str,
