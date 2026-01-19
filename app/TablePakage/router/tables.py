@@ -357,7 +357,7 @@ async def get_unique_param(
             """)
         params = {"value": value}
 
-    result = await db.execute(delete_sql, params)
+    await db.execute(delete_sql, params)
     await db.commit()
 
     return {
@@ -365,3 +365,138 @@ async def get_unique_param(
         "parameter": param_name,
         "deleted_value": value,
     }
+
+
+@router.post("/added_value_for_param", description="Добавление значения для выбранного параметра в БД.")
+async def get_unique_param(
+        product_name: str,
+        param_name: str,
+        value: Optional[str] = None,
+        db: AsyncSession = Depends(get_db)
+):
+    table_name = f"{to_sql_name_lat(product_name)}_table"
+    param_name = to_sql_name_lat(param_name)
+
+    # Проверяем, что таблица существует
+    exists = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_name = :table_name
+            )
+        """),
+        {"table_name": table_name}
+    )
+
+    if not exists.scalar():
+        raise HTTPException(status_code=404, detail="Table not found")
+
+    # Проверяем, что колонка существует
+    column_exists = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = :table_name
+                  AND column_name = :column_name
+            )
+        """),
+        {
+            "table_name": table_name,
+            "column_name": param_name
+        }
+    )
+
+    if not column_exists.scalar():
+        raise HTTPException(status_code=404, detail="Column not found")
+
+    # Получаем данные таблицы
+    result = await db.execute(
+        text(f"""
+            SELECT "{param_name}"
+            FROM "{table_name}"
+            WHERE "{param_name}" IS NOT NULL
+        """)
+    )
+    values = [row[0] for row in result.fetchall()]
+
+    if not values:
+        # все значения в выбранной колонке - NULL
+        await db.execute(
+            text(f"""
+                UPDATE "{table_name}"
+                SET "{param_name}" = :new_value
+            """),
+            {"new_value": value}
+        )
+        await db.commit()
+
+        return {
+            "parameter": param_name,
+            "new_value": value,
+            "mode": "updated_null_column"
+        }
+
+    else:
+        # считаем количество записей для каждого значения
+        count_result = await db.execute(
+            text(f"""
+                    SELECT "{param_name}", COUNT(*) AS cnt
+                    FROM "{table_name}"
+                    WHERE "{param_name}" IS NOT NULL
+                    GROUP BY "{param_name}"
+                """)
+        )
+
+        rows = count_result.fetchall()
+        if not rows:
+            raise HTTPException(status_code=400, detail="No values to duplicate")
+
+        # значение с максимальным количеством записей
+        max_value = max(rows, key=lambda r: r[1])[0]
+
+        # получаем все колонки таблицы, кроме id
+        cols_result = await db.execute(
+            text("""
+                    SELECT column_name
+                    FROM information_schema.columns
+                    WHERE table_name = :table_name
+                      AND column_name != 'id'
+                """),
+            {"table_name": table_name}
+        )
+
+        columns = [r[0] for r in cols_result.fetchall()]
+
+        # формируем SELECT: заменяем только param_name
+        select_columns = []
+        for col in columns:
+            if col == param_name:
+                select_columns.append(":new_value AS " + col)
+            else:
+                select_columns.append(f'"{col}"')
+
+        insert_sql = text(f"""
+                INSERT INTO "{table_name}" ({", ".join(f'"{c}"' for c in columns)})
+                SELECT {", ".join(select_columns)}
+                FROM "{table_name}"
+                WHERE "{param_name}" = :max_value
+            """)
+
+        await db.execute(
+            insert_sql,
+            {
+                "new_value": value,
+                "max_value": max_value
+            }
+        )
+
+        await db.commit()
+
+        return {
+            "parameter": param_name,
+            "new_value": value,
+            "copied_from": max_value,
+            "mode": "duplicated_rows"
+        }
