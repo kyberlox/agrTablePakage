@@ -9,6 +9,10 @@ import app.logging_config
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 app = FastAPI(title=" App API", version="1.0.0")
 
 

@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-user = os.getenv("POSTGRES_USER")
-pswd = os.getenv("POSTGRES_PASSWORD")
-host = os.getenv("POSTGRES_HOST", "postgres")
+user = os.getenv("user")
+pswd = os.getenv("pswd")
+host = os.getenv("DBHOST", "postgres")
 port = os.getenv("POSTGRES_PORT")
 database = os.getenv("POSTGRES_DB", "pdb")
 
