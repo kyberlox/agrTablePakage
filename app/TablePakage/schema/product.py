@@ -8,7 +8,7 @@ class ProductBase(BaseModel):
     name: str
     description: Optional[str] = None
     manufacturer: Optional[str] = None
-    image_url: Optional[str] = None  # ← новое поле
+    image_url: Optional[str] = None
 
 
 class ProductCreate(ProductBase):
@@ -22,6 +22,7 @@ class ProductUpdate(ProductBase):
 class ProductResponse(ProductBase):
     id: int
     image: Optional[str] = None
+    image_url: Optional[str] = None
     created_at: datetime
 
     class Config:

@@ -45,6 +45,13 @@ async def create_parameter_schema(
     await db.refresh(db_schema)
     return db_schema
 
+@router.get("/by_product/{product_id}", response_model=list[ParameterSchemaResponse], description="Выведение информации по параметрам продукта по его {ID}.")
+async def get_parameters(product_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(ParameterSchema).where(ParameterSchema.product_id == product_id))
+    params = result.scalars().all()
+    if not params:
+        raise HTTPException(status_code=404, detail="Parameters not found")
+    return params
 
 @router.get("/{param_id}", response_model=ParameterSchemaResponse,
             description="Выведение информации по параметру по его {ID}.")

@@ -17,8 +17,12 @@ class ParameterSchemaCreate(ParameterSchemaBase):
 
 
 class ParameterSchemaUpdate(BaseModel):
+    name: Optional[str] = None
     description: Optional[str] = None
-    field_of_view: Optional[Dict[str, bool]] = None
+    type: Optional[str] = None
+    table_name: Optional[str] = None
+    field_of_view: Optional[str] = None
+    product_id: Optional[int] = None
 
 
 class ParameterSchemaResponse(ParameterSchemaBase):

@@ -1,7 +1,7 @@
 services:
 
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27.0-alpine
     container_name: nginx_app
     depends_on:
       - fastapi
@@ -18,10 +18,10 @@ services:
       - app-network
 
   postgres:
-    image: postgres:18.1
+    image: postgres:18.1-bookworm
     container_name: postgres
     environment:
-      POSTGRES_DB: "pdb"
+      POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${user}
       POSTGRES_PASSWORD: ${pswd}
     volumes:

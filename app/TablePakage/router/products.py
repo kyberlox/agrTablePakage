@@ -65,6 +65,7 @@ async def create_product(
         db: AsyncSession = Depends(get_db)
 ):
     image_path = None
+    image_url = None
 
     if image:
         validate_image(image)
@@ -73,12 +74,14 @@ async def create_product(
         with open(file_path, "wb") as f:
             f.write(await image.read())
         image_path = f"/static/images/{unique_filename}"
+        image_url = f"/api/files/images/{unique_filename}"
 
     db_product = Product(
         name=name,
         description=description,
         manufacturer=manufacturer,
-        image=image_path
+        image=image_path,
+        image_url=image_url
     )
     db.add(db_product)
     await db.commit()
