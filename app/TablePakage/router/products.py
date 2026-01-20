@@ -1,7 +1,9 @@
 # app/products/router/products.py
 import os
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+
+from fastapi import APIRouter, Depends, File, HTTPException, Form, Body
 from fastapi import UploadFile
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
@@ -11,20 +13,17 @@ import imghdr
 
 from ..model.database import get_db
 from ..model.product import Product
-from ..model.parameter_schema import ParameterSchema
-from ..schema.product import ProductCreate, ProductUpdate, ProductResponse
-from ..schema.parameter_schema import ParameterSchemaCreate, ParameterSchemaResponse, ParameterSchemaUpdate
-from ..utils.db_utils import create_or_alter_table
+from ..schema.product import ProductUpdate, ProductResponse
 
 router = APIRouter(prefix="/products", tags=["Products"])
 
 UPLOAD_DIR = "./static/images"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-
 # Настройки
 MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 МБ
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"}
+
 
 def validate_image(file: UploadFile) -> None:
     # Проверка размера
@@ -48,18 +47,22 @@ def validate_image(file: UploadFile) -> None:
     if ext == ".jpg" and img_type not in ["jpeg", "jpg"]:
         raise HTTPException(status_code=400, detail="File extension does not match content")
 
+
 def generate_unique_filename(original_filename: str) -> str:
     ext = Path(original_filename).suffix
     unique_name = f"{uuid.uuid4()}{ext}"
     return unique_name
 
+
+# === Product Schema Endpoints ===
+
 @router.post("/", response_model=ProductResponse, status_code=201)
 async def create_product(
-    name: str = Form(...),
-    description: str = Form(None),
-    manufacturer: str = Form(None),
-    image: UploadFile = File(None),
-    db: AsyncSession = Depends(get_db)
+        name: str = Form(...),
+        description: str = Form(None),
+        manufacturer: str = Form(None),
+        image: UploadFile = File(None),
+        db: AsyncSession = Depends(get_db)
 ):
     image_path = None
 
@@ -83,14 +86,14 @@ async def create_product(
     return db_product
 
 
-
-@router.get("/", response_model=list[ProductResponse])
+@router.get("/", response_model=list[ProductResponse], description="Выведение всей продукции из БД.")
 async def get_products(skip: int = 0, limit: int = 100, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Product).offset(skip).limit(limit))
     return result.scalars().all()
 
 
-@router.get("/{product_id}", response_model=ProductResponse)
+@router.get("/{product_id}", response_model=ProductResponse,
+            description="Выведение вариации всех параметров товара по его {ID}.")
 async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(Product).where(Product.id == product_id))
     product = result.scalar_one_or_none()
@@ -99,59 +102,32 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
     return product
 
 
-# === Parameter Schema Endpoints ===
+@router.put("/{product_id}", response_model=ProductResponse, description="Запрос на изменение товара.")
+async def edit_product(data: ProductUpdate = Body(...), db: AsyncSession = Depends(get_db)):
+    result = await db.execute(
+        select(Product).where(Product.id == data.id)
+    )
+    product = result.scalar_one_or_none()
 
-@router.post("/parameters", response_model=ParameterSchemaResponse, status_code=201)
-async def create_parameter_schema(
-    schema: ParameterSchemaCreate,
-    db: AsyncSession = Depends(get_db)
-):
-    # Проверка типа
-    if schema.type not in ["Table", "Formula"]:
-        raise HTTPException(status_code=400, detail="Type must be 'Table' or 'Formula'")
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found")
 
-    # Проверка связи с продуктом
-    product_result = await db.execute(select(Product).where(Product.id == schema.product_id))
-    if not product_result.scalar_one_or_none():
-        raise HTTPException(status_code=400, detail="Invalid product_id")
-
-    db_schema = ParameterSchema(**schema.dict())
-    db.add(db_schema)
-
-    # Если тип Table — создаём или изменяем таблицу
-    if schema.type == "Table":
-        if not schema.table_name:
-            raise HTTPException(status_code=400, detail="table_name is required for type 'Table'")
-        await create_or_alter_table(db, schema.table_name, schema.name)
-
+    product.name = data.name
+    product.description = data.description
+    product.params = data.params
     await db.commit()
-    await db.refresh(db_schema)
-    return db_schema
+    await db.refresh(product)
+    return product
 
 
-@router.get("/parameters/{param_id}", response_model=ParameterSchemaResponse)
-async def get_parameter(param_id: int, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
-    param = result.scalar_one_or_none()
-    if not param:
-        raise HTTPException(status_code=404, detail="Parameter not found")
-    return param
+@router.delete("/{product_id}", response_model=ProductResponse, description="Запрос на удаление товара.")
+async def delete_product(product_id: int, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Product).where(Product.id == product_id))
+    product = result.scalar_one_or_none()
 
+    if product is None:
+        return HTTPException(status_code=404, detail="Product not found")
 
-@router.put("/parameters/{param_id}", response_model=ParameterSchemaResponse)
-async def update_parameter(
-    param_id: int,
-    schema_update: ParameterSchemaUpdate,
-    db: AsyncSession = Depends(get_db)
-):
-    result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
-    param = result.scalar_one_or_none()
-    if not param:
-        raise HTTPException(status_code=404, detail="Parameter not found")
-
-    for key, value in schema_update.dict(exclude_unset=True).items():
-        setattr(param, key, value)
-
+    await db.delete(product)
     await db.commit()
-    await db.refresh(param)
-    return param
+    return product

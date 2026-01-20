@@ -3,14 +3,16 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 import re
 
+
 # Проверка корректности имени таблицы/колонки
 def is_valid_identifier(name: str) -> bool:
     return re.match(r"^[a-zA-Z_][a-zA-Z0-9_]*$", name) is not None
 
+
 async def create_or_alter_table(
-    db: AsyncSession,
-    table_name: str,
-    column_name: str
+        db: AsyncSession,
+        table_name: str,
+        column_name: str
 ):
     if not is_valid_identifier(table_name) or not is_valid_identifier(column_name):
         raise ValueError("Invalid table or column name")

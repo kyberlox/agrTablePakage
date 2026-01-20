@@ -2,6 +2,7 @@
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 
+
 class ParameterSchemaBase(BaseModel):
     name: str
     description: Optional[str] = None
@@ -10,15 +11,18 @@ class ParameterSchemaBase(BaseModel):
     field_of_view: Optional[Dict[str, bool]] = None
     product_id: int
 
+
 class ParameterSchemaCreate(ParameterSchemaBase):
     pass
+
 
 class ParameterSchemaUpdate(BaseModel):
     description: Optional[str] = None
     field_of_view: Optional[Dict[str, bool]] = None
 
+
 class ParameterSchemaResponse(ParameterSchemaBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
