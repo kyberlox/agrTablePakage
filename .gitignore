@@ -3,7 +3,6 @@
 .env
 .gigaide
 **/__pycache__/**
-
 /app_logs
 /postgresql
 /nginx/ssl
