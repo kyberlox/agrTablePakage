@@ -50,3 +50,34 @@ async def create_or_alter_table(
             # Добавляем колонку
             await db.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {column_name} TEXT;"))
             await db.commit()
+
+
+async def create_table(
+        db: AsyncSession,
+        table_name: str,
+):
+    if not is_valid_identifier(table_name):
+        raise ValueError("Invalid table name")
+
+    result = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_name = :table_name
+            )
+        """),
+        {"table_name": table_name}
+    )
+
+    table_exists = result.scalar()
+
+    if not table_exists:
+        await db.execute(
+            text(f"""
+                CREATE TABLE "{table_name}" (
+                    id SERIAL PRIMARY KEY
+                )
+            """)
+        )
+        await db.commit()

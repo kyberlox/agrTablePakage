@@ -13,6 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import pandas as pd
 
 from ..model.database import get_db
+from ..utils.db_utils import create_table
 from ..utils.router_utils import to_sql_name_kir, to_sql_name_lat
 
 router = APIRouter(prefix="/tables", tags=["Tables"])
@@ -22,20 +23,23 @@ router = APIRouter(prefix="/tables", tags=["Tables"])
 
 @router.post("/upload_full_xlsx", description="Импорт всех параметров из XLSX.")
 async def import_excel(
-        product_name: str,
+        product_id: int,
         file: UploadFile = File(...),
         db: AsyncSession = Depends(get_db)
 ):
+    # Получаем product_name
+    product_result = await db.execute(
+        text("SELECT name FROM products WHERE id = :id"),
+        {"id": product_id}
+    )
+    product_name = product_result.scalar_one_or_none()
+
+    if product_name is None:
+        raise HTTPException(status_code=404, detail="Продукция не найдена")
+
     table_name = f"{to_sql_name_lat(product_name)}_table"
 
-    product_result = await db.execute(
-        text("SELECT id FROM products WHERE name = :name"),
-        {"name": product_name}
-    )
-    product_id = product_result.scalar_one_or_none()
-
-    if product_id is None:
-        return {"message": f"Продукция '{product_name}' не найдена."}
+    await create_table(db, table_name)
 
     # Читаем Excel
     df = pd.read_excel(file.file)
@@ -125,11 +129,23 @@ async def import_excel(
 
 @router.post("/upload_matched_params_xlsx", description="Импорт параметров из XLSX, которые уже есть в базе данных.")
 async def import_excel(
-        product_name: str,
+        product_id: int,
         file: UploadFile = File(...),
         db: AsyncSession = Depends(get_db)
 ):
+    # Получаем product_name
+    product_result = await db.execute(
+        text("SELECT name FROM products WHERE id = :id"),
+        {"id": product_id}
+    )
+    product_name = product_result.scalar_one_or_none()
+
+    if product_name is None:
+        raise HTTPException(status_code=404, detail="Продукция не найдена")
+
     table_name = f"{to_sql_name_lat(product_name)}_table"
+
+    await create_table(db, table_name)
 
     # Читаем Excel
     df = pd.read_excel(file.file)
@@ -187,9 +203,19 @@ async def import_excel(
 
 @router.post("/download_xlsx", description="Выгрузка параметров из БД в XLSX.")
 async def download_xlsx(
-        product_name: str,
+        product_id: int,
         db: AsyncSession = Depends(get_db)
 ):
+    # Получаем product_name
+    product_result = await db.execute(
+        text("SELECT name FROM products WHERE id = :id"),
+        {"id": product_id}
+    )
+    product_name = product_result.scalar_one_or_none()
+
+    if product_name is None:
+        raise HTTPException(status_code=404, detail="Продукция не найдена")
+
     table_name = f"{to_sql_name_lat(product_name)}_table"
 
     # Проверяем, что таблица существует
@@ -245,12 +271,39 @@ async def download_xlsx(
 
 @router.get("/get_unique_param", description="Получение уникальных значений выбранного параметра из БД.")
 async def get_unique_param(
-        product_name: str,
-        param_name: str,
+        product_id: int,
+        param_id: int,
         db: AsyncSession = Depends(get_db)
 ):
+    # Получаем product_name
+    product_result = await db.execute(
+        text("SELECT name FROM products WHERE id = :id"),
+        {"id": product_id}
+    )
+    product_name = product_result.scalar_one_or_none()
+
+    if product_name is None:
+        raise HTTPException(status_code=404, detail="Продукция не найдена")
+
     table_name = f"{to_sql_name_lat(product_name)}_table"
-    param_name = to_sql_name_lat(param_name)
+
+    # Получаем param_name
+    param_result = await db.execute(
+        text("""
+                SELECT name
+                FROM parameter_schemas
+                WHERE id = :param_id
+                  AND product_id = :product_id
+            """),
+        {
+            "param_id": param_id,
+            "product_id": product_id
+        }
+    )
+    param_name = param_result.scalar_one_or_none()
+
+    if param_name is None:
+        raise HTTPException(status_code=404, detail="Параметр не найден")
 
     # Проверяем, что таблица существует
     exists = await db.execute(
@@ -301,13 +354,40 @@ async def get_unique_param(
 
 @router.post("/delete_selected_value_of_param", description="Удаление выбранного значения из параметра в БД.")
 async def get_unique_param(
-        product_name: str,
-        param_name: str,
+        product_id: int,
+        param_id: int,
         value: Optional[str] = None,
         db: AsyncSession = Depends(get_db)
 ):
+    # Получаем product_name
+    product_result = await db.execute(
+        text("SELECT name FROM products WHERE id = :id"),
+        {"id": product_id}
+    )
+    product_name = product_result.scalar_one_or_none()
+
+    if product_name is None:
+        raise HTTPException(status_code=404, detail="Продукция не найдена")
+
     table_name = f"{to_sql_name_lat(product_name)}_table"
-    param_name = to_sql_name_lat(param_name)
+
+    # Получаем param_name
+    param_result = await db.execute(
+        text("""
+                   SELECT name
+                   FROM parameter_schemas
+                   WHERE id = :param_id
+                     AND product_id = :product_id
+               """),
+        {
+            "param_id": param_id,
+            "product_id": product_id
+        }
+    )
+    param_name = param_result.scalar_one_or_none()
+
+    if param_name is None:
+        raise HTTPException(status_code=404, detail="Параметр не найден")
 
     # Проверяем, что таблица существует
     exists = await db.execute(
@@ -369,13 +449,40 @@ async def get_unique_param(
 
 @router.post("/added_value_for_param", description="Добавление значения для выбранного параметра в БД.")
 async def get_unique_param(
-        product_name: str,
-        param_name: str,
+        product_id: int,
+        param_id: int,
         value: Optional[str] = None,
         db: AsyncSession = Depends(get_db)
 ):
+    # Получаем product_name
+    product_result = await db.execute(
+        text("SELECT name FROM products WHERE id = :id"),
+        {"id": product_id}
+    )
+    product_name = product_result.scalar_one_or_none()
+
+    if product_name is None:
+        raise HTTPException(status_code=404, detail="Продукция не найдена")
+
     table_name = f"{to_sql_name_lat(product_name)}_table"
-    param_name = to_sql_name_lat(param_name)
+
+    # Получаем param_name
+    param_result = await db.execute(
+        text("""
+                   SELECT name
+                   FROM parameter_schemas
+                   WHERE id = :param_id
+                     AND product_id = :product_id
+               """),
+        {
+            "param_id": param_id,
+            "product_id": product_id
+        }
+    )
+    param_name = param_result.scalar_one_or_none()
+
+    if param_name is None:
+        raise HTTPException(status_code=404, detail="Параметр не найден")
 
     # Проверяем, что таблица существует
     exists = await db.execute(
