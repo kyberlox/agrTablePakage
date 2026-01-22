@@ -31,7 +31,13 @@ async def create_parameter_schema(
     if not product_result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Invalid product_id")
 
-    db_schema = ParameterSchema(**schema.dict())
+    # Транслитерируем имя параметра
+    sql_param_name = to_sql_name_lat(schema.name)
+
+    db_schema = ParameterSchema(
+        **schema.dict(exclude={"name"}),
+        name=sql_param_name
+    )
     db.add(db_schema)
 
     # Если тип Table — создаём или изменяем таблицу

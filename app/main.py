@@ -30,6 +30,7 @@ app.mount("/api/files", StaticFiles(directory="./static"), name="files")
 app.include_router(products_router, prefix="/api")
 app.include_router(parameters_router, prefix="/api")
 app.include_router(tables_router, prefix="/api")
+app.include_router(modules_router, prefix="/api")
 
 
 @app.get("/")
