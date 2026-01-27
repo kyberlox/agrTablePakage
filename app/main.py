@@ -4,11 +4,12 @@ from fastapi.staticfiles import StaticFiles
 from .TablePakage.router.products import router as products_router
 from .TablePakage.router.parameters import router as parameters_router
 from .TablePakage.router.tables import router as tables_router
-from .TablePakage.model.database import create_tables, get_db
+from .TablePakage.model.database import create_tables
 
 #from .TablePakage.router.formulas import router as formulas_router
 
-import app.logging_config
+#import app.logging_config
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI(title=" App API", version="1.0.0")
+
 
 
 # Создаём таблицы при старте приложения
