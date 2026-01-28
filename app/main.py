@@ -1,13 +1,13 @@
 from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
-from .TablePakage.model.product import Product
 from .TablePakage.router.products import router as products_router
 from .TablePakage.router.parameters import router as parameters_router
 from .TablePakage.router.tables import router as tables_router
-from .TablePakage.model.database import create_tables, get_db
+from .TableSearch.router.module_search import router as module_search_router
+from .TableSearch.router.module_search_pandas import router as module_search_router_pandas
+
+from .TablePakage.model.database import create_tables
 import app.logging_config
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from dotenv import load_dotenv
 
@@ -30,7 +30,8 @@ app.mount("/api/files", StaticFiles(directory="./static"), name="files")
 app.include_router(products_router, prefix="/api")
 app.include_router(parameters_router, prefix="/api")
 app.include_router(tables_router, prefix="/api")
-app.include_router(modules_router, prefix="/api")
+app.include_router(module_search_router, prefix="/api")
+app.include_router(module_search_router_pandas, prefix="/api")
 
 
 @app.get("/")
