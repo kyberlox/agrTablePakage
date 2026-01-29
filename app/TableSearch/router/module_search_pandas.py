@@ -73,8 +73,8 @@ async def process_table_data(
     if product_name is None:
         raise HTTPException(status_code=404, detail="Продукция не найдена")
 
-    if not selected_params:
-        raise HTTPException(status_code=400, detail="Параметры не переданы")
+    # if not selected_params:
+    #     raise HTTPException(status_code=400, detail="Параметры не переданы")
 
     table_name = f"{to_sql_name_lat(product_name)}_table"
 

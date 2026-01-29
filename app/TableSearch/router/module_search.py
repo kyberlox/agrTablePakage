@@ -32,8 +32,8 @@ async def process_table_data(
 
     table_name = f"{to_sql_name_lat(product_name)}_table"
 
-    if not selected_params:
-        raise HTTPException(status_code=400, detail="Параметры не переданы")
+    # if not selected_params:
+    #     raise HTTPException(status_code=400, detail="Параметры не переданы")
 
     # Параметры продукта (КИРИЛЛИЦА — ИСТИНА)
     schema_result = await db.execute(
