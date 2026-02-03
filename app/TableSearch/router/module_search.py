@@ -110,6 +110,6 @@ async def process_table_data(
         "product_id": product_id,
         "product_name": product_name,
         "parameters": parameters,
-        "matched_rows": len(row),
+        "matched_rows": row["matched_rows"],
         "request_time": request_time,
     }
