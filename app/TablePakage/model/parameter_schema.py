@@ -18,3 +18,6 @@ class ParameterSchema(Base):
 
     # ORM-связь
     product = relationship("Product", back_populates="parameters")
+
+    # Связь с формулами
+    calculated = relationship("Calculated", back_populates="parameter")
