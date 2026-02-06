@@ -20,4 +20,7 @@ class ParameterSchema(Base):
     product = relationship("Product", back_populates="parameters")
 
     # Связь с формулами
-    calculated = relationship("Calculated", back_populates="parameter")
+    # calculated = relationship("Calculated", back_populates="parameter")
+
+    # Связь с user_input
+    user_inputs = relationship("UserInput", back_populates="user_input_parametr_schema", cascade="all, delete-orphan")

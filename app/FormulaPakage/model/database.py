@@ -1,1 +1,1 @@
-from ..__init__ import *
+from .TablePakage.model.database import Base
