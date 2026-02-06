@@ -6,6 +6,7 @@ import time
 from app.TablePakage.model.database import get_db
 from app.TablePakage.utils.router_utils import to_sql_name_lat
 from app.TableSearch.schema.search import ModuleSearchResponse
+from app.TableSearch.utils.dm_search import get_full_search_from_dm
 
 router = APIRouter(prefix="/module_search", tags=["Module_search"])
 
@@ -48,6 +49,20 @@ async def process_table_data(
 
     if not schema_params:
         raise HTTPException(status_code=404, detail="Параметры не найдены")
+
+    if not selected_params:
+        parameters, matched_rows = await get_full_search_from_dm(
+            db=db,
+            product_id=product_id,
+        )
+
+        return {
+            "product_id": product_id,
+            "product_name": product_name,
+            "parameters": parameters,
+            "matched_rows": matched_rows,
+            "request_time": time.perf_counter() - start_time,
+        }
 
     # Формируем WHERE
     where_clauses = []
