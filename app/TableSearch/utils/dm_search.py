@@ -3,6 +3,32 @@ from sqlalchemy import text
 from app.TablePakage.utils.router_utils import to_sql_name_lat
 
 
+async def ensure_dm_exists(
+        db: AsyncSession,
+        product_id: int,
+        table_name: str,
+        schema_params: list[str],
+):
+    # Проверяем существование
+    exists = await db.execute(
+        text("SELECT to_regclass(:name)"),
+        {"name": f"dm_product_{product_id}"}
+    )
+
+    if exists.scalar():
+        return
+
+    # Создаём витрину
+    create_sql = build_dm_sql(
+        table_name=table_name,
+        schema_params=schema_params,
+        product_id=product_id,
+    )
+
+    await db.execute(text(create_sql))
+    await db.commit()
+
+
 def build_dm_sql(
         table_name: str,
         schema_params: list[str],
@@ -28,32 +54,6 @@ def build_dm_sql(
         CREATE TABLE IF NOT EXISTS dm_product_{product_id} AS
         {union_sql};
     """
-
-
-async def ensure_dm_exists(
-        db: AsyncSession,
-        product_id: int,
-        table_name: str,
-        schema_params: list[str],
-):
-    # Проверяем существование
-    exists = await db.execute(
-        text("SELECT to_regclass(:name)"),
-        {"name": f"dm_product_{product_id}"}
-    )
-
-    if exists.scalar():
-        return
-
-    # Создаём витрину
-    create_sql = build_dm_sql(
-        table_name=table_name,
-        schema_params=schema_params,
-        product_id=product_id,
-    )
-
-    await db.execute(text(create_sql))
-    await db.commit()
 
 
 async def get_full_search_from_dm(
