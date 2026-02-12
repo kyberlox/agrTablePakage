@@ -118,6 +118,33 @@ async def import_excel(
         }
         await db.execute(insert_sql, values)
 
+    dm_table = f"dm_product_{product_id}"
+
+    await db.execute(
+        text("""
+        INSERT INTO datamart_registry (
+            product_id,
+            dm_table_name,
+            is_dirty,
+            updated_at
+        )
+        VALUES (
+            :product_id,
+            :dm_table_name,
+            TRUE,
+            now()
+        )
+        ON CONFLICT (product_id)
+        DO UPDATE
+        SET is_dirty = TRUE,
+            updated_at = now()
+        """),
+        {
+            "product_id": product_id,
+            "dm_table_name": dm_table
+        }
+    )
+
     await db.commit()
 
     return {
@@ -191,6 +218,33 @@ async def import_excel(
             for col in common_columns
         }
         await db.execute(insert_sql, values)
+
+    dm_table = f"dm_product_{product_id}"
+
+    await db.execute(
+        text("""
+            INSERT INTO datamart_registry (
+                product_id,
+                dm_table_name,
+                is_dirty,
+                updated_at
+            )
+            VALUES (
+                :product_id,
+                :dm_table_name,
+                TRUE,
+                now()
+            )
+            ON CONFLICT (product_id)
+            DO UPDATE
+            SET is_dirty = TRUE,
+                updated_at = now()
+            """),
+        {
+            "product_id": product_id,
+            "dm_table_name": dm_table
+        }
+    )
 
     await db.commit()
 
@@ -438,6 +492,34 @@ async def get_unique_param(
         params = {"value": value}
 
     await db.execute(delete_sql, params)
+
+    dm_table = f"dm_product_{product_id}"
+
+    await db.execute(
+        text("""
+            INSERT INTO datamart_registry (
+                product_id,
+                dm_table_name,
+                is_dirty,
+                updated_at
+            )
+            VALUES (
+                :product_id,
+                :dm_table_name,
+                TRUE,
+                now()
+            )
+            ON CONFLICT (product_id)
+            DO UPDATE
+            SET is_dirty = TRUE,
+                updated_at = now()
+            """),
+        {
+            "product_id": product_id,
+            "dm_table_name": dm_table
+        }
+    )
+
     await db.commit()
 
     return {
@@ -537,6 +619,33 @@ async def get_unique_param(
             """),
             {"new_value": value}
         )
+        dm_table = f"dm_product_{product_id}"
+
+        await db.execute(
+            text("""
+                INSERT INTO datamart_registry (
+                    product_id,
+                    dm_table_name,
+                    is_dirty,
+                    updated_at
+                )
+                VALUES (
+                    :product_id,
+                    :dm_table_name,
+                    TRUE,
+                    now()
+                )
+                ON CONFLICT (product_id)
+                DO UPDATE
+                SET is_dirty = TRUE,
+                    updated_at = now()
+                """),
+            {
+                "product_id": product_id,
+                "dm_table_name": dm_table
+            }
+        )
+
         await db.commit()
 
         return {
@@ -596,6 +705,33 @@ async def get_unique_param(
             {
                 "new_value": value,
                 "max_value": max_value
+            }
+        )
+
+        dm_table = f"dm_product_{product_id}"
+
+        await db.execute(
+            text("""
+                INSERT INTO datamart_registry (
+                    product_id,
+                    dm_table_name,
+                    is_dirty,
+                    updated_at
+                )
+                VALUES (
+                    :product_id,
+                    :dm_table_name,
+                    TRUE,
+                    now()
+                )
+                ON CONFLICT (product_id)
+                DO UPDATE
+                SET is_dirty = TRUE,
+                    updated_at = now()
+                """),
+            {
+                "product_id": product_id,
+                "dm_table_name": dm_table
             }
         )
 

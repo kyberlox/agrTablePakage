@@ -52,15 +52,15 @@ async def process_table_data(
 
     if not selected_params:
         await ensure_dm_exists(
-            db=db,
-            product_id=product_id,
-            table_name=table_name,
-            schema_params=schema_params,
+            db,
+            product_id,
+            table_name,
+            schema_params,
         )
 
         parameters, matched_rows = await get_full_search_from_dm(
-            db=db,
-            product_id=product_id,
+            db,
+            product_id,
         )
 
         return {
@@ -75,7 +75,12 @@ async def process_table_data(
     where_clauses = []
     sql_params = {}
 
+    allowed_params = set(schema_params)
+
     for param_name, value in selected_params.items():
+        if param_name not in allowed_params:
+            continue
+
         if value is None:
             continue
 
@@ -121,17 +126,15 @@ async def process_table_data(
 
     # Собираем значения параметров
     parameters = {
-        param_name: sorted(map(str, row[col]))
+        param_name: sorted(str(v) for v in row[col])
         for col, param_name in column_to_param.items()
         if row[col]
     }
-
-    request_time = time.perf_counter() - start_time
 
     return {
         "product_id": product_id,
         "product_name": product_name,
         "parameters": parameters,
         "matched_rows": row["matched_rows"],
-        "request_time": request_time,
+        "request_time": time.perf_counter() - start_time,
     }
