@@ -1,7 +1,4 @@
-from .model import *
-from .schema import *
-from .router import *
-from .utils import *
+from .calculated_utils import *
 
 # from ..TablePakage.router.products import router as products_router
 # from ..TablePakage.router.parameters  import router as parameters_router
@@ -12,9 +9,6 @@ from .utils import *
 
 
 __all__ = [
-    'model',
-    'shema',
-    'router',
-    'utils'
+    'calculated_utils'
 ]
 __version__ = "1.0.0"

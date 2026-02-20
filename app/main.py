@@ -1,10 +1,18 @@
 from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
 #from .TablePakage.model.product import Product
+from .FormulaPakage.model import *
+
 from .TablePakage.router.products import router as products_router
 from .TablePakage.router.parameters import router as parameters_router
 from .TablePakage.router.tables import router as tables_router
 from .TablePakage.model.database import create_tables
+
+from .FormulaPakage.router.calculate import router as calculated_router
+from .FormulaPakage.router.user_inputs import router as user_input_router
+from .FormulaPakage.router.conditions import router as condition_router
+from .FormulaPakage.router.selected_files import router as selected_file_router
+from .FormulaPakage.router.fields_of_view import router as fields_of_view_router
 
 #from .TablePakage.router.formulas import router as formulas_router
 
@@ -35,6 +43,12 @@ app.mount("/api/files", StaticFiles(directory="./static"), name="files")
 app.include_router(products_router, prefix="/api")
 app.include_router(parameters_router, prefix="/api")
 app.include_router(tables_router, prefix="/api")
+
+app.include_router(calculated_router, prefix="/api")
+app.include_router(user_input_router, prefix="/api")
+app.include_router(condition_router, prefix="/api")
+app.include_router(selected_file_router, prefix="/api")
+app.include_router(fields_of_view_router, prefix="/api")
 #app.include_router(formulas_router, prefix="/api")
 
 
