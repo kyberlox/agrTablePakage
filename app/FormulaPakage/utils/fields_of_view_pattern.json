@@ -142,6 +142,11 @@
                 "name": "Название подбираемого параметра",
                 "field": "result_param_name",
                 "data_type": "str"
+            },
+            {
+                "name": "Результат подбираемого параметра",
+                "field": "result_value",
+                "data_type": "str"
             } 
         ]
     },

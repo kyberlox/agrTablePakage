@@ -149,7 +149,7 @@ async def update(
         if not existing_node:
             raise HTTPException(status_code=404, detail=f"Отсутствует запись в Conditions с id: {node_id}")
         
-        # ДОБАВИТЬ РАСЧЕТ result_value И ЗАНЕСТИ В ТАБЛИЦУ
+        # result_value мы получаем
 
         for key, value in schema_update.dict(exclude_unset=True).items():
             setattr(existing_node, key, value)

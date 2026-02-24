@@ -7,6 +7,7 @@ from ..utils.calculated_utils import OPERATIONS
 class ConditionsSchemaBase(BaseModel):
     condition_operator: str
     condition_value: str
+    result_value: str
     condition_param_id: int
     result_param_id: int
 
@@ -25,6 +26,7 @@ class ConditionsSchemaCreate(ConditionsSchemaBase):
 class ConditionsSchemaUpdate(BaseModel):
     condition_operator: Optional[str] = None
     condition_value: Optional[str] = None
+    result_value: Optional[str] = None
     condition_param_id: Optional[int] = None
     result_param_id: Optional[int] = None
 
