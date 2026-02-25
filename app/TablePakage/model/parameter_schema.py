@@ -1,5 +1,5 @@
 # app/products/model/parameter_schema.py
-from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, ForeignKey, Index
+from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -21,5 +21,5 @@ class ParameterSchema(Base):
 
     __table_args__ = (
         Index("idx_parameter_product_id", "product_id"),
-        Index("idx_parameter_product_name", "product_id", "name"),
+        UniqueConstraint("product_id", "name", name="uq_product_parameter"),
     )
