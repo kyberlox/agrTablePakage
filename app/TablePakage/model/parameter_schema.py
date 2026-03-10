@@ -1,5 +1,5 @@
 # app/products/model/parameter_schema.py
-from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.orm import relationship
 from .database import Base
 
@@ -18,3 +18,8 @@ class ParameterSchema(Base):
 
     # ORM-связь
     product = relationship("Product", back_populates="parameters")
+
+    __table_args__ = (
+        Index("idx_parameter_product_id", "product_id"),
+        UniqueConstraint("product_id", "name", name="uq_product_parameter"),
+    )
