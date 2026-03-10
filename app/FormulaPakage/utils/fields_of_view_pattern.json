@@ -1,0 +1,189 @@
+{
+    "user_input":{
+        "fields": [
+            {
+                "name": "ID",
+                "field": "id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название",
+                "field": "name",
+                "data_type": "str"
+            },
+            {
+                "name": "Описание",
+                "field": "description",
+                "data_type": "str"
+            },
+            {
+                "name": "Единица измерения",
+                "field": "type",
+                "data_type": "str"
+            },
+            {
+                "name": "Минимальное значение параметра",
+                "field": "min_value",
+                "data_type": "int"
+            },
+            {
+                "name": "Максимальное значение параметра",
+                "field": "max_value",
+                "data_type": "int"
+            },
+            {
+                "name": "Параметр ID",
+                "field": "parameter_schema_id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название параметра",
+                "field": "parameter_schema_name",
+                "data_type": "str"
+            }
+        ]
+    },
+    "calculated":{
+        "fields": [
+            {
+                "name": "ID",
+                "field": "id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название",
+                "field": "name",
+                "data_type": "str"
+            },
+            {
+                "name": "Описание",
+                "field": "description",
+                "data_type": "str"
+            },
+            {
+                "name": "Арифметическая операция",
+                "field": "operation",
+                "data_type": "str"
+            },
+            {
+                "name": "Первый параметр ID",
+                "field": "parameter_1_id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название первого параметра",
+                "field": "parameter_1_name",
+                "data_type": "str"
+            },
+            {
+                "name": "Второй параметр ID",
+                "field": "parameter_2_id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название второго параметра",
+                "field": "parameter_2_name",
+                "data_type": "str"
+            },
+            {
+                "name": "Подбираемый параметр ID",
+                "field": "result_param_id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название подбираемого параметра",
+                "field": "result_param_name",
+                "data_type": "str"
+            }
+        ]
+    },
+    "condition": {
+        "fields": [
+            {
+                "name": "ID",
+                "field": "id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Параметр ID",
+                "field": "condition_param_id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название параметра",
+                "field": "condition_param_name",
+                "data_type": "str"
+            },
+            {
+                "name": "Условие",
+                "field": "condition_operator",
+                "data_type": "str"
+            },
+            {
+                "name": "Атрибут",
+                "field": "condition_value",
+                "data_type": "str"
+            },
+            {
+                "name": "Подбираемый параметр ID",
+                "field": "result_param_id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название подбираемого параметра",
+                "field": "result_param_name",
+                "data_type": "str"
+            },
+            {
+                "name": "Результат подбираемого параметра",
+                "field": "result_value",
+                "data_type": "str"
+            } 
+        ]
+    },
+    "selected_file": {
+        "fields": [
+            {
+                "name": "ID",
+                "field": "id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название",
+                "field": "name",
+                "data_type": "str"
+            },
+            {
+                "name": "Описание",
+                "field": "description",
+                "data_type": "str"
+            },
+            {
+                "name": "Параметр ID",
+                "field": "parametr_schema_id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Параметр",
+                "field": "parametr_schema_name",
+                "data_type": "str"
+            },
+            {
+                "name": "Изображение",
+                "field": "file_path",
+                "data_type": "str"
+            }
+        ]
+    }
+}
