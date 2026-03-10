@@ -13,10 +13,18 @@ from .fields_of_view import FIELDS_OF_VIEW_PATTERN
 
 import aiofiles
 import os
+from pathlib import Path
+import uuid
 
 router = APIRouter(prefix="/selected_file", tags=["SelectedFiles"])
 
-STORAGE_PATH = ('./selected_files_bd')
+STORAGE_PATH = ("./static/param_files")
+
+def generate_unique_filename(original_filename: str) -> str:
+    ext = Path(original_filename).suffix
+    unique_name = f"{uuid.uuid4()}{ext}"
+    return unique_name
+
 
 @router.put("/update/{node_id}", response_model=SelectedFileSchemaResponse, description="Занесение данных в таблицу")
 async def update(
@@ -45,6 +53,7 @@ async def update(
         data = {
             'id': existing_node.id,
             'file_path': existing_node.file_path,
+            'file_url': existing_node.file_url,
             'name': existing_node.name,
             'description': existing_node.description,
             'parametr_schema_name': param.name,
@@ -80,13 +89,18 @@ async def upload(
         
         file_fromat = sel_file.filename.split('.')[-1]
         chunk_size = 1024 * 1024
-        file_path = os.path.join(STORAGE_PATH, sel_file.filename)
+
+        unique_filename = generate_unique_filename(sel_file.filename)
+
+        file_path = os.path.join(STORAGE_PATH, unique_filename)
+        file_url = f"/api/files/param_files/{unique_filename}"
 
         async with aiofiles.open(file_path, "wb") as f:
             while chunk := await sel_file.read(chunk_size):
                 await f.write(chunk)
 
         existing_node.file_path = file_path
+        existing_node.file_url = file_url
         existing_node.content_type = file_fromat
 
         await db.refresh(existing_node)
@@ -102,6 +116,7 @@ async def upload(
         data = {
             'id': existing_node.id,
             'file_path': existing_node.file_path,
+            'file_url': existing_node.file_url,
             'name': existing_node.name,
             'description': existing_node.description,
             'parametr_schema_name': param.name,
@@ -142,6 +157,7 @@ async def add_param_to_selected_file(param_id: int, db: AsyncSession = Depends(g
         data = {
             'id': new_node.id,
             'file_path': new_node.file_path,
+            'file_url': new_node.file_url,
             'name': new_node.name,
             'description': new_node.description,
             'parametr_schema_name': param.name,
@@ -192,6 +208,7 @@ async def delete_file(
         data = {
             'id': existing_node.id,
             'file_path': existing_node.file_path,
+            'file_url': existing_node.file_url,
             'name': existing_node.name,
             'description': existing_node.description,
             'parametr_schema_name': param.name,
@@ -248,6 +265,7 @@ async def get_selected_file(node_id: int, db: AsyncSession = Depends(get_db)):
         stmt = select(
             SelectedFile.id,
             SelectedFile.file_path,
+            SelectedFile.file_url,
             SelectedFile.name,
             SelectedFile.content_type,
             ParameterSchema.name.label('parametr_schema_name'),
@@ -261,6 +279,7 @@ async def get_selected_file(node_id: int, db: AsyncSession = Depends(get_db)):
         data = {
             'id': row.id,
             'file_path': row.file_path,
+            'file_url': row.file_url,
             'name': row.name,
             'content_type': row.content_type,
             'parametr_schema_name': row.parametr_schema_name,
@@ -287,6 +306,7 @@ async def get_selected_files(db: AsyncSession = Depends(get_db)):
         stmt = select(
             SelectedFile.id,
             SelectedFile.file_path,
+            SelectedFile.file_url,
             SelectedFile.name,
             ParameterSchema.name.label('parametr_schema_name'),
             ParameterSchema.id.label('parametr_schema_id')
@@ -299,6 +319,7 @@ async def get_selected_files(db: AsyncSession = Depends(get_db)):
             data = {
                 'id': row.id,
                 'file_path': row.file_path,
+                'file_url': row.file_url,
                 'name': row.name,
                 'parametr_schema_name': row.parametr_schema_name,
                 'parametr_schema_id': row.parametr_schema_id
