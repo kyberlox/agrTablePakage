@@ -4,23 +4,28 @@ from ..utils.calculated_utils import OPERATIONS
 
 
 class CalculatedSchemaBase(BaseModel):
-    name: str
+    name: Optional[str] = None
     description: Optional[str] = None
-    operation: str 
-    parameter_1_id: int
-    parameter_2_id: int
+    operation: Optional[str] = None 
+    parameter_1_id: Optional[int] = None
+    parameter_2_id: Optional[int] = None
     result_param_id: int
 
     @field_validator('operation')
     @classmethod
     def validate_operation(cls, value):
-        if value not in OPERATIONS:
+        if value is not None and value not in OPERATIONS:
             raise ValueError(f"Арифметическая операция: {value} не валидна!")
         return value
 
 class CalculatedSchemaCreate(CalculatedSchemaBase):
     pass
 
+class CalculatedSchemaGet(CalculatedSchemaBase):
+    id: int
+    parameter_2_name: Optional[str] = None
+    parameter_1_name: Optional[str] = None 
+    result_param_name: Optional[str] = None 
 
 class CalculatedSchemaUpdate(BaseModel):
     name: Optional[str] = None

@@ -106,9 +106,10 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
 
 
 @router.put("/{product_id}", response_model=ProductResponse, description="Запрос на изменение товара.")
-async def edit_product(data: ProductUpdate = Body(...), db: AsyncSession = Depends(get_db)):
+async def edit_product(product_id: int, data: ProductUpdate = Body(...), db: AsyncSession = Depends(get_db)):
+    #!!!!!!!!!!! ПРОБЛЕМА С ЭТОЙ РУЧКОЙ "AttributeError: 'ProductUpdate' object has no attribute 'params'"
     result = await db.execute(
-        select(Product).where(Product.id == data.id)
+        select(Product).where(Product.id == product_id)
     )
     product = result.scalar_one_or_none()
 
@@ -117,7 +118,7 @@ async def edit_product(data: ProductUpdate = Body(...), db: AsyncSession = Depen
 
     product.name = data.name
     product.description = data.description
-    product.params = data.params
+    # product.params = data.params Откуда это берется
     await db.commit()
     await db.refresh(product)
     return product

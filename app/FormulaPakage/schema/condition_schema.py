@@ -11,17 +11,21 @@ class ConditionsSchemaBase(BaseModel):
     condition_param_id: int
     result_param_id: int
 
-    @field_validator('condition_operator')
-    @classmethod
-    def validate_operation(cls, value):
-        if value not in OPERATIONS:
-            raise ValueError(f"Арифметическая операция: {value} не валидна!")
-        return value
+    # @field_validator('condition_operator')
+    # @classmethod
+    # def validate_operation(cls, value):
+    #     if value not in OPERATIONS:
+    #         raise ValueError(f"Арифметическая операция: {value} не валидна!")
+    #     return value
 
 
 class ConditionsSchemaCreate(ConditionsSchemaBase):
     pass
 
+class ConditionsSchemaGet(BaseModel):
+    id: int
+    condition_param_name: str
+    result_param_name: str
 
 class ConditionsSchemaUpdate(BaseModel):
     condition_operator: Optional[str] = None
