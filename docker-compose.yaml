@@ -28,8 +28,8 @@ services:
       - ./postgresql/data:/var/lib/postgresql
       - ./app_logs/postgres:/var/log/postgresql  # Логи PostgreSQL
     ports:
-      #- "127.0.0.1:5432:5432"
-      - 5432:5432
+      - "127.0.0.1:5432:5432"
+      #- 5432:5432
     networks:
       - app-network
 
