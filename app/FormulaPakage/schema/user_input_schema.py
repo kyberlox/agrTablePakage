@@ -9,11 +9,21 @@ class UserInputSchemaBase(BaseModel):
     type: str
     min_value: float
     max_value: float
-    parametr_schema_id: int
+    parameter_schema_id: int
 
 
 class UserInputSchemaCreate(UserInputSchemaBase):
     pass
+
+class UserInputSchemaGet(UserInputSchemaBase):
+    id: int
+    name: Optional[str] = None
+    description: Optional[str] = None
+    type: Optional[str] = None
+    min_value: Optional[float] = None
+    max_value: Optional[float] = None
+    # parametr_schema_id: Optional[int] = None
+    parameter_schema_name: Optional[str] = None
 
 
 class UserInputSchemaUpdate(BaseModel):

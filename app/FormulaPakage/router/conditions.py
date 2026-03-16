@@ -8,13 +8,13 @@ from app.TablePakage.model.database import get_db
 from app.TablePakage.model.parameter_schema import ParameterSchema
 
 from ..model.condition import Conditions
-from ..schema.condition_schema import ConditionsSchemaCreate, ConditionsSchemaUpdate, ConditionsSchemaResponse
+from ..schema.condition_schema import ConditionsSchemaGet, ConditionsSchemaCreate, ConditionsSchemaUpdate, ConditionsSchemaResponse
 
 from .fields_of_view import FIELDS_OF_VIEW_PATTERN
 
 router = APIRouter(prefix="/condition", tags=["Conditions"])
 
-@router.get("/get_conditions", response_model=List[ConditionsSchemaResponse], description="Получение данных о всех Conditions") 
+@router.get("/get_conditions", response_model=List[ConditionsSchemaGet], description="Получение данных о всех Conditions") 
 async def get_conditions(db: AsyncSession = Depends(get_db)) -> list:
     try:
         ConditionParameter = aliased(ParameterSchema)
@@ -31,7 +31,7 @@ async def get_conditions(db: AsyncSession = Depends(get_db)) -> list:
             ResultParameter.name.label('result_param_name')
         ).join(ConditionParameter, Conditions.condition_param_id == ConditionParameter.id).join(ResultParameter, Conditions.result_param_id == ResultParameter.id)
         result = await db.execute(stmt)
-        conditions = result.scalars().all()
+        conditions = result.fetchall()
         if not conditions:
             return res
         for condition in conditions:
@@ -50,7 +50,7 @@ async def get_conditions(db: AsyncSession = Depends(get_db)) -> list:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при получении записей в Conditions: {e}")
 
-@router.get("/get_condition/{id}", response_model=ConditionsSchemaResponse, description="Получение данных о Condition по id записи")
+@router.get("/get_condition/{id}", response_model=ConditionsSchemaGet, description="Получение данных о Condition по id записи")
 async def get_condition(id: int, db: AsyncSession = Depends(get_db)):
     try:
         ConditionParameter = aliased(ParameterSchema)
@@ -69,7 +69,7 @@ async def get_condition(id: int, db: AsyncSession = Depends(get_db)):
                 Conditions.id == id
             )
         result = await db.execute(stmt)
-        condition = result.one_or_none()
+        condition = result.scalar_one_or_none()
         if not condition:
             raise HTTPException(status_code=404, detail=f"Отсутствует запись в Conditions с id: {id}")
         condition_result = {'fields': []}
@@ -97,11 +97,11 @@ async def get_condition(id: int, db: AsyncSession = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при получении записи в Conditions с id={id}: {e}")
 
-@router.post("/add_param/{param_id}", response_model=ConditionsSchemaResponse, description="Создание записи в Conditions")
+@router.post("/add_param/{param_id}", description="Создание записи в Conditions") # response_model=ConditionsSchemaResponse, 
 async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_db)):
     try:
         result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
-        param = result.one_or_none()
+        param = result.scalar_one_or_none()
         if not param:
             raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {param_id}")
         new_node = Conditions(result_param_id=param_id)
@@ -119,7 +119,7 @@ async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_d
             'result_param_id': new_node.result_param_id,
             'result_param_name': param.result_param_name
         }
-        for field in FIELDS_OF_VIEW_PATTERN['selected_file']['fields']:
+        for field in FIELDS_OF_VIEW_PATTERN['condition']['fields']:
             if field['field'] in data and data[field['field']] is not None:
                 field['value'] = data[field['field']]
                 condition_result['fields'].append(field)
@@ -134,7 +134,7 @@ async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_d
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Ошибка при добавлении параметра с id: {param_id} в таблицу Conditions: {str(e)}")
 
-@router.put("/update/{node_id}", response_model=ConditionsSchemaResponse, description="Занесение/обновление данных в таблицу")
+@router.put("/update/{node_id}", description="Занесение/обновление данных в таблицу") # response_model=ConditionsSchemaResponse, 
 async def update(
     node_id: int,
     schema_update: ConditionsSchemaUpdate,
@@ -145,7 +145,7 @@ async def update(
         ResultParameter = aliased(ParameterSchema)
 
         result = await db.execute(select(Conditions).where(Conditions.id == node_id))
-        existing_node = result.one_or_none()
+        existing_node = result.scalar_one_or_none()
         if not existing_node:
             raise HTTPException(status_code=404, detail=f"Отсутствует запись в Conditions с id: {node_id}")
         
@@ -153,15 +153,15 @@ async def update(
 
         for key, value in schema_update.dict(exclude_unset=True).items():
             setattr(existing_node, key, value)
-        await db.refresh(existing_node)
         await db.commit()
+        await db.refresh(existing_node)
 
         # Сборка шаблона
         stmt = select(
             ConditionParameter.name.label('condition_param_name'), ResultParameter.name.label('result_param_name')
         ).join(ConditionParameter, ConditionParameter.id == existing_node.condition_param_id).join(ResultParameter, ResultParameter.id == existing_node.result_param_id)
         res = await db.execute(stmt)
-        param = res.one_or_none()
+        param = res.scalar_one_or_none()
         if not param:
             raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.parametr_schema_id}")
         condition_result = {'fields': []}
@@ -175,7 +175,7 @@ async def update(
             'condition_param_id': existing_node.condition_param_id,
             'condition_param_name': param.condition_param_name
         }
-        for field in FIELDS_OF_VIEW_PATTERN['selected_file']['fields']:
+        for field in FIELDS_OF_VIEW_PATTERN['condition']['fields']:
             if field['field'] in data and data[field['field']] is not None:
                 field['value'] = data[field['field']]
                 condition_result['fields'].append(field)
@@ -191,14 +191,14 @@ async def update(
         await db.rollback()
         raise HTTPException(status_code=500, detail=f"Ошибка при обновлении записи с id: {node_id} в таблице Conditions: {str(e)}")
 
-@router.delete("/delete_node/{node_id}", response_model=ConditionsSchemaResponse, description="Удаление записи с Conditions")  
+@router.delete("/delete_node/{node_id}", description="Удаление записи с Conditions")   # response_model=ConditionsSchemaResponse, 
 async def delete_node(
     node_id: int,
     db: AsyncSession = Depends(get_db)
 ):
     try:
         result = await db.execute(select(Conditions).where(Conditions.id == node_id))
-        existing_node = result.one_or_none()
+        existing_node = result.scalar_one_or_none()
         if not existing_node:
             raise HTTPException(status_code=404, detail=f"Отсутствует запись в Conditions с id: {node_id}")
         

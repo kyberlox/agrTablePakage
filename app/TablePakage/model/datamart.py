@@ -23,4 +23,4 @@ class DataMartRegistry(Base):
         server_default=func.now()
     )
         # ORM-связь
-    product = relationship("Product", back_populates="datamart")
+    product = relationship("Product", back_populates="datamarts")

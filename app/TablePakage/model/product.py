@@ -17,3 +17,5 @@ class Product(Base):
 
     # Связь с параметрами
     parameters = relationship("ParameterSchema", back_populates="product", cascade="all, delete-orphan")
+
+    datamarts = relationship("DataMartRegistry", back_populates="product", cascade="all, delete-orphan")
