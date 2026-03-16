@@ -164,11 +164,6 @@
                 "data_type": "str"
             },
             {
-                "name": "Описание",
-                "field": "description",
-                "data_type": "str"
-            },
-            {
                 "name": "Параметр ID",
                 "field": "parametr_schema_id",
                 "data_type": "int",
@@ -183,6 +178,18 @@
                 "name": "Изображение",
                 "field": "file_path",
                 "data_type": "str"
+            },
+            {
+                "name": "Ссылка Изображения",
+                "field": "file_url",
+                "data_type": "str",
+                "desabled": true
+            },
+            {
+                "name": "Тип фото",
+                "field": "content_type",
+                "data_type": "str",
+                "desabled": true
             }
         ]
     }

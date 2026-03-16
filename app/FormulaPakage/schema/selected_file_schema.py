@@ -4,17 +4,20 @@ from typing import Optional, Dict, Any
 
 class SelectedFileSchemaBase(BaseModel):
     name: Optional[str] = None
-    description: Optional[str] = None
     parametr_schema_id: int
 
 
 class SelectedFileSchemaCreate(SelectedFileSchemaBase):
     pass
 
+class SelectedFileSchemaGet(SelectedFileSchemaBase):
+    id: int
+    parametr_schema_name: Optional[str] = None
+    file_path: Optional[str] = None
+    file_url: Optional[str] = None
 
 class SelectedFileSchemaUpdate(BaseModel):
     name: Optional[str] = None
-    description: Optional[str] = None
     parametr_schema_id: Optional[int] = None
 
 
