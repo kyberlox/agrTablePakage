@@ -50,7 +50,7 @@ async def get_conditions(db: AsyncSession = Depends(get_db)) -> list:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при получении записей в Conditions: {e}")
 
-@router.get("/get_condition/{id}", response_model=ConditionsSchemaGet, description="Получение данных о Condition по id записи")
+@router.get("/get_condition/{id}", description="Получение данных о Condition по id записи") # response_model=ConditionsSchemaGet, 
 async def get_condition(id: int, db: AsyncSession = Depends(get_db)):
     try:
         ConditionParameter = aliased(ParameterSchema)
@@ -64,15 +64,16 @@ async def get_condition(id: int, db: AsyncSession = Depends(get_db)):
             Conditions.condition_param_id,
             ConditionParameter.name.label('condition_param_name'),
             ResultParameter.name.label('result_param_name')
-        ).join(ConditionParameter, Conditions.condition_param_id == ConditionParameter.id).join(
-            ResultParameter, Conditions.result_param_id == ResultParameter.id).where(
+        ).join(ConditionParameter, Conditions.condition_param_id == ConditionParameter.id, isouter = True).join(
+            ResultParameter, Conditions.result_param_id == ResultParameter.id, isouter = True).where(
                 Conditions.id == id
             )
         result = await db.execute(stmt)
-        condition = result.scalar_one_or_none()
+        condition = result.one_or_none()
         if not condition:
             raise HTTPException(status_code=404, detail=f"Отсутствует запись в Conditions с id: {id}")
         condition_result = {'fields': []}
+        print(condition)
         data = {
             'id': condition.id,
             'condition_operator': condition.condition_operator,
@@ -117,7 +118,7 @@ async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_d
             'condition_value': new_node.condition_value,
             'result_value': new_node.result_value,
             'result_param_id': new_node.result_param_id,
-            'result_param_name': param.result_param_name
+            'result_param_name': param.name
         }
         for field in FIELDS_OF_VIEW_PATTERN['condition']['fields']:
             if field['field'] in data and data[field['field']] is not None:
@@ -158,22 +159,31 @@ async def update(
 
         # Сборка шаблона
         stmt = select(
-            ConditionParameter.name.label('condition_param_name'), ResultParameter.name.label('result_param_name')
-        ).join(ConditionParameter, ConditionParameter.id == existing_node.condition_param_id).join(ResultParameter, ResultParameter.id == existing_node.result_param_id)
+            ConditionParameter.name.label('condition_param_name'),
+            ResultParameter.name.label('result_param_name')
+        ).select_from(Conditions).join(
+            ConditionParameter, ConditionParameter.id == Conditions.condition_param_id
+        ).join(
+            ResultParameter, ResultParameter.id == Conditions.result_param_id
+        ).where(Conditions.id == existing_node.id)
+
         res = await db.execute(stmt)
-        param = res.scalar_one_or_none()
-        if not param:
+        params = res.first()
+        if not params:
             raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.parametr_schema_id}")
         condition_result = {'fields': []}
+        
+        condition_param_name, result_param_name = params
+        
         data = {
             'id': existing_node.id,
             'condition_operator': existing_node.condition_operator,
             'condition_value': existing_node.condition_value,
             'result_value': existing_node.result_value,
             'result_param_id': existing_node.result_param_id,
-            'result_param_name': param.result_param_name,
+            'result_param_name': result_param_name,
             'condition_param_id': existing_node.condition_param_id,
-            'condition_param_name': param.condition_param_name
+            'condition_param_name': condition_param_name
         }
         for field in FIELDS_OF_VIEW_PATTERN['condition']['fields']:
             if field['field'] in data and data[field['field']] is not None:
