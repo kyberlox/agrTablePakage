@@ -1,5 +1,5 @@
 # app/products/schema/search.py
-from typing import Dict, Optional, List, Any
+from typing import Dict, Optional, List, Any, Union
 from pydantic import BaseModel
 
 
@@ -11,7 +11,7 @@ class ModuleSearchRequest(BaseModel):
 class ModuleSearchResponse(BaseModel):
     product_id: int
     product_name: str
-    parameters: Dict[str, List[str]]
+    parameters: Dict[str, Union[str, List[str]]]
     matched_rows: int
     request_time: float
 

@@ -199,6 +199,7 @@ async def delete_file(
             os.remove(existing_node.file_path)
         existing_node.file_path = None
         existing_node.file_url = None
+        existing_node.content_type = None
         
         await db.commit()
         await db.refresh(existing_node)

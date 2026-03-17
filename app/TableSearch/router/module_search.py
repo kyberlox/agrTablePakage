@@ -41,28 +41,30 @@ async def process_table_data(
         text("""
             SELECT name
             FROM parameter_schemas
-            WHERE product_id = :product_id
+            WHERE product_id = :product_id and type = 'Table'
         """),
         {"product_id": product_id},
     )
+    
     schema_params = [row[0] for row in schema_result.fetchall()]
-
+    
     if not schema_params:
         raise HTTPException(status_code=404, detail="Параметры не найдены")
-
+    
     if not selected_params:
+        
         await ensure_dm_exists(
             db,
             product_id,
             table_name,
             schema_params,
         )
-
+        
         parameters, matched_rows = await get_full_search_from_dm(
             db,
             product_id,
         )
-
+        
         return {
             "product_id": product_id,
             "product_name": product_name,
@@ -124,12 +126,25 @@ async def process_table_data(
             "matched_rows": 0,
         }
 
+    
     # Собираем значения параметров
     parameters = {
         param_name: sorted(str(v) for v in row[col])
         for col, param_name in column_to_param.items()
         if row[col]
     }
+    parameters = dict()
+    for col, param_name in column_to_param.items():
+        if row[col] and len(row[col]) == 1:
+            parameters[param_name] = row[col][0]
+        elif row[col] and len(row[col]) > 1:
+            parameters[param_name] = sorted(str(v) for v in row[col])
+
+    #сюда функция формульного поиска
+    """
+    функция формульного поиска
+    аргументыЖ id продукта и словарь с параметрами
+    """
 
     return {
         "product_id": product_id,
@@ -138,3 +153,12 @@ async def process_table_data(
         "matched_rows": row["matched_rows"],
         "request_time": time.perf_counter() - start_time,
     }
+
+    # return {
+    #     "product_id": product_id,
+    #     "product_name": product_name,
+    #     "table_parameters": table_parameters,
+    #     "fromula_parameters": fromula_parameters,
+    #     "matched_rows": row["matched_rows"],
+    #     "request_time": time.perf_counter() - start_time,
+    # }
