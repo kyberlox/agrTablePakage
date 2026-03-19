@@ -58,7 +58,7 @@ def generate_unique_filename(original_filename: str) -> str:
 
 @router.post("/", response_model=ProductResponse, status_code=201)
 async def create_product(
-        data = Body(),
+        data:dict = Body(),
         image: UploadFile = File(None),
         db: AsyncSession = Depends(get_db)
 ):
