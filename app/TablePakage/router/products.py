@@ -56,10 +56,10 @@ def generate_unique_filename(original_filename: str) -> str:
 
 # === Product Schema Endpoints ===
 
-@router.post("/", response_model=ProductResponse, status_code=201)
+@router.post("/", status_code=201)
 async def create_product(
-        data:dict = Body(),
-        image: UploadFile = File(None),
+        data: dict = Body(),
+        #image: UploadFile = File(None),
         db: AsyncSession = Depends(get_db)
 ):
     name = data["name"]
