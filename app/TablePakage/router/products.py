@@ -64,6 +64,7 @@ async def create_product(
         image: UploadFile = File(None),
         db: AsyncSession = Depends(get_db)
 ):
+    
     image_path = None
     image_url = None
 
