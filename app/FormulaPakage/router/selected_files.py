@@ -46,11 +46,11 @@ async def update(
         await db.refresh(existing_node)
 
         # Сборка шаблона
-        stmt = select(ParameterSchema).where(ParameterSchema.id == existing_node.parametr_schema_id)
+        stmt = select(ParameterSchema).where(ParameterSchema.id == existing_node.result_param_id)
         res = await db.execute(stmt)
         param = res.scalar_one_or_none()
         if not param:
-            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.parametr_schema_id}")
+            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.result_param_id}")
         selected_file_result = {'fields': []}
         data = {
             'id': existing_node.id,
@@ -58,7 +58,7 @@ async def update(
             'file_url': existing_node.file_url,
             'name': existing_node.name,
             'parametr_schema_name': param.name,
-            'parametr_schema_id': param.id
+            'result_param_id': param.id
         }
         for field in FIELDS_OF_VIEW_PATTERN['selected_file']['fields']:
             if field['field'] in data and data[field['field']] is not None:
@@ -109,11 +109,11 @@ async def upload(
         await db.refresh(existing_node)
 
         # Сборка шаблона
-        stmt = select(ParameterSchema).where(ParameterSchema.id == existing_node.parametr_schema_id)
+        stmt = select(ParameterSchema).where(ParameterSchema.id == existing_node.result_param_id)
         res = await db.execute(stmt)
         param = res.scalar_one_or_none()
         if not param:
-            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.parametr_schema_id}")
+            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.result_param_id}")
         selected_file_result = {'fields': []}
         data = {
             'id': existing_node.id,
@@ -122,7 +122,7 @@ async def upload(
             'name': existing_node.name,
             'content_type': existing_node.content_type,
             'parametr_schema_name': param.name,
-            'parametr_schema_id': param.id
+            'result_param_id': param.id
         }
         for field in FIELDS_OF_VIEW_PATTERN['selected_file']['fields']:
             if field['field'] in data and data[field['field']] is not None:
@@ -149,7 +149,7 @@ async def add_param_to_selected_file(param_id: int, db: AsyncSession = Depends(g
         param = result.scalar_one_or_none()
         if not param:
             raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {param_id}")
-        new_node = SelectedFile(parametr_schema_id=param_id)
+        new_node = SelectedFile(result_param_id=param_id)
         db.add(new_node)
         await db.commit()
         await db.refresh(new_node)
@@ -163,7 +163,7 @@ async def add_param_to_selected_file(param_id: int, db: AsyncSession = Depends(g
             'content_type': new_node.content_type,
             'name': new_node.name,
             'parametr_schema_name': param.name,
-            'parametr_schema_id': param.id
+            'result_param_id': param.id
         }
         for field in FIELDS_OF_VIEW_PATTERN['selected_file']['fields']:
             if field['field'] in data and data[field['field']] is not None:
@@ -205,11 +205,11 @@ async def delete_file(
         await db.refresh(existing_node)
 
         # Сборка шаблона
-        stmt = select(ParameterSchema).where(ParameterSchema.id == existing_node.parametr_schema_id)
+        stmt = select(ParameterSchema).where(ParameterSchema.id == existing_node.result_param_id)
         res = await db.execute(stmt)
         param = res.scalar_one_or_none()
         if not param:
-            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.parametr_schema_id}")
+            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.result_param_id}")
         selected_file_result = {'fields': []}
         data = {
             'id': existing_node.id,
@@ -217,7 +217,7 @@ async def delete_file(
             'file_url': existing_node.file_url,
             'name': existing_node.name,
             'parametr_schema_name': param.name,
-            'parametr_schema_id': param.id
+            'result_param_id': param.id
         }
         for field in FIELDS_OF_VIEW_PATTERN['selected_file']['fields']:
             if field['field'] in data and data[field['field']] is not None:
@@ -274,8 +274,8 @@ async def get_selected_file(node_id: int, db: AsyncSession = Depends(get_db)):
             SelectedFile.name,
             SelectedFile.content_type,
             ParameterSchema.name.label('parametr_schema_name'),
-            ParameterSchema.id.label('parametr_schema_id')
-        ).join(ParameterSchema).where(SelectedFile.id == node_id, ParameterSchema.id == SelectedFile.parametr_schema_id)
+            ParameterSchema.id.label('result_param_id')
+        ).join(ParameterSchema).where(SelectedFile.id == node_id, ParameterSchema.id == SelectedFile.result_param_id)
         result = await db.execute(stmt)
         selected_file = result.one_or_none()
         if not selected_file:
@@ -288,7 +288,7 @@ async def get_selected_file(node_id: int, db: AsyncSession = Depends(get_db)):
             'name': selected_file.name,
             'content_type': selected_file.content_type,
             'parametr_schema_name': selected_file.parametr_schema_name,
-            'parametr_schema_id': selected_file.parametr_schema_id
+            'result_param_id': selected_file.result_param_id
         }
         for field in FIELDS_OF_VIEW_PATTERN['selected_file']['fields']:
             if field['field'] in data and data[field['field']] is not None:
@@ -314,8 +314,8 @@ async def get_selected_files(db: AsyncSession = Depends(get_db)):
             SelectedFile.file_url,
             SelectedFile.name,
             ParameterSchema.name.label('parametr_schema_name'),
-            ParameterSchema.id.label('parametr_schema_id')
-        ).join(ParameterSchema).where(ParameterSchema.id == SelectedFile.parametr_schema_id)
+            ParameterSchema.id.label('result_param_id')
+        ).join(ParameterSchema).where(ParameterSchema.id == SelectedFile.result_param_id)
         result = await db.execute(stmt)
         selected_files = result.fetchall()
         if not selected_files:
@@ -327,7 +327,7 @@ async def get_selected_files(db: AsyncSession = Depends(get_db)):
                 'file_url': files.file_url,
                 'name': files.name,
                 'parametr_schema_name': files.parametr_schema_name,
-                'parametr_schema_id': files.parametr_schema_id
+                'result_param_id': files.result_param_id
             }
             res.append(data)
         return res

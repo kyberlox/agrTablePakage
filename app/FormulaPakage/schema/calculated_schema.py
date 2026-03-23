@@ -7,8 +7,7 @@ class CalculatedSchemaBase(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     operation: Optional[str] = None 
-    parameter_1_id: Optional[int] = None
-    parameter_2_id: Optional[int] = None
+    parameter_id: Optional[int] = None
     result_param_id: int
 
     @field_validator('operation')
@@ -23,16 +22,14 @@ class CalculatedSchemaCreate(CalculatedSchemaBase):
 
 class CalculatedSchemaGet(CalculatedSchemaBase):
     id: int
-    parameter_2_name: Optional[str] = None
-    parameter_1_name: Optional[str] = None 
+    parameter_name: Optional[str] = None 
     result_param_name: Optional[str] = None 
 
 class CalculatedSchemaUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     operation: Optional[str] = None
-    parameter_1_id: Optional[int] = None
-    parameter_2_id: Optional[int] = None
+    parameter_id: Optional[int] = None
     result_param_id: Optional[int] = None
 
     @field_validator('operation')

@@ -18,7 +18,6 @@ router = APIRouter(prefix="/calculated", tags=["Calculated"])
 async def get_calculates(db: AsyncSession = Depends(get_db)):
     try:
         FirstParameter = aliased(ParameterSchema)
-        SecondParameter = aliased(ParameterSchema)
         ResultParameter = aliased(ParameterSchema)
         res = []
         stmt = select(
@@ -26,18 +25,14 @@ async def get_calculates(db: AsyncSession = Depends(get_db)):
             Calculated.name,
             Calculated.description,
             Calculated.operation,
-            Calculated.parameter_1_id,
-            Calculated.parameter_2_id,
+            Calculated.parameter_id,
             Calculated.result_param_id,
-            FirstParameter.name.label('parameter_1_name'),
-            SecondParameter.name.label('parameter_2_name'),
+            FirstParameter.name.label('parameter_name'),
             ResultParameter.name.label('result_param_name')
         ).join(
-            FirstParameter, Calculated.parameter_1_id == FirstParameter.id, isouter = True
+            FirstParameter, Calculated.parameter_id == FirstParameter.id, isouter = True
         ).join(
             ResultParameter, Calculated.result_param_id == ResultParameter.id
-        ).join(
-            SecondParameter, Calculated.parameter_2_id == SecondParameter.id, isouter = True
         )
         result = await db.execute(stmt)
         calculates = result.fetchall()
@@ -50,10 +45,8 @@ async def get_calculates(db: AsyncSession = Depends(get_db)):
                 'name': calculate.name,
                 'description': calculate.description,
                 'operation': calculate.operation,
-                'parameter_1_id': calculate.parameter_1_id,
-                'parameter_1_name': calculate.parameter_1_name,
-                'parameter_2_id': calculate.parameter_2_id,
-                'parameter_2_name': calculate.parameter_2_name,
+                'parameter_id': calculate.parameter_id,
+                'parameter_name': calculate.parameter_name,
                 'result_param_id': calculate.result_param_id,
                 'result_param_name': calculate.result_param_name
             }
@@ -69,7 +62,6 @@ async def get_calculates(db: AsyncSession = Depends(get_db)):
 async def get_calculate(id: int, db: AsyncSession = Depends(get_db)):
     try:
         FirstParameter = aliased(ParameterSchema)
-        SecondParameter = aliased(ParameterSchema)
         ResultParameter = aliased(ParameterSchema)
         res = []
         stmt = select(
@@ -77,18 +69,14 @@ async def get_calculate(id: int, db: AsyncSession = Depends(get_db)):
             Calculated.name,
             Calculated.description,
             Calculated.operation,
-            Calculated.parameter_1_id,
-            Calculated.parameter_2_id,
+            Calculated.parameter_id,
             Calculated.result_param_id,
-            FirstParameter.name.label('parameter_1_name'),
-            SecondParameter.name.label('parameter_2_name'),
+            FirstParameter.name.label('parameter_name'),
             ResultParameter.name.label('result_param_name')
         ).join(
-            FirstParameter, Calculated.parameter_1_id == FirstParameter.id, isouter = True
+            FirstParameter, Calculated.parameter_id == FirstParameter.id, isouter = True
         ).join(
             ResultParameter, Calculated.result_param_id == ResultParameter.id
-        ).join(
-            SecondParameter, Calculated.parameter_2_id == SecondParameter.id, isouter = True
         ).where(Calculated.id == id)
         result = await db.execute(stmt)
         calculate = result.one_or_none()
@@ -100,9 +88,8 @@ async def get_calculate(id: int, db: AsyncSession = Depends(get_db)):
             'name': calculate.name,
             'description': calculate.description,
             'operation': calculate.operation,
-            'parameter_1_id': calculate.parameter_1_id,
-            'parameter_1_name': calculate.parameter_1_name,
-            'parameter_2_id': calculate.parameter_2_id,
+            'parameter_id': calculate.parameter_id,
+            'parameter_name': calculate.parameter_name,
             'parameter_2_name': calculate.parameter_2_name,
             'result_param_id': calculate.result_param_id,
             'result_param_name': calculate.result_param_name
@@ -141,8 +128,7 @@ async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_d
             'name': new_node.name,
             'description': new_node.description,
             'operation': new_node.operation,
-            'parameter_1_id': new_node.parameter_1_id,
-            'parameter_2_id': new_node.parameter_2_id,
+            'parameter_id': new_node.parameter_id,
             'result_param_id': new_node.result_param_id,
             'result_param_name': param.name
         }
@@ -170,7 +156,6 @@ async def update(
 ):
     try:
         FirstParameter = aliased(ParameterSchema)
-        SecondParameter = aliased(ParameterSchema)
         ResultParameter = aliased(ParameterSchema)
 
         result = await db.execute(select(Calculated).where(Calculated.id == node_id))
@@ -188,13 +173,10 @@ async def update(
 
         # Сборка шаблона
         stmt = select(
-            FirstParameter.name.label('parameter_1_name'),
-            SecondParameter.name.label('parameter_2_name'), 
+            FirstParameter.name.label('parameter_name'), 
             ResultParameter.name.label('result_param_name')
         ).select_from(Calculated).join(
-            FirstParameter, FirstParameter.id == existing_node.parameter_1_id
-        ).join(
-            SecondParameter, SecondParameter.id == existing_node.parameter_2_id
+            FirstParameter, FirstParameter.id == existing_node.parameter_id
         ).join(
             ResultParameter, ResultParameter.id == existing_node.result_param_id
         ).where(Calculated.id == existing_node.id)
@@ -202,20 +184,18 @@ async def update(
         params = res.first()
         
         if not params:
-            raise HTTPException(status_code=404, detail=f"Отсутствует один из параметров в ParameterSchema: {existing_node.parameter_1_id}, {existing_node.parameter_2_id},{existing_node.result_param_id}")
+            raise HTTPException(status_code=404, detail=f"Отсутствует один из параметров в ParameterSchema: {existing_node.parameter_id},{existing_node.result_param_id}")
         calculate_result = {'fields': []}
 
-        parameter_1_name, parameter_2_name, result_param_name = params
+        parameter_name, result_param_name = params
 
         data = {
             'id': existing_node.id,
             'name': existing_node.name,
             'description': existing_node.description,
             'operation': existing_node.operation,
-            'parameter_1_id': existing_node.parameter_1_id,
-            'parameter_1_name': parameter_1_name,
-            'parameter_2_id': existing_node.parameter_2_id,
-            'parameter_2_name': parameter_2_name,
+            'parameter_id': existing_node.parameter_id,
+            'parameter_name': parameter_name,
             'result_param_id': existing_node.result_param_id,
             'result_param_name': result_param_name
         }

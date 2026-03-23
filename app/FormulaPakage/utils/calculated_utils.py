@@ -1,6 +1,10 @@
 import operator
-        
+
+def start(x):
+    return x
+
 OPERATIONS = {
+    'start': start, 
     '+': operator.add,
     '-': operator.sub,
     '*': operator.mul,
@@ -8,10 +12,13 @@ OPERATIONS = {
     '//': operator.floordiv,  
     '%': operator.mod,
     '**': operator.pow,
-    '<': "меньше",
-    '>': "больше",
+    '<': operator.lt,
+    '<=': operator.le,
+    '>': operator.gt,
+    '>': operator.ge,
     '&': operator.and_,
     '|': operator.or_,
     '^': operator.xor,
+    '=': operator.eq,
 } 
 

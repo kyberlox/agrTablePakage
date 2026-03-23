@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, ForeignKey, Boolean
 from sqlalchemy.orm import relationship
 # from .database import Base
 from app.TablePakage.model.database import Base
@@ -12,6 +12,7 @@ class Conditions(Base):
     condition_operator = Column(Text, nullable=True) 
     condition_value = Column(Text, nullable=True) 
     result_value = Column(Text, nullable=True) 
+    result_value_type = Column(Boolean, nullable=True)
     result_param_id = Column(Integer, ForeignKey("parameter_schemas.id"), nullable=False)
 
     # Связь через обратное отношение с парамтером, чтобы обеспечить обратную связь с таблицей ParameterSchema

@@ -26,10 +26,11 @@ async def get_conditions(db: AsyncSession = Depends(get_db)) -> list:
             Conditions.condition_value,
             Conditions.result_value,
             Conditions.result_param_id,
+            Conditions.result_value_type,
             Conditions.condition_param_id,
             ConditionParameter.name.label('condition_param_name'),
             ResultParameter.name.label('result_param_name')
-        ).join(ConditionParameter, Conditions.condition_param_id == ConditionParameter.id).join(ResultParameter, Conditions.result_param_id == ResultParameter.id)
+        ).join(ConditionParameter, Conditions.condition_param_id == ConditionParameter.id, isouter = True).join(ResultParameter, Conditions.result_param_id == ResultParameter.id)
         result = await db.execute(stmt)
         conditions = result.fetchall()
         if not conditions:
@@ -42,6 +43,7 @@ async def get_conditions(db: AsyncSession = Depends(get_db)) -> list:
                 'result_value': condition.result_value,
                 'result_param_id': condition.result_param_id,
                 'result_param_name': condition.result_param_name,
+                'result_value_type': condition.result_value_type,
                 'condition_param_id': condition.condition_param_id,
                 'condition_param_name': condition.condition_param_name
             }
@@ -61,6 +63,7 @@ async def get_condition(id: int, db: AsyncSession = Depends(get_db)):
             Conditions.condition_value,
             Conditions.result_value,
             Conditions.result_param_id,
+            Conditions.result_value_type,
             Conditions.condition_param_id,
             ConditionParameter.name.label('condition_param_name'),
             ResultParameter.name.label('result_param_name')
@@ -81,10 +84,11 @@ async def get_condition(id: int, db: AsyncSession = Depends(get_db)):
             'result_value': condition.result_value,
             'result_param_id': condition.result_param_id,
             'result_param_name': condition.result_param_name,
+            'result_value_type': condition.result_value_type,
             'condition_param_id': condition.condition_param_id,
             'condition_param_name': condition.condition_param_name
         }
-        for field in FIELDS_OF_VIEW_PATTERN['condition']['fields']:
+        for field in FIELDS_OF_VIEW_PATTERN['conditions']['fields']:
             if field['field'] in data and data[field['field']] is not None:
                 field['value'] = data[field['field']]
                 condition_result['fields'].append(field)
@@ -117,10 +121,11 @@ async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_d
             'condition_operator': new_node.condition_operator,
             'condition_value': new_node.condition_value,
             'result_value': new_node.result_value,
+            'result_value_type': new_node.result_value_type,
             'result_param_id': new_node.result_param_id,
             'result_param_name': param.name
         }
-        for field in FIELDS_OF_VIEW_PATTERN['condition']['fields']:
+        for field in FIELDS_OF_VIEW_PATTERN['conditions']['fields']:
             if field['field'] in data and data[field['field']] is not None:
                 field['value'] = data[field['field']]
                 condition_result['fields'].append(field)
@@ -182,10 +187,11 @@ async def update(
             'result_value': existing_node.result_value,
             'result_param_id': existing_node.result_param_id,
             'result_param_name': result_param_name,
+            'result_value_type': existing_node.result_value_type,
             'condition_param_id': existing_node.condition_param_id,
             'condition_param_name': condition_param_name
         }
-        for field in FIELDS_OF_VIEW_PATTERN['condition']['fields']:
+        for field in FIELDS_OF_VIEW_PATTERN['conditions']['fields']:
             if field['field'] in data and data[field['field']] is not None:
                 field['value'] = data[field['field']]
                 condition_result['fields'].append(field)

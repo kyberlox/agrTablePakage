@@ -1,8 +1,7 @@
 # app/products/model/parameter_schema.py
 from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, ForeignKey, Index, UniqueConstraint
 from sqlalchemy.orm import relationship
-from .database import Base
-
+from .database import Base 
 
 class ParameterSchema(Base):
     __tablename__ = "parameter_schemas"
@@ -20,7 +19,7 @@ class ParameterSchema(Base):
     product = relationship("Product", back_populates="parameters")
 
     # Связь с user_input
-    user_inputs = relationship("UserInput", foreign_keys="[UserInput.parameter_schema_id]", back_populates="user_input_parametr_schema", cascade="all, delete-orphan")
+    user_inputs = relationship("UserInput", foreign_keys="[UserInput.result_param_id]", back_populates="user_input_parametr_schema", cascade="all, delete-orphan")
    
     # Связь с conditions
     conditions = relationship(
@@ -40,7 +39,7 @@ class ParameterSchema(Base):
     # Связь с selected_file
     selected_files = relationship(
         "SelectedFile", 
-        foreign_keys="[SelectedFile.parametr_schema_id]", 
+        foreign_keys="[SelectedFile.result_param_id]", 
         back_populates="selected_file_parametr_schema", 
         cascade="all, delete-orphan"
     )
@@ -48,17 +47,17 @@ class ParameterSchema(Base):
     # Связь с формулами
     calculations_as_first_param = relationship(
         "Calculated", 
-        foreign_keys="[Calculated.parameter_1_id]",
+        foreign_keys="[Calculated.parameter_id]",
         back_populates="first_parameter",
         cascade="all, delete-orphan"
     )
     
-    calculations_as_second_param = relationship(
-        "Calculated", 
-        foreign_keys="[Calculated.parameter_2_id]",
-        back_populates="second_parameter",
-        cascade="all, delete-orphan"
-    )
+    # calculations_as_second_param = relationship(
+    #     "Calculated", 
+    #     foreign_keys="[Calculated.parameter_2_id]",
+    #     back_populates="second_parameter",
+    #     cascade="all, delete-orphan"
+    # )
     
     calculations_as_result = relationship(
         "Calculated", 

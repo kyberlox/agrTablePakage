@@ -34,7 +34,7 @@
             },
             {
                 "name": "Параметр ID",
-                "field": "parameter_schema_id",
+                "field": "result_param_id",
                 "data_type": "int",
                 "desabled": true
             },
@@ -70,24 +70,13 @@
             },
             {
                 "name": "Первый параметр ID",
-                "field": "parameter_1_id",
+                "field": "parameter_id",
                 "data_type": "int",
                 "desabled": true
             },
             {
                 "name": "Название первого параметра",
-                "field": "parameter_1_name",
-                "data_type": "str"
-            },
-            {
-                "name": "Второй параметр ID",
-                "field": "parameter_2_id",
-                "data_type": "int",
-                "desabled": true
-            },
-            {
-                "name": "Название второго параметра",
-                "field": "parameter_2_name",
+                "field": "parameter_name",
                 "data_type": "str"
             },
             {
@@ -103,7 +92,7 @@
             }
         ]
     },
-    "condition": {
+    "conditions": {
         "fields": [
             {
                 "name": "ID",
@@ -147,7 +136,12 @@
                 "name": "Результат подбираемого параметра",
                 "field": "result_value",
                 "data_type": "str"
-            } 
+            },
+            {
+                "name": "Является ли результат значением другого параметра",
+                "field": "result_value_type",
+                "data_type": "bool"
+            }
         ]
     },
     "selected_file": {
@@ -165,7 +159,7 @@
             },
             {
                 "name": "Параметр ID",
-                "field": "parametr_schema_id",
+                "field": "result_param_id",
                 "data_type": "int",
                 "desabled": true
             },
