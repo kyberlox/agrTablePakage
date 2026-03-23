@@ -16,7 +16,10 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(ProductBase):
-    image_base64: Optional[str] = None
+    name: Optional[str] = None
+    description: Optional[str] = None
+    manufacturer: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 class ProductResponse(ProductBase):
