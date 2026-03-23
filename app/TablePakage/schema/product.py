@@ -16,7 +16,7 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(ProductBase):
-    pass
+    image_base64: Optional[str] = None
 
 
 class ProductResponse(ProductBase):

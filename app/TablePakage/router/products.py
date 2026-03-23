@@ -1,5 +1,7 @@
 # app/products/router/products.py
+import base64
 import os
+import re
 
 from fastapi import APIRouter, Depends, File, HTTPException, Form, Body
 from fastapi import UploadFile
@@ -52,6 +54,32 @@ def generate_unique_filename(original_filename: str) -> str:
     ext = Path(original_filename).suffix
     unique_name = f"{uuid.uuid4()}{ext}"
     return unique_name
+
+
+#функция декодирования изображения из base64
+def save_base64_image(base64_string: str) -> str:
+    match = re.match(r"data:image/(\w+);base64,(.+)", base64_string)
+    if not match:
+        raise HTTPException(status_code=400, detail="Invalid base64 image format")
+
+    ext = match.group(1)
+    data = match.group(2)
+
+    if f".{ext}" not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Invalid image format")
+
+    file_bytes = base64.b64decode(data)
+
+    if len(file_bytes) > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File too large")
+
+    filename = f"{uuid.uuid4()}.{ext}"
+    file_path = os.path.join(UPLOAD_DIR, filename)
+
+    with open(file_path, "wb") as f:
+        f.write(file_bytes)
+
+    return filename
 
 
 # === Product Schema Endpoints ===
