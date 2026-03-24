@@ -16,7 +16,10 @@ class ProductCreate(ProductBase):
 
 
 class ProductUpdate(ProductBase):
-    pass
+    name: Optional[str] = None
+    description: Optional[str] = None
+    manufacturer: Optional[str] = None
+    image_url: Optional[str] = None
 
 
 class ProductResponse(ProductBase):
