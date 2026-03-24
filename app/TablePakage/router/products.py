@@ -65,7 +65,7 @@ async def create_product(
     name = data["name"]
     description = data["description"]
     manufacturer = data["manufacturer"]
-
+    
     image_path = None
     image_url = None
 
