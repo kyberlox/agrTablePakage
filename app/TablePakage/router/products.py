@@ -86,9 +86,13 @@ def save_base64_image(base64_string: str) -> str:
 
 @router.post("/", response_model=ProductResponse, status_code=201)
 async def create_product(
-        data: ProductUpdate,
+        data: dict = Body(),
+        image: UploadFile = File(None),
         db: AsyncSession = Depends(get_db)
 ):
+    name = data["name"]
+    description = data["description"]
+    manufacturer = data["manufacturer"]
     image_path = None
     image_url = None
 
@@ -155,6 +159,10 @@ async def edit_product(product_id: int,
     for key, value in update_data.items():
         setattr(product, key, value)
 
+
+    for key, value in product_update.dict(exclude_unset=True).items():
+        setattr(product, key, value)
+        
     await db.commit()
     await db.refresh(product)
 

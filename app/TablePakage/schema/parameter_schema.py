@@ -50,6 +50,7 @@ class ParameterSchemaUpdate(BaseModel):
 
 class ParameterSchemaResponse(ParameterSchemaBase):
     id: int
+    transliterated_name: str
 
     class Config:
         from_attributes = True
