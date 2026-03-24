@@ -21,7 +21,7 @@ router = APIRouter(prefix="/tables", tags=["Tables"])
 
 # === Table Schema Endpoints ===
 
-@router.post("/upload_full_xlsx", description="Импорт всех параметров из XLSX.")
+@router.post("/upload_full_xlsx/{product_id}", description="Импорт всех параметров из XLSX.")
 async def import_excel(
         product_id: int,
         file: UploadFile = File(...),
@@ -154,7 +154,7 @@ async def import_excel(
     }
 
 
-@router.post("/upload_matched_params_xlsx", description="Импорт параметров из XLSX, которые уже есть в базе данных.")
+@router.post("/upload_matched_params_xlsx/{product_id}", description="Импорт параметров из XLSX, которые уже есть в базе данных.")
 async def import_excel(
         product_id: int,
         file: UploadFile = File(...),
@@ -255,7 +255,7 @@ async def import_excel(
     }
 
 
-@router.post("/download_xlsx", description="Выгрузка параметров из БД в XLSX.")
+@router.get("/download_xlsx/{product_id}", description="Выгрузка параметров из БД в XLSX.")
 async def download_xlsx(
         product_id: int,
         db: AsyncSession = Depends(get_db)
@@ -323,7 +323,7 @@ async def download_xlsx(
     )
 
 
-@router.get("/get_unique_param", description="Получение уникальных значений выбранного параметра из БД.")
+@router.get("/get_unique_param/{product_id}/{param_id}", description="Получение уникальных значений выбранного параметра из БД.")
 async def get_unique_param(
         product_id: int,
         param_id: int,
@@ -406,7 +406,7 @@ async def get_unique_param(
     }
 
 
-@router.post("/delete_selected_value_of_param", description="Удаление выбранного значения из параметра в БД.")
+@router.post("/delete_selected_value_of_param/{product_id}/{param_id}", description="Удаление выбранного значения из параметра в БД.")
 async def get_unique_param(
         product_id: int,
         param_id: int,
@@ -529,7 +529,7 @@ async def get_unique_param(
     }
 
 
-@router.post("/added_value_for_param", description="Добавление значения для выбранного параметра в БД.")
+@router.post("/added_value_for_param/{product_id}/{param_id}", description="Добавление значения для выбранного параметра в БД.")
 async def get_unique_param(
         product_id: int,
         param_id: int,

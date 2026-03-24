@@ -84,7 +84,7 @@ def save_base64_image(base64_string: str) -> str:
 
 # === Product Schema Endpoints ===
 
-@router.post("/", response_model=ProductResponse, status_code=201)
+@router.post("/", status_code=201)
 async def create_product(
         data: dict = Body(),
         image: UploadFile = File(None),
@@ -102,9 +102,9 @@ async def create_product(
         image_url = f"/api/files/images/{filename}"
 
     db_product = Product(
-        name=data.name,
-        description=data.description,
-        manufacturer=data.manufacturer,
+        name=name,
+        description=description,
+        manufacturer=manufacturer,
         image=image_path,
         image_url=image_url
     )

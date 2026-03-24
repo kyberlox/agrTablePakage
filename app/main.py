@@ -58,7 +58,6 @@ app.include_router(fields_of_view_router, prefix="/api")
 
 
 
-
 # app.include_router(formulas_router, prefix="/api")
 
 
