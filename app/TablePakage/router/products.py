@@ -87,7 +87,7 @@ def save_base64_image(base64_string: str) -> str:
 @router.post("/", response_model=ProductResponse, status_code=201)
 async def create_product(
         data: dict = Body(),
-        image: UploadFile = File(None),
+        # image: UploadFile = File(None),
         db: AsyncSession = Depends(get_db)
 ):
     name = data["name"]
@@ -96,15 +96,15 @@ async def create_product(
     image_path = None
     image_url = None
 
-    if data.image_base64:
-        filename = save_base64_image(data.image_base64)
+    if data['image']:
+        filename = save_base64_image(data['image'])
         image_path = f"/static/images/{filename}"
         image_url = f"/api/files/images/{filename}"
 
     db_product = Product(
-        name=data.name,
-        description=data.description,
-        manufacturer=data.manufacturer,
+        name=name,
+        description=description,
+        manufacturer=manufacturer,
         image=image_path,
         image_url=image_url
     )

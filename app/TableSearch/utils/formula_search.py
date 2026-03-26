@@ -137,87 +137,87 @@ async def get_dependencies_for_param(param, db):
         return param_names.scalars().all()
     return []
 
-async def search_formula(db, params, table_name_params):
-    from collections import deque
-    from sqlalchemy import select, text
-
-    # 1. Получаем все формульные параметры (кроме selected_file)
-    stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula')
-    res = await db.execute(stmt_formula_params)
-    all_formula_params = res.scalars().all()
-
-    formula_params = []
-    for param in all_formula_params:
-        table_name = next((key for key, value in param.field_of_view.items() if value), None)
-        if table_name != 'selected_file':
-            formula_params.append(param)
-
-    formula_params_names = {p.name for p in formula_params}
-
-    # 2. Строим граф зависимостей (рёбра от зависимостей к зависящим)
-    graph = {}          # ключ: параметр-зависимость, значение: список параметров, которые от него зависят
-    in_degree = {}      # количество формульных зависимостей у параметра
-
-    for param in formula_params:
-        deps = await get_dependencies_for_param(param, db)
-        # Оставляем только формульные зависимости
-        formula_deps = [dep for dep in deps if dep in formula_params_names]
-
-        # Инициализируем in_degree для текущего параметра
-        if param.name not in in_degree:
-            in_degree[param.name] = 0
-        in_degree[param.name] = len(formula_deps)  # сколько формульных параметров ему нужно
-
-        # Добавляем рёбра от зависимостей к текущему параметру
-        for dep in formula_deps:
-            if dep not in graph:
-                graph[dep] = []
-            graph[dep].append(param.name)
-
-    # 3. Топологическая сортировка (алгоритм Кана)
-    queue = deque([name for name, deg in in_degree.items() if deg == 0])
-    order = []
-
-    while queue:
-        current = queue.popleft()
-        order.append(current)
-        # Уменьшаем счётчик зависимостей для тех, кто ждёт этот параметр
-        if current in graph:
-            for dependent in graph[current]:
-                in_degree[dependent] -= 1
-                if in_degree[dependent] == 0:
-                    queue.append(dependent)
-
-    # 4. Вычисляем параметры в порядке order
-    print(order, 'пустой?')
-    for param_name in order:
-        param = next(p for p in formula_params if p.name == param_name)
-        table_name = next(key for key, value in param.field_of_view.items() if value)
-
-        # Если это user_input и значение уже есть (строка), пропускаем
-        if table_name == 'user_input' and param.name in params and isinstance(params[param.name], str):
-            continue
-
-        stmt_table_params = await db.execute(
-            text(f"""
-                SELECT *
-                FROM {table_name}
-                WHERE result_param_id = :result_param_id
-            """),
-            {'result_param_id': param.id}
-        )
-        table_formula_params = stmt_table_params.mappings().all()
-
-        for formula_param in table_formula_params:
-            func = FUNCS_FOR_FIELD_OF_VIEW.get(table_name)
-            if func:
-                res = await func(formula_param, db, params)
-                if res is not None:
-                    params[param.name] = res
-
-    return params
-
 # async def search_formula(db, params, table_name_params):
+#     from collections import deque
+#     from sqlalchemy import select, text
+
+#     # 1. Получаем все формульные параметры (кроме selected_file)
+#     stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula')
+#     res = await db.execute(stmt_formula_params)
+#     all_formula_params = res.scalars().all()
+
+#     formula_params = []
+#     for param in all_formula_params:
+#         table_name = next((key for key, value in param.field_of_view.items() if value), None)
+#         if table_name != 'selected_file':
+#             formula_params.append(param)
+
+#     formula_params_names = {p.name for p in formula_params}
+
+#     # 2. Строим граф зависимостей (рёбра от зависимостей к зависящим)
+#     graph = {}          # ключ: параметр-зависимость, значение: список параметров, которые от него зависят
+#     in_degree = {}      # количество формульных зависимостей у параметра
+
+#     for param in formula_params:
+#         deps = await get_dependencies_for_param(param, db)
+#         # Оставляем только формульные зависимости
+#         formula_deps = [dep for dep in deps if dep in formula_params_names]
+
+#         # Инициализируем in_degree для текущего параметра
+#         if param.name not in in_degree:
+#             in_degree[param.name] = 0
+#         in_degree[param.name] = len(formula_deps)  # сколько формульных параметров ему нужно
+
+#         # Добавляем рёбра от зависимостей к текущему параметру
+#         for dep in formula_deps:
+#             if dep not in graph:
+#                 graph[dep] = []
+#             graph[dep].append(param.name)
+
+#     # 3. Топологическая сортировка (алгоритм Кана)
+#     queue = deque([name for name, deg in in_degree.items() if deg == 0])
+#     order = []
+
+#     while queue:
+#         current = queue.popleft()
+#         order.append(current)
+#         # Уменьшаем счётчик зависимостей для тех, кто ждёт этот параметр
+#         if current in graph:
+#             for dependent in graph[current]:
+#                 in_degree[dependent] -= 1
+#                 if in_degree[dependent] == 0:
+#                     queue.append(dependent)
+
+#     # 4. Вычисляем параметры в порядке order
+#     print(order, 'пустой?')
+#     for param_name in order:
+#         param = next(p for p in formula_params if p.name == param_name)
+#         table_name = next(key for key, value in param.field_of_view.items() if value)
+
+#         # Если это user_input и значение уже есть (строка), пропускаем
+#         if table_name == 'user_input' and param.name in params and isinstance(params[param.name], str):
+#             continue
+
+#         stmt_table_params = await db.execute(
+#             text(f"""
+#                 SELECT *
+#                 FROM {table_name}
+#                 WHERE result_param_id = :result_param_id
+#             """),
+#             {'result_param_id': param.id}
+#         )
+#         table_formula_params = stmt_table_params.mappings().all()
+
+#         for formula_param in table_formula_params:
+#             func = FUNCS_FOR_FIELD_OF_VIEW.get(table_name)
+#             if func:
+#                 res = await func(formula_param, db, params)
+#                 if res is not None:
+#                     params[param.name] = res
+
+#     return params
+
+async def search_formula(db, params, table_name_params):
     # 1. Получаем все формульные параметры (кроме selected_file)
     stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula')
     res = await db.execute(stmt_formula_params)

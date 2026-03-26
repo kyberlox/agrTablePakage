@@ -21,7 +21,7 @@ class ParameterSchema(Base):
 
     # Связь с user_input
     user_inputs = relationship("UserInput", foreign_keys="[UserInput.result_param_id]", back_populates="user_input_parametr_schema", cascade="all, delete-orphan")
-   
+ 
     # Связь с conditions
     conditions = relationship(
         "Conditions",
