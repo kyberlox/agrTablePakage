@@ -1,6 +1,7 @@
 # app/products/router/parameters.py
 
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -95,8 +96,19 @@ async def update_parameter(
     update_data = schema_update.dict(exclude_unset=True)
 
     if "name" in update_data:
+        old_translit = param.transliterated_name
+        new_translit = to_sql_name_lat(update_data["name"])
+
         param.name = update_data["name"]
-        param.transliterated_name = to_sql_name_lat(update_data["name"])
+        param.transliterated_name = new_translit
+
+        # если это Table → переименовываем колонку
+        if param.type == "Table" and param.table_name:
+            table_name = to_sql_name_lat(param.table_name) + "_table"
+
+            await db.execute(
+                text(f'ALTER TABLE {table_name} RENAME COLUMN "{old_translit}" TO "{new_translit}"')
+            )
 
     for key, value in update_data.items():
         if key != "name":

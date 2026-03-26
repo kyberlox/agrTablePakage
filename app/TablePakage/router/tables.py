@@ -19,6 +19,34 @@ from ..utils.router_utils import to_sql_name_kir, to_sql_name_lat
 router = APIRouter(prefix="/tables", tags=["Tables"])
 
 
+# Функция для обновления витрины при внесении изменений
+async def mark_datamart_dirty(db, product_id):
+    await db.execute(
+        text("""
+            INSERT INTO datamart_registry (
+                product_id,
+                dm_table_name,
+                is_dirty,
+                updated_at
+            )
+            VALUES (
+                :product_id,
+                :dm_table_name,
+                TRUE,
+                now()
+            )
+            ON CONFLICT (product_id)
+            DO UPDATE
+            SET is_dirty = TRUE,
+                updated_at = now()
+        """),
+        {
+            "product_id": product_id,
+            "dm_table_name": f"dm_product_{product_id}"
+        }
+    )
+
+
 # === Table Schema Endpoints ===
 
 @router.post("/upload_full_xlsx", description="Импорт всех параметров из XLSX.")
@@ -58,12 +86,31 @@ async def import_excel(
 
     db_columns = {row[0] for row in result.fetchall()}
 
-    # Сопоставление: транслит → оригинальное имя из Excel
-    excel_map = {
-        to_sql_name_lat(col): col
-        for col in df.columns
-        if col.lower() != "id"
+    param_result = await db.execute(
+        text("""
+            SELECT name, transliterated_name
+            FROM parameter_schemas
+            WHERE product_id = :product_id
+        """),
+        {"product_id": product_id}
+    )
+
+    param_map = {
+        row[0]: row[1]
+        for row in param_result.fetchall()
     }
+
+    excel_map = {}
+
+    for col in df.columns:
+        if col.lower() == "id":
+            continue
+
+        if col in param_map:
+            excel_map[param_map[col]] = col
+        else:
+            translit = to_sql_name_lat(col)
+            excel_map[translit] = col
 
     common_columns = set(excel_map.keys())
 
@@ -75,26 +122,31 @@ async def import_excel(
     # Создаём недостающие
     for col in missing:
         await db.execute(
-            text(f'ALTER TABLE {table_name} ADD COLUMN "{col}" TEXT')
+            text(f'ALTER TABLE "{table_name}" ADD COLUMN "{col}" TEXT')
         )
         await db.execute(
             text("""
-                            INSERT INTO parameter_schemas (name, type, table_name, product_id)
-                            SELECT
-                            CAST(:name AS VARCHAR),
-                            'Table',
-                            CAST(:table_name AS VARCHAR),
-                            :product_id
-                            WHERE NOT EXISTS (
-                                SELECT 1
-                                FROM parameter_schemas
-                                WHERE name = :name
-                                  AND product_id = :product_id
-                            )
-                        """),
+                INSERT INTO parameter_schemas (
+                    name,
+                    transliterated_name,
+                    type,
+                    table_name,
+                    product_id
+                )
+                VALUES (
+                    :name,
+                    :transliterated_name,
+                    'Table',
+                    :table_name,
+                    :product_id
+                )
+                ON CONFLICT (transliterated_name, product_id)
+                DO NOTHING
+            """),
             {
-                "name": col,
-                "table_name": product_name,
+                "name": excel_map[col],
+                "transliterated_name": col,
+                "table_name": table_name,
                 "product_id": product_id
             }
         )
@@ -102,7 +154,7 @@ async def import_excel(
     await db.commit()
 
     # Формируем INSERT
-    columns_sql = ", ".join(common_columns)
+    columns_sql = ", ".join(f'"{col}"' for col in common_columns)
     values_sql = ", ".join(f":{col}" for col in common_columns)
 
     insert_sql = text(f"""
@@ -120,30 +172,7 @@ async def import_excel(
 
     dm_table = f"dm_product_{product_id}"
 
-    await db.execute(
-        text("""
-        INSERT INTO datamart_registry (
-            product_id,
-            dm_table_name,
-            is_dirty,
-            updated_at
-        )
-        VALUES (
-            :product_id,
-            :dm_table_name,
-            TRUE,
-            now()
-        )
-        ON CONFLICT (product_id)
-        DO UPDATE
-        SET is_dirty = TRUE,
-            updated_at = now()
-        """),
-        {
-            "product_id": product_id,
-            "dm_table_name": dm_table
-        }
-    )
+    await mark_datamart_dirty(db, product_id)
 
     await db.commit()
 
@@ -221,30 +250,7 @@ async def import_excel(
 
     dm_table = f"dm_product_{product_id}"
 
-    await db.execute(
-        text("""
-            INSERT INTO datamart_registry (
-                product_id,
-                dm_table_name,
-                is_dirty,
-                updated_at
-            )
-            VALUES (
-                :product_id,
-                :dm_table_name,
-                TRUE,
-                now()
-            )
-            ON CONFLICT (product_id)
-            DO UPDATE
-            SET is_dirty = TRUE,
-                updated_at = now()
-            """),
-        {
-            "product_id": product_id,
-            "dm_table_name": dm_table
-        }
-    )
+    await mark_datamart_dirty(db, product_id)
 
     await db.commit()
 
@@ -344,7 +350,7 @@ async def get_unique_param(
     # Получаем param_name
     param_result = await db.execute(
         text("""
-                SELECT name
+                SELECT transliterated_name
                 FROM parameter_schemas
                 WHERE id = :param_id
                   AND product_id = :product_id
@@ -394,7 +400,7 @@ async def get_unique_param(
         raise HTTPException(status_code=404, detail="Column not found")
 
     # Получаем данные таблицы
-    result = await db.execute(text(f"SELECT {param_name} FROM {table_name}"))
+    result = await db.execute(text(f'SELECT "{param_name}" FROM "{table_name}"'))
     values = set([row[0] for row in result.fetchall()])
 
     if not values:
@@ -407,7 +413,7 @@ async def get_unique_param(
 
 
 @router.post("/delete_selected_value_of_param", description="Удаление выбранного значения из параметра в БД.")
-async def get_unique_param(
+async def delete_selected_value_of_param(
         product_id: int,
         param_id: int,
         value: Optional[str] = None,
@@ -428,7 +434,7 @@ async def get_unique_param(
     # Получаем param_name
     param_result = await db.execute(
         text("""
-                   SELECT name
+                   SELECT transliterated_name
                    FROM parameter_schemas
                    WHERE id = :param_id
                      AND product_id = :product_id
@@ -495,30 +501,7 @@ async def get_unique_param(
 
     dm_table = f"dm_product_{product_id}"
 
-    await db.execute(
-        text("""
-            INSERT INTO datamart_registry (
-                product_id,
-                dm_table_name,
-                is_dirty,
-                updated_at
-            )
-            VALUES (
-                :product_id,
-                :dm_table_name,
-                TRUE,
-                now()
-            )
-            ON CONFLICT (product_id)
-            DO UPDATE
-            SET is_dirty = TRUE,
-                updated_at = now()
-            """),
-        {
-            "product_id": product_id,
-            "dm_table_name": dm_table
-        }
-    )
+    await mark_datamart_dirty(db, product_id)
 
     await db.commit()
 
@@ -530,13 +513,13 @@ async def get_unique_param(
 
 
 @router.post("/added_value_for_param", description="Добавление значения для выбранного параметра в БД.")
-async def get_unique_param(
+async def added_value_for_param(
         product_id: int,
         param_id: int,
         value: Optional[str] = None,
         db: AsyncSession = Depends(get_db)
 ):
-    # Получаем product_name
+    # Получаем product_named
     product_result = await db.execute(
         text("SELECT name FROM products WHERE id = :id"),
         {"id": product_id}
@@ -551,7 +534,7 @@ async def get_unique_param(
     # Получаем param_name
     param_result = await db.execute(
         text("""
-                   SELECT name
+                   SELECT transliterated_name
                    FROM parameter_schemas
                    WHERE id = :param_id
                      AND product_id = :product_id
@@ -621,30 +604,7 @@ async def get_unique_param(
         )
         dm_table = f"dm_product_{product_id}"
 
-        await db.execute(
-            text("""
-                INSERT INTO datamart_registry (
-                    product_id,
-                    dm_table_name,
-                    is_dirty,
-                    updated_at
-                )
-                VALUES (
-                    :product_id,
-                    :dm_table_name,
-                    TRUE,
-                    now()
-                )
-                ON CONFLICT (product_id)
-                DO UPDATE
-                SET is_dirty = TRUE,
-                    updated_at = now()
-                """),
-            {
-                "product_id": product_id,
-                "dm_table_name": dm_table
-            }
-        )
+        await mark_datamart_dirty(db, product_id)
 
         await db.commit()
 
@@ -710,30 +670,7 @@ async def get_unique_param(
 
         dm_table = f"dm_product_{product_id}"
 
-        await db.execute(
-            text("""
-                INSERT INTO datamart_registry (
-                    product_id,
-                    dm_table_name,
-                    is_dirty,
-                    updated_at
-                )
-                VALUES (
-                    :product_id,
-                    :dm_table_name,
-                    TRUE,
-                    now()
-                )
-                ON CONFLICT (product_id)
-                DO UPDATE
-                SET is_dirty = TRUE,
-                    updated_at = now()
-                """),
-            {
-                "product_id": product_id,
-                "dm_table_name": dm_table
-            }
-        )
+        await mark_datamart_dirty(db, product_id)
 
         await db.commit()
 
