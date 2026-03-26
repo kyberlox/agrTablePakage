@@ -4,7 +4,7 @@ from typing import Optional, Dict, Any
 
 class SelectedFileSchemaBase(BaseModel):
     name: Optional[str] = None
-    parametr_schema_id: int
+    result_param_id: int
 
 
 class SelectedFileSchemaCreate(SelectedFileSchemaBase):
@@ -18,7 +18,7 @@ class SelectedFileSchemaGet(SelectedFileSchemaBase):
 
 class SelectedFileSchemaUpdate(BaseModel):
     name: Optional[str] = None
-    parametr_schema_id: Optional[int] = None
+    result_param_id: Optional[int] = None
 
 
 class SelectedFileSchemaResponse(SelectedFileSchemaBase):

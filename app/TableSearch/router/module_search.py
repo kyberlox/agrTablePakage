@@ -7,6 +7,7 @@ from app.TablePakage.model.database import get_db
 from app.TablePakage.utils.router_utils import to_sql_name_lat
 from app.TableSearch.schema.search import ModuleSearchResponse
 from app.TableSearch.utils.dm_search import ensure_dm_exists, get_full_search_from_dm
+from app.TableSearch.utils.formula_search import search_formula
 
 router = APIRouter(prefix="/module_search", tags=["Module_search"])
 
@@ -78,9 +79,10 @@ async def process_table_data(
     sql_params = {}
 
     allowed_params = set(schema_params)
-
+    formula_params = dict() # добавляю формульные параметры
     for param_name, value in selected_params.items():
         if param_name not in allowed_params:
+            formula_params[param_name] = value
             continue
 
         if value is None:
@@ -145,6 +147,17 @@ async def process_table_data(
     функция формульного поиска
     аргументыЖ id продукта и словарь с параметрами
     """
+    if formula_params:
+        # print(formula_params)
+        for key, value in formula_params.items():
+            parameters[key] = value
+    # print(parameters)
+    parameters = await search_formula(db, parameters, table_name)
+    # print(test_res)
+    # if test_res:
+    #     for key, value in test_res.items():
+    #         parameters[key] = value
+    # print(test_res)
 
     return {
         "product_id": product_id,

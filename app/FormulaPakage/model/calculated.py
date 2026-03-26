@@ -15,21 +15,21 @@ class Calculated(Base):
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    parameter_1_id = Column(Integer, ForeignKey("parameter_schemas.id"), nullable=True)  # Связь через внешний ключ
-    parameter_2_id = Column(Integer, ForeignKey("parameter_schemas.id"), nullable=True)  # Связь через внешний ключ
+    parameter_id = Column(Integer, ForeignKey("parameter_schemas.id"), nullable=True)  # Связь через внешний ключ
+    # parameter_id = Column(Integer, ForeignKey("parameter_schemas.id"), nullable=True)  # Связь через внешний ключ
     result_param_id = Column(Integer, ForeignKey("parameter_schemas.id"), nullable=False)
     
     first_parameter = relationship(
         "ParameterSchema", 
-        foreign_keys=[parameter_1_id],
+        foreign_keys=[parameter_id],
         back_populates="calculations_as_first_param"
     )
     
-    second_parameter = relationship(
-        "ParameterSchema", 
-        foreign_keys=[parameter_2_id],
-        back_populates="calculations_as_second_param"
-    )
+    # second_parameter = relationship(
+    #     "ParameterSchema", 
+    #     foreign_keys=[parameter_2_id],
+    #     back_populates="calculations_as_second_param"
+    # )
     
     result_parameter = relationship(
         "ParameterSchema", 

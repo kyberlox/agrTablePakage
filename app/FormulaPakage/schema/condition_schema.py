@@ -8,8 +8,9 @@ class ConditionsSchemaBase(BaseModel):
     condition_operator: str
     condition_value: str
     result_value: str
-    condition_param_id: int
+    condition_param_id: Optional[int] = None
     result_param_id: int
+    result_value_type: bool
 
     # @field_validator('condition_operator')
     # @classmethod
@@ -24,7 +25,7 @@ class ConditionsSchemaCreate(ConditionsSchemaBase):
 
 class ConditionsSchemaGet(BaseModel):
     id: int
-    condition_param_name: str
+    condition_param_name: Optional[str] = None
     result_param_name: str
 
 class ConditionsSchemaUpdate(BaseModel):
@@ -33,6 +34,7 @@ class ConditionsSchemaUpdate(BaseModel):
     result_value: Optional[str] = None
     condition_param_id: Optional[int] = None
     result_param_id: Optional[int] = None
+    result_value_type: Optional[bool] = None
 
     @field_validator('condition_operator')
     @classmethod

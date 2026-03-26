@@ -2,7 +2,7 @@
 from pydantic import BaseModel, validator
 from typing import Optional, Dict, Any
 
-FIELD_OF_VIEWS = ['user_input', 'calculated', 'condition', 'selected_file']
+FIELD_OF_VIEWS = ['user_input', 'calculated', 'conditions', 'selected_file']
 
 class ParameterSchemaBase(BaseModel):
     name: str

@@ -24,10 +24,10 @@ async def get_user_inputs(db: AsyncSession = Depends(get_db)):
             UserInput.type,
             UserInput.min_value,
             UserInput.max_value,
-            UserInput.parameter_schema_id,
+            UserInput.result_param_id,
             ParameterSchema.name.label('parameter_schema_name')
         ).join(
-            ParameterSchema, UserInput.parameter_schema_id == ParameterSchema.id
+            ParameterSchema, UserInput.result_param_id == ParameterSchema.id
         )
         result = await db.execute(stmt)
         user_inputs = result.fetchall()
@@ -42,7 +42,7 @@ async def get_user_inputs(db: AsyncSession = Depends(get_db)):
                 'type': user_input.type,
                 'min_value': user_input.min_value,
                 'max_value': user_input.max_value,
-                'parameter_schema_id': user_input.parameter_schema_id,
+                'result_param_id': user_input.result_param_id,
                 'parameter_schema_name': user_input.parameter_schema_name
             }
             res.append(data)
@@ -61,10 +61,10 @@ async def get_user_input(id: int, db: AsyncSession = Depends(get_db)):
             UserInput.type,
             UserInput.min_value,
             UserInput.max_value,
-            UserInput.parameter_schema_id,
+            UserInput.result_param_id,
             ParameterSchema.name.label('parameter_schema_name')
         ).join(
-            ParameterSchema, UserInput.parameter_schema_id == ParameterSchema.id
+            ParameterSchema, UserInput.result_param_id == ParameterSchema.id
         ).where(UserInput.id == id)
         result = await db.execute(stmt)
         user_input = result.one_or_none()
@@ -78,7 +78,7 @@ async def get_user_input(id: int, db: AsyncSession = Depends(get_db)):
             'type': user_input.type,
             'min_value': user_input.min_value,
             'max_value': user_input.max_value,
-            'parameter_schema_id': user_input.parameter_schema_id,
+            'result_param_id': user_input.result_param_id,
             'parameter_schema_name': user_input.parameter_schema_name
         }
         for field in FIELDS_OF_VIEW_PATTERN['user_input']['fields']:
@@ -102,7 +102,7 @@ async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_d
         param = result.scalar_one_or_none()
         if not param:
             raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {param_id}")
-        new_node = UserInput(parameter_schema_id=param_id)
+        new_node = UserInput(result_param_id=param_id)
         db.add(new_node)
         await db.commit()
         await db.refresh(new_node)
@@ -116,7 +116,7 @@ async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_d
             'type': new_node.type,
             'min_value': new_node.min_value,
             'max_value': new_node.max_value,
-            'parameter_schema_id': new_node.parameter_schema_id,
+            'result_param_id': new_node.result_param_id,
             'parameter_schema_name': param.name
         }
         for field in FIELDS_OF_VIEW_PATTERN['user_input']['fields']:
@@ -154,10 +154,10 @@ async def update(
         await db.refresh(existing_node)
 
         # Сборка шаблона
-        result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == existing_node.parameter_schema_id))
+        result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == existing_node.result_param_id))
         param = result.scalar_one_or_none()
         if not param:
-            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.parameter_schema_id}")
+            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {existing_node.result_param_id}")
 
         user_input_result = {'fields': []}
         data = {
@@ -167,7 +167,7 @@ async def update(
             'type': existing_node.type,
             'min_value': existing_node.min_value,
             'max_value': existing_node.max_value,
-            'parameter_schema_id': existing_node.parameter_schema_id,
+            'result_param_id': existing_node.result_param_id,
             'parameter_schema_name': param.name
         }
         for field in FIELDS_OF_VIEW_PATTERN['user_input']['fields']:

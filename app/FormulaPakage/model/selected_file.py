@@ -11,6 +11,6 @@ class SelectedFile(Base):
     content_type = Column(Text, nullable=True)
     file_path = Column(Text, nullable=True)
     file_url = Column(Text, nullable=True)
-    parametr_schema_id = Column(Integer, ForeignKey("parameter_schemas.id"), nullable=False)
+    result_param_id = Column(Integer, ForeignKey("parameter_schemas.id"), nullable=False)
 
     selected_file_parametr_schema = relationship("ParameterSchema", back_populates="selected_files")
