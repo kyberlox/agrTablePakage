@@ -27,37 +27,47 @@ async def create_parameter_schema(
         raise HTTPException(status_code=400, detail="Type must be 'Table' or 'Formula'")
 
     # Проверка связи с продуктом
-    product_result = await db.execute(select(Product).where(Product.id == schema.product_id))
+    product_result = await db.execute(
+        select(Product).where(Product.id == schema.product_id)
+    )
     if not product_result.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Invalid product_id")
 
     # Транслитерируем имя параметра
-    sql_param_name = to_sql_name_lat(schema.name)
+    translit_name = to_sql_name_lat(schema.name)
 
     db_schema = ParameterSchema(
-        **schema.dict(exclude={"name"}),
-        name=sql_param_name
+        **schema.dict(),
+        transliterated_name=to_sql_name_lat(schema.name)
     )
+
     db.add(db_schema)
 
     # Если тип Table — создаём или изменяем таблицу
     if schema.type == "Table":
         if not schema.table_name:
-            raise HTTPException(status_code=400, detail="table_name is required for type 'Table'")
-        await create_or_alter_table(db, to_sql_name_lat(schema.table_name) + "_table",
-                                    to_sql_name_lat(schema.name))
+            raise HTTPException(status_code=400, detail="table_name is required")
+
+        await create_or_alter_table(
+            db,
+            to_sql_name_lat(schema.table_name) + "_table",
+            translit_name
+        )
 
     await db.commit()
     await db.refresh(db_schema)
     return db_schema
 
-@router.get("/by_product/{product_id}", response_model=list[ParameterSchemaResponse], description="Выведение информации по параметрам продукта по его {ID}.")
+
+@router.get("/by_product/{product_id}", response_model=list[ParameterSchemaResponse],
+            description="Выведение информации по параметрам продукта по его {ID}.")
 async def get_parameters(product_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(select(ParameterSchema).where(ParameterSchema.product_id == product_id))
     params = result.scalars().all()
     if not params:
         raise HTTPException(status_code=404, detail="Parameters not found")
     return params
+
 
 @router.get("/{param_id}", response_model=ParameterSchemaResponse,
             description="Выведение информации по параметру по его {ID}.")
@@ -78,14 +88,23 @@ async def update_parameter(
 ):
     result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
     param = result.scalar_one_or_none()
+
     if not param:
         raise HTTPException(status_code=404, detail="Parameter not found")
 
-    for key, value in schema_update.dict(exclude_unset=True).items():
-        setattr(param, key, value)
+    update_data = schema_update.dict(exclude_unset=True)
 
-    await db.refresh(param)
+    if "name" in update_data:
+        param.name = update_data["name"]
+        param.transliterated_name = to_sql_name_lat(update_data["name"])
+
+    for key, value in update_data.items():
+        if key != "name":
+            setattr(param, key, value)
+
     await db.commit()
+    await db.refresh(param)
+
     return param
 
 
@@ -95,12 +114,15 @@ async def delete_parameter(
         param_id: int,
         db: AsyncSession = Depends(get_db)
 ):
-    result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
+    result = await db.execute(
+        select(ParameterSchema).where(ParameterSchema.id == param_id)
+    )
     param = result.scalar_one_or_none()
 
-    if result is None:
-        return HTTPException(status_code=404, detail="Parameter not found")
+    if not param:
+        raise HTTPException(status_code=404, detail="Parameter not found")
 
     await db.delete(param)
     await db.commit()
+
     return param

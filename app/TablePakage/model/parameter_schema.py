@@ -8,6 +8,7 @@ class ParameterSchema(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False)
+    transliterated_name = Column(String(255), nullable=False)
     description = Column(Text)
     type = Column(String(50), nullable=False)  # "Table" или "Formula"
     table_name = Column(String(255))  # Имя таблицы для типа "Table"
@@ -68,5 +69,5 @@ class ParameterSchema(Base):
 
     __table_args__ = (
         Index("idx_parameter_product_id", "product_id"),
-        UniqueConstraint("product_id", "name", name="uq_product_parameter"),
+        UniqueConstraint("product_id", "transliterated_name", name="uq_product_parameter"),
     )
