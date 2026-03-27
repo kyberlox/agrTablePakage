@@ -232,11 +232,11 @@ async def import_excel(
         return {"message": "Нет совпадающих колонок"}
 
     # Формируем INSERT
-    columns_sql = ", ".join(common_columns)
+    columns_sql = ", ".join(f'"{col}"' for col in common_columns)
     values_sql = ", ".join(f":{col}" for col in common_columns)
 
     insert_sql = text(f"""
-        INSERT INTO {table_name} ({columns_sql})
+        INSERT INTO "{table_name}" ({columns_sql})
         VALUES ({values_sql})
     """)
 
