@@ -21,11 +21,12 @@ async def rebuild_dm(
         union_queries = []
         
         for param in schema_params:
+            col = to_sql_name_lat(param)
             union_queries.append(f"""
                 SELECT
                     '{param}'::text AS param_name,
-                    array_agg(DISTINCT "{param}")
-                        FILTER (WHERE "{param}" IS NOT NULL) AS values,
+                    array_agg(DISTINCT "{col}")
+                        FILTER (WHERE "{col}" IS NOT NULL) AS values,
                     COUNT(*) AS matched_rows
                 FROM "{table_name}"
             """)
