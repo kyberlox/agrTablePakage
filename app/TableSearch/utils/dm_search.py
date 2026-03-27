@@ -19,7 +19,7 @@ async def rebuild_dm(
 
         # 2️⃣ CREATE отдельно
         union_queries = []
-
+        
         for param in schema_params:
             union_queries.append(f"""
                 SELECT
@@ -29,16 +29,16 @@ async def rebuild_dm(
                     COUNT(*) AS matched_rows
                 FROM "{table_name}"
             """)
-
+        
         final_sql = f"""
             CREATE TABLE "{dm_table}" AS
             {" UNION ALL ".join(union_queries)}
         """
-
+        
         await db.execute(text(final_sql))
-
+        
         dm_table = f"dm_product_{product_id}"
-
+        
         await db.execute(text("""
             INSERT INTO datamart_registry (
                 product_id,
@@ -60,9 +60,9 @@ async def rebuild_dm(
             "pid": product_id,
             "dm_table_name": dm_table
         })
-
+        
         await db.commit()
-
+        
     finally:
         # unlock всегда в finally
         await db.execute(text("SELECT pg_advisory_unlock(:pid)"), {"pid": product_id})
