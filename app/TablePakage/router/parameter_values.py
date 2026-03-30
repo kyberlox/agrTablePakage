@@ -1,4 +1,5 @@
 # app/products/router/parameter_values.py
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -8,9 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..model.database import get_db
 from ..utils.router_utils import to_sql_name_lat
 
-
 router = APIRouter(prefix="/parameter_values", tags=["Parameter_values"])
-
 
 
 # Функция для обновления витрины при внесении изменений
@@ -121,6 +120,107 @@ async def get_unique_param(
     return {
         "parameter": param_name,
         "values": values
+    }
+
+
+@router.post("/edit_value_for_param", description="Изменение значения для выбранного параметра в БД.")
+async def edit_value_of_param(
+        product_id: int,
+        param_id: int,
+        old_value: Optional[str] = None,
+        new_value: Optional[str] = None,
+        db: AsyncSession = Depends(get_db)
+):
+    # Получаем product_named
+    product_result = await db.execute(
+        text("SELECT name FROM products WHERE id = :id"),
+        {"id": product_id}
+    )
+    product_name = product_result.scalar_one_or_none()
+
+    if product_name is None:
+        raise HTTPException(status_code=404, detail="Продукция не найдена")
+
+    table_name = f"{to_sql_name_lat(product_name)}_table"
+
+    # Получаем param_name
+    param_result = await db.execute(
+        text("""
+                   SELECT transliterated_name
+                   FROM parameter_schemas
+                   WHERE id = :param_id
+                     AND product_id = :product_id
+               """),
+        {
+            "param_id": param_id,
+            "product_id": product_id
+        }
+    )
+    param_name = param_result.scalar_one_or_none()
+
+    if param_name is None:
+        raise HTTPException(status_code=404, detail="Параметр не найден")
+
+    # Проверяем, что таблица существует
+    exists = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_name = :table_name
+            )
+        """),
+        {"table_name": table_name}
+    )
+
+    if not exists.scalar():
+        raise HTTPException(status_code=404, detail="Table not found")
+
+    # Проверяем, что колонка существует
+    column_exists = await db.execute(
+        text("""
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.columns
+                WHERE table_name = :table_name
+                  AND column_name = :column_name
+            )
+        """),
+        {
+            "table_name": table_name,
+            "column_name": param_name
+        }
+    )
+
+    if not column_exists.scalar():
+        raise HTTPException(status_code=404, detail="Column not found")
+
+    if old_value is None:
+        where_sql = f'"{param_name}" IS NULL'
+        params = {"new_value": new_value}
+    else:
+        where_sql = f'"{param_name}" = :old_value'
+        params = {"new_value": new_value, "old_value": old_value}
+
+    result = await db.execute(
+        text(f"""
+            UPDATE "{table_name}"
+            SET "{param_name}" = :new_value
+            WHERE {where_sql}
+        """),
+        params
+    )
+
+    if result.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Значение не найдено")
+
+    await mark_datamart_dirty(db, product_id)
+
+    await db.commit()
+
+    return {
+        "parameter": param_name,
+        "new_value": new_value,
     }
 
 
