@@ -96,7 +96,7 @@ async def create_product(
     image_path = None
     image_url = None
 
-    if data['image']:
+    if "image" in data and data['image']:
         filename = save_base64_image(data['image'])
         image_path = f"/static/images/{filename}"
         image_url = f"/api/files/images/{filename}"
