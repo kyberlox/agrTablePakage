@@ -14,6 +14,7 @@ import pandas as pd
 from ..model.database import get_db
 from ..utils.db_utils import create_table
 from ..utils.router_utils import to_sql_name_kir, to_sql_name_lat
+from .parameter_values import mark_datamart_dirty
 
 router = APIRouter(prefix="/tables", tags=["Tables"])
 
