@@ -53,7 +53,7 @@ async def process_table_data(
         raise HTTPException(status_code=404, detail="Параметры не найдены")
     
     if not selected_params:
-        
+           
         await ensure_dm_exists(
             db,
             product_id,
@@ -66,6 +66,9 @@ async def process_table_data(
             product_id,
         )
         
+        # тут возвращаются формульные параметры
+        parameters = await search_formula(db, parameters, table_name)
+
         return {
             "product_id": product_id,
             "product_name": product_name,

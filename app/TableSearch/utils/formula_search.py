@@ -1,8 +1,9 @@
 from sqlalchemy import select, text
 from app.TablePakage.model.parameter_schema import ParameterSchema
-from app.FormulaPakage.utils.calculated_utils import OPERATIONS
+from app.FormulaPakage.utils.calculated_utils import OPERATIONS, PRIORITY
 from app.FormulaPakage.model.selected_file import SelectedFile
 from app.TablePakage.utils.router_utils import to_sql_name_kir
+from fastapi import HTTPException
 
 from collections import deque
 from sqlalchemy import text
@@ -24,38 +25,52 @@ async def check_operation(condition_param, condition_value, condition_operator):
             return True
         return False
 
-async def calculated_params(param_info, db, params):
-    if not param_info['parameter_id'] or not param_info['parameter_2_id']:
+async def calculated_params(note_params_info, db, user_params):
+    try:
+        priority_nodes = {op: [] for op in PRIORITY}
+        for item in note_params_info:
+            op = item['operation']
+            if op in priority_nodes:
+                priority_nodes[op].append(item)
+
+        # Преобразуем пустые списки в None
+        priority_nodes = {k: (v if v else None) for k, v in priority_nodes.items()}
+        if not priority_nodes[PRIORITY[0]]:
+            raise HTTPException(status_code=500, detail="Отсутствует стартовый параметр в Calculated")
+
+        start_value_id = priority_nodes[PRIORITY[0]][0]['parameter_id']
+        priority_nodes.pop(PRIORITY[0])
+        print(priority_nodes)
+        param_start_stmt =  await db.execute(select(ParameterSchema.name).where(ParameterSchema.id == start_value_id))
+        param_start = param_start_stmt.scalar()
+
+
+        param_start_res = user_params[param_start] if param_start in user_params and isinstance(user_params[param_start], str) and "Введите" not in user_params[param_start] else None
+
+        if not param_start_res:
+            param_start_kir = to_sql_name_kir(param_start)
+            return f"Введите значения для параметра {param_start_kir!r}"
+
+        result_param = float(param_start_res)
+        
+        for queue_operation, value in priority_nodes.items(): 
+            if not value:
+                continue
+            for val in value:
+                param_val_stmt =  await db.execute(select(ParameterSchema.name).where(ParameterSchema.id == val['parameter_id']))
+                param_val = param_val_stmt.scalar()
+                param_val_res = user_params[param_val] if param_start in user_params and isinstance(user_params[param_val], str) and "Введите" not in user_params[param_val] else None
+                if not param_val_res:
+                    param_start_kir = to_sql_name_kir(param_val)
+                    return f"Введите значения для параметра {param_start_kir!r}"
+                result_param = OPERATIONS[queue_operation](result_param, float(param_val_res))
+
+
+        return result_param
+    except Exception as e:
+        print(f'Ошибка в функции calculated_params: ', str(e))
         return None
 
-    param_1_stmt =  await db.execute(select(ParameterSchema.name).where(ParameterSchema.id == param_info['parameter_id']))
-    param_1 = param_1_stmt.scalar()
-    param_1_res = params[param_1] if isinstance(params[param_1], str) else None
-
-    param_2_stmt =  await db.execute(select(ParameterSchema.name).where(ParameterSchema.id == param_info['parameter_2_id']))
-    param_2 = param_2_stmt.scalar()
-    param_2_res = params[param_2] if isinstance(params[param_2], str) else None
-
-    if not param_1_res or not param_2_res:
-        param_1_kir = to_sql_name_kir(param_1)
-        param_2_kir = to_sql_name_kir(param_2)
-        return f"Введите значения для параметров {param_1_kir!r} и {param_2_kir!r}"
-    elif not param_1_res and param_2_res:
-        param_1_kir = to_sql_name_kir(param_1)
-        return f"Введите значения для параметра {param_1_kir!r}"
-    elif not param_2_res and param_1_res:
-        param_2_kir = to_sql_name_kir(param_2)
-        return f"Введите значения для параметра {param_2_kir!r}"
-
-
-    try:
-        param_1_res = float(param_1_res)
-        param_2_res = float(param_2_res)
-        res = OPERATIONS[param_info['operation']](param_1_res, param_2_res)
-        return str(res)
-    except ValueError: # если значение не конвертируется в число, то это операции со строками
-        res = OPERATIONS[param_info['operation']](param_1_res, param_2_res)
-        return res
 
 async def condition_params(param_info, db, params):
     if not param_info['condition_param_id'] or not param_info['condition_value']:
@@ -91,8 +106,6 @@ async def condition_params(param_info, db, params):
         return param_info['result_value']
 
         
-        
-
 
 async def user_input_params(param_info, db, params):
     if not param_info['min_value'] or not param_info['max_value']:
@@ -112,14 +125,12 @@ async def get_dependencies_for_param(param, db):
 
     if table_name == 'calculated':
         # Запрос к таблице calculated
-        stmt = text("SELECT parameter_id, parameter_2_id FROM calculated WHERE result_param_id = :id")
+        stmt = text("SELECT parameter_id FROM calculated WHERE result_param_id = :id")
         res = await db.execute(stmt, {'id': param.id})
         row = res.first()
         if row:
             if row.parameter_id:
                 deps_ids.append(row.parameter_id)
-            if row.parameter_2_id:
-                deps_ids.append(row.parameter_2_id)
 
     elif table_name == 'conditions':
         # Запрос к таблице conditions
@@ -247,8 +258,8 @@ async def search_formula(db, params, table_name_params):
     # 3. Топологическая сортировка (алгоритм Кана)
     # Инициализируем очередь вершинами с in_degree = 0
     queue = deque([name for name, deg in in_degree.items() if deg == 0])
-    print(queue, 'queue')
-    print(in_degree, 'in_degree')
+    # print(queue, 'queue')
+    # print(in_degree, 'in_degree')
     order = []
 
     while queue:
@@ -260,9 +271,9 @@ async def search_formula(db, params, table_name_params):
                 in_degree[dependent] -= 1
                 if in_degree[dependent] == 0:
                     queue.append(dependent)
-    print(order, 'order')
-    print(graph, 'graph')
-    print(in_degree, 'in_degree')
+    # print(order, 'order')
+    # print(graph, 'graph')
+    # print(in_degree, 'in_degree')
     # 4. Вычисляем параметры в порядке order
     for param_name in order:
         # Находим объект ParameterSchema для этого имени
@@ -284,12 +295,20 @@ async def search_formula(db, params, table_name_params):
         )
         table_formula_params = stmt_table_params.mappings().all()
 
-        # Для каждой записи (их обычно одна) вызываем обработчик
-        for formula_param in table_formula_params:
-            func = FUNCS_FOR_FIELD_OF_VIEW.get(table_name)
-            if func:
-                res = await func(formula_param, db, params)
-                if res is not None:
-                    params[param.name] = res
-        print(param.name, table_name, 'что получаем?')
+        # отловить все calculated параметры, для которых результат - 1 параметр( то есть это одна большая формула )
+        if table_name == "calculated":
+            # тут передаем массив записей (table_formula_params) чтобы рассчитать его формулу типа calculated 
+            res = await calculated_params(table_formula_params, db, params)
+            if res is not None:
+                params[param.name] = str(res)
+        else:
+            # Для каждой записи (их обычно одна) вызываем обработчик
+            #для conditions и user_input вызываем из словаря
+            for formula_param in table_formula_params:
+                func = FUNCS_FOR_FIELD_OF_VIEW.get(table_name)
+                if func:
+                    res = await func(formula_param, db, params)
+                    if res is not None:
+                        params[param.name] = res
+        # print(param.name, table_name, 'что получаем?')
     return params
