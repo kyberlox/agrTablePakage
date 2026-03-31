@@ -60,6 +60,7 @@ async def update(
             'parametr_schema_name': param.name,
             'result_param_id': param.id
         }
+        print(data)
         for field in FIELDS_OF_VIEW_PATTERN['selected_file']['fields']:
             if field['field'] in data and data[field['field']] is not None:
                 field['value'] = data[field['field']]

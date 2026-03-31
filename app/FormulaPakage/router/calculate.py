@@ -90,7 +90,6 @@ async def get_calculate(id: int, db: AsyncSession = Depends(get_db)):
             'operation': calculate.operation,
             'parameter_id': calculate.parameter_id,
             'parameter_name': calculate.parameter_name,
-            'parameter_2_name': calculate.parameter_2_name,
             'result_param_id': calculate.result_param_id,
             'result_param_name': calculate.result_param_name
         }

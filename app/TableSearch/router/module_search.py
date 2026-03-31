@@ -66,6 +66,9 @@ async def process_table_data(
             product_id,
         )
         
+        # тут возвращаются формульные параметры
+        parameters = await search_formula(db, parameters, table_name)
+
         return {
             "product_id": product_id,
             "product_name": product_name,
