@@ -12,7 +12,7 @@ class Product(Base):
     description = Column(Text)
     manufacturer = Column(String(255))
     image = Column(String(512))  # Путь к файлу изображения
-    image_url = Column(String(512))  # URL изображения
+    image_url = Column(Text)  # URL изображения
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     # Связь с параметрами
