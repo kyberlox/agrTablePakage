@@ -90,7 +90,7 @@ async def create_product(
         # image: UploadFile = File(None),
         db: AsyncSession = Depends(get_db)
 ):
-    print(datas)
+    print(data)
     name = data["name"]
     description = data["description"]
     manufacturer = data["manufacturer"]
