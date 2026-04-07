@@ -170,7 +170,7 @@ async def edit_product(
 
     if image:
         validate_image(image)
-        with open(file_path, "wb") as f:
+        with open(image_path, "wb") as f:
             f.write(await image.read())
 
     await db.commit()
