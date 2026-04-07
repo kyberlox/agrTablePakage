@@ -170,8 +170,21 @@ async def edit_product(
 
     if image:
         validate_image(image)
-        with open(image_path, "wb") as f:
-            f.write(await image.read())
+        if image_path is not None and image_path != "" and os.path.exists(image_path):
+            with open(image_path, "wb") as f:
+                f.write(await image.read())
+        else:
+            unique_filename = generate_unique_filename(image.filename)
+            file_path = os.path.join(UPLOAD_DIR, unique_filename)
+            with open(file_path, "wb") as f:
+                f.write(await image.read())
+            image_path = file_path
+            image_url = f"/api/files/images/{unique_filename}"
+
+            product.image = image_path
+            product.image_url = image_url
+
+
 
     await db.commit()
     await db.refresh(product)
