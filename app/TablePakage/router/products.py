@@ -143,42 +143,36 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
     return product
 
 
-@router.put("/{product_id}", response_model=ProductResponse,
-            description="Запрос на изменение товара.")
-async def edit_product(product_id: int,
-                       product_update: ProductUpdate,
-                       db: AsyncSession = Depends(get_db)):
-    # !!!!!!!!!!! ПРОБЛЕМА С ЭТОЙ РУЧКОЙ "AttributeError: 'ProductUpdate' object has no attribute 'params'"
+
+@router.put("/{product_id}", response_model=ProductResponse, description="Запрос на изменение товара.")
+async def edit_product(
+    product_id: int, 
+    data: ProductUpdate = Body(...),
+    image: UploadFile = File(None),
+    db: AsyncSession = Depends(get_db)):
+    #!!!!!!!!!!! ПРОБЛЕМА С ЭТОЙ РУЧКОЙ "AttributeError: 'ProductUpdate' object has no attribute 'params'"
     result = await db.execute(
         select(Product).where(Product.id == product_id)
     )
     product = result.scalar_one_or_none()
 
-    update_data = product_update.dict(exclude_unset=True)
+    if product is None:
+        raise HTTPException(status_code=404, detail="Product not found")
 
-    if "image_base64" in update_data:
-        if product.image:
-            old_path = "." + product.image
-            if os.path.exists(old_path):
-                os.remove(old_path)
+    product.name = data.name
+    product.description = data.description
 
-        filename = save_base64_image(update_data["image_base64"])
-        product.image = f"/static/images/{filename}"
-        product.image_url = f"/api/files/images/{filename}"
-        del update_data["image_base64"]
+    #отдельно замена файла
+    image_path = product.image_path
 
-    for key, value in update_data.items():
-        setattr(product, key, value)
+    if image:
+        validate_image(image)
+        with open(file_path, "wb") as f:
+            f.write(await image.read())
 
-
-    for key, value in product_update.dict(exclude_unset=True).items():
-        setattr(product, key, value)
-        
     await db.commit()
     await db.refresh(product)
-
     return product
-
 
 @router.delete("/{product_id}", response_model=ProductResponse, description="Запрос на удаление товара.")
 async def delete_product(product_id: int, db: AsyncSession = Depends(get_db)):
