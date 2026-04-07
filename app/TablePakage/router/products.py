@@ -28,41 +28,33 @@ ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"}
 
 
 
-@router.post("/", response_model=ProductResponse, status_code=201)
-async def create_product(
-        name: str = Form(...),
-        description: str = Form(None),
-        manufacturer: str = Form(None),
-        image: UploadFile = File(None),
-        db: AsyncSession = Depends(get_db)
-):
-    
-    image_path = None
-    image_url = None
+def validate_image(file: UploadFile) -> None:
+    # Проверка размера
+    file.file.seek(0, 2)  # в конец
+    size = file.file.tell()
+    if size > MAX_FILE_SIZE:
+        raise HTTPException(status_code=400, detail="File too large. Max size is 5 MB.")
+    file.file.seek(0)  # в начало
 
-    if image:
-        validate_image(image)
-        unique_filename = generate_unique_filename(image.filename)
-        file_path = os.path.join(UPLOAD_DIR, unique_filename)
-        with open(file_path, "wb") as f:
-            f.write(await image.read())
-        image_path = f"/static/images/{unique_filename}"
-        image_url = f"/api/files/images/{unique_filename}"
+    # Проверка расширения
+    ext = Path(file.filename).suffix.lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Invalid file extension. Allowed: .jpg, .jpeg, .png, .gif")
 
-    db_product = Product(
-        name=name,
-        description=description,
-        manufacturer=manufacturer,
-        image=image_path,
-        image_url=image_url
-    )
+    # Проверка содержимого
+    content = file.file.read(1024)
+    file.file.seek(0)
+    img_type = imghdr.what(None, h=content)
+    if not img_type:
+        raise HTTPException(status_code=400, detail="Invalid image file")
+    if ext == ".jpg" and img_type not in ["jpeg", "jpg"]:
+        raise HTTPException(status_code=400, detail="File extension does not match content")
 
-    db.add(db_product)
 
-    await db.commit()
-    await db.refresh(db_product)
-
-    return db_product
+def generate_unique_filename(original_filename: str) -> str:
+    ext = Path(original_filename).suffix
+    unique_name = f"{uuid.uuid4()}{ext}"
+    return unique_name
 
 
 def generate_unique_filename(original_filename: str) -> str:
@@ -101,24 +93,24 @@ def save_base64_image(base64_string: str) -> str:
 
 @router.post("/", response_model=ProductResponse, status_code=201)
 async def create_product(
-        # data: dict = Body(),
         name: str = Form(...),
         description: str = Form(None),
         manufacturer: str = Form(None),
         image: UploadFile = File(None),
         db: AsyncSession = Depends(get_db)
 ):
-    # print(data)
-    # name = data["name"]
-    # description = data["description"]
-    # manufacturer = data["manufacturer"]
+    
     image_path = None
     image_url = None
 
-    # if "image" in data and data['image']:
-    #     filename = save_base64_image(data['image'])
-    #     image_path = f"/static/images/{filename}"
-    #     image_url = f"/api/files/images/{filename}"
+    if image:
+        validate_image(image)
+        unique_filename = generate_unique_filename(image.filename)
+        file_path = os.path.join(UPLOAD_DIR, unique_filename)
+        with open(file_path, "wb") as f:
+            f.write(await image.read())
+        image_path = f"/static/images/{unique_filename}"
+        image_url = f"/api/files/images/{unique_filename}"
 
     db_product = Product(
         name=name,
