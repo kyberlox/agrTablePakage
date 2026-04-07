@@ -166,7 +166,7 @@ async def edit_product(
     product.manufacturer = manufacturer
 
     #отдельно замена файла
-    image_path = product.image_path
+    image_path = product.image
 
     if image:
         validate_image(image)
