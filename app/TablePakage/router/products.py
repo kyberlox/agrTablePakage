@@ -185,6 +185,10 @@ async def delete_product(product_id: int, db: AsyncSession = Depends(get_db)):
     if product is None:
         return HTTPException(status_code=404, detail="Product not found")
 
+    image_path = product.image
+    if image_path is not None and image_path != "" and os.path.exists(image_path):
+        os.remove(image_path)
+
     await db.delete(product)
     await db.commit()
     return product
