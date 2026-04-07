@@ -147,7 +147,9 @@ async def get_product(product_id: int, db: AsyncSession = Depends(get_db)):
 @router.put("/{product_id}", response_model=ProductResponse, description="Запрос на изменение товара.")
 async def edit_product(
     product_id: int, 
-    data: ProductUpdate = Body(...),
+    name: str = Form(...),
+    description: str = Form(None),
+    manufacturer: str = Form(None),
     image: UploadFile = File(None),
     db: AsyncSession = Depends(get_db)):
     #!!!!!!!!!!! ПРОБЛЕМА С ЭТОЙ РУЧКОЙ "AttributeError: 'ProductUpdate' object has no attribute 'params'"
@@ -159,8 +161,9 @@ async def edit_product(
     if product is None:
         raise HTTPException(status_code=404, detail="Product not found")
 
-    product.name = data.name
-    product.description = data.description
+    product.name = name
+    product.description = description
+    product.manufacturer = manufacturer
 
     #отдельно замена файла
     image_path = product.image_path
