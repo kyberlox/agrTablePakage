@@ -109,7 +109,7 @@ async def create_product(
         file_path = os.path.join(UPLOAD_DIR, unique_filename)
         with open(file_path, "wb") as f:
             f.write(await image.read())
-        image_path = f"{UPLOAD_DIR}{unique_filename}"
+        image_path = file_path
         image_url = f"/api/files/images/{unique_filename}"
 
     db_product = Product(
