@@ -23,7 +23,7 @@ UPLOAD_DIR = "./static/images"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 # Настройки
-MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 МБ
+MAX_FILE_SIZE = 35 * 1024 * 1024  # 35 МБ
 ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif"}
 
 
