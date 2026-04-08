@@ -21,13 +21,14 @@ router = APIRouter(prefix="/tables", tags=["Tables"])
 
 # === Table Schema Endpoints ===
 
-@router.post("/upload_full_xlsx", description="Импорт всех параметров из XLSX.")
-async def import_excel(
+
+@router.post("/upload_xlsx", description="Импорт параметров из XLSX с авто-синхронизацией")
+async def upload_xlsx(
         product_id: int,
         file: UploadFile = File(...),
         db: AsyncSession = Depends(get_db)
 ):
-    # Получаем product_name
+    # Получаем продукт
     product_result = await db.execute(
         text("SELECT name FROM products WHERE id = :id"),
         {"id": product_id}
@@ -39,197 +40,130 @@ async def import_excel(
 
     table_name = f"{to_sql_name_lat(product_name)}_table"
 
+    # Создаём таблицу если нет
     await create_table(db, table_name)
 
     # Читаем Excel
     df = pd.read_excel(file.file)
     df = df.where(pd.notnull(df), None)
 
-    # Получаем колонки БД (без id)
-    result = await db.execute(
-        text("""
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_name = :table_name
-              AND column_name != 'id'
-        """),
-        {"table_name": table_name}
-    )
-
-    db_columns = {row[0] for row in result.fetchall()}
-
-    param_result = await db.execute(
-        text("""
-            SELECT name, transliterated_name
-            FROM parameter_schemas
-            WHERE product_id = :product_id
-        """),
-        {"product_id": product_id}
-    )
-
-    param_map = {
-        row[0]: row[1]
-        for row in param_result.fetchall()
-    }
-
-    excel_map = {}
-
-    for col in df.columns:
-        if col.lower() == "id":
-            continue
-
-        if col in param_map:
-            excel_map[param_map[col]] = col
-        else:
-            translit = to_sql_name_lat(col)
-            excel_map[translit] = col
-
-    common_columns = set(excel_map.keys())
-
-    if not common_columns:
-        return {"message": "Нет колонок для вставки"}
-
-    missing = common_columns - db_columns
-
-    # Создаём недостающие
-    for col in missing:
-        await db.execute(
-            text(f'ALTER TABLE "{table_name}" ADD COLUMN "{col}" TEXT')
-        )
-        await db.execute(
-            text("""
-                INSERT INTO parameter_schemas (
-                    name,
-                    transliterated_name,
-                    type,
-                    table_name,
-                    product_id
-                )
-                VALUES (
-                    :name,
-                    :transliterated_name,
-                    'Table',
-                    :table_name,
-                    :product_id
-                )
-                ON CONFLICT (transliterated_name, product_id)
-                DO NOTHING
-            """),
-            {
-                "name": excel_map[col],
-                "transliterated_name": col,
-                "table_name": table_name,
-                "product_id": product_id
-            }
-        )
-
-    await db.commit()
-
-    # Формируем INSERT
-    columns_sql = ", ".join(f'"{col}"' for col in common_columns)
-    values_sql = ", ".join(f":{col}" for col in common_columns)
-
-    insert_sql = text(f"""
-        INSERT INTO {table_name} ({columns_sql})
-        VALUES ({values_sql})
-    """)
-
-    # Вставляем строки
-    for _, row in df.iterrows():
-        values = {
-            col: str(row[excel_map[col]]) if row[excel_map[col]] is not None else None
-            for col in common_columns
-        }
-        await db.execute(insert_sql, values)
-
-    dm_table = f"dm_product_{product_id}"
-
-    await mark_datamart_dirty(db, product_id)
-
-    await db.commit()
-
-    return {
-        "table": table_name,
-        "inserted_rows": len(df),
-        "used_columns": list(common_columns)
-    }
-
-
-@router.post("/upload_matched_params_xlsx", description="Импорт параметров из XLSX, которые уже есть в базе данных.")
-async def import_excel(
-        product_id: int,
-        file: UploadFile = File(...),
-        db: AsyncSession = Depends(get_db)
-):
-    # Получаем product_name
-    product_result = await db.execute(
-        text("SELECT name FROM products WHERE id = :id"),
-        {"id": product_id}
-    )
-    product_name = product_result.scalar_one_or_none()
-
-    if product_name is None:
-        raise HTTPException(status_code=404, detail="Продукция не найдена")
-
-    table_name = f"{to_sql_name_lat(product_name)}_table"
-
-    await create_table(db, table_name)
-
-    # Читаем Excel
-    df = pd.read_excel(file.file)
-    df = df.where(pd.notnull(df), None)
-
-    # Получаем колонки БД (без id)
-    result = await db.execute(
-        text("""
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_name = :table_name
-              AND column_name != 'id'
-        """),
-        {"table_name": table_name}
-    )
-    db_columns = {row[0] for row in result.fetchall()}
-
-    # Сопоставление: транслит → оригинальное имя из Excel
+    # Excel → SQL имена
     excel_map = {
         to_sql_name_lat(col): col
         for col in df.columns
+        if col.lower() != "id"
     }
+    excel_columns = set(excel_map.keys())
 
-    # Пересечение
-    common_columns = db_columns & excel_map.keys()
+    # Получаем колонки БД
+    result = await db.execute(
+        text("""
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_name = :table_name
+              AND column_name != 'id'
+        """),
+        {"table_name": table_name}
+    )
+    db_columns = {row[0] for row in result.fetchall()}
 
-    if not common_columns:
-        return {"message": "Нет совпадающих колонок"}
+    # Проверка совпадения
+    columns_match = db_columns == excel_columns
 
-    # Формируем INSERT
-    columns_sql = ", ".join(f'"{col}"' for col in common_columns)
-    values_sql = ", ".join(f":{col}" for col in common_columns)
+    if not columns_match:
+        # Добавляем новые колонки
+        missing = excel_columns - db_columns
+
+        for col in missing:
+            # Колонка в таблицу
+            await db.execute(
+                text(f'ALTER TABLE "{table_name}" ADD COLUMN "{col}" TEXT')
+            )
+
+            # Добавляем в parameter_schemas
+            await db.execute(
+                text("""
+                    INSERT INTO parameter_schemas (
+                        name,
+                        transliterated_name,
+                        type,
+                        table_name,
+                        product_id
+                    )
+                    VALUES (
+                        :name,
+                        :transliterated_name,
+                        'Table',
+                        :table_name,
+                        :product_id
+                    )
+                    ON CONFLICT (transliterated_name, product_id)
+                    DO NOTHING
+                """),
+                {
+                    "name": excel_map[col],  # оригинальное имя из Excel
+                    "transliterated_name": col,
+                    "table_name": table_name,
+                    "product_id": product_id
+                }
+            )
+
+        # Удаляем колонки, которые не совпали
+        extra = db_columns - excel_columns
+
+        for col in extra:
+            # Удаляем из таблицы
+            await db.execute(
+                text(f'ALTER TABLE "{table_name}" DROP COLUMN "{col}"')
+            )
+
+            # Удаляем из parameter_schemas
+            await db.execute(
+                text("""
+                    DELETE FROM parameter_schemas
+                    WHERE transliterated_name = :col
+                      AND product_id = :product_id
+                """),
+                {
+                    "col": col,
+                    "product_id": product_id
+                }
+            )
+
+        await db.commit()
+
+        # Перезаписываем данные в бд
+        await db.execute(text(f'DELETE FROM "{table_name}"'))
+
+    # Делаем вставку в бд
+    columns_sql = ", ".join(f'"{col}"' for col in excel_columns)
+    values_sql = ", ".join(f":{col}" for col in excel_columns)
 
     insert_sql = text(f"""
         INSERT INTO "{table_name}" ({columns_sql})
         VALUES ({values_sql})
     """)
 
-    # Вставляем строки
-    for _, row in df.iterrows():
-        values = {
+    rows = [
+        {
             col: str(row[excel_map[col]]) if row[excel_map[col]] is not None else None
-            for col in common_columns
+            for col in excel_columns
         }
-        await db.execute(insert_sql, values)
+        for _, row in df.iterrows()
+    ]
 
-    dm_table = f"dm_product_{product_id}"
+    await db.execute(insert_sql, rows)
 
+    # Обновляем витрину datamart
     await mark_datamart_dirty(db, product_id)
 
     await db.commit()
 
     return {
         "table": table_name,
-        "inserted_rows": len(df),
-        "used_columns": list(common_columns)
+        "rows": len(df),
+        "columns_match": columns_match,
+        "columns": list(excel_columns)
     }
 
 
