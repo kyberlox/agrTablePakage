@@ -143,14 +143,17 @@ async def upload(
 
 
 
-@router.post("/add_param/{param_id}", description="Создание записи для загрузки файла")
-async def add_param_to_selected_file(param_id: int, db: AsyncSession = Depends(get_db)):
+@router.post("/add_selected_file", description="Создание записи для загрузки файла")
+async def add_selected_file(
+    schema_create: SelectedFileSchemaCreate,
+    db: AsyncSession = Depends(get_db)
+):
     try:
-        result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
+        result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == schema_create.result_param_id))
         param = result.scalar_one_or_none()
         if not param:
-            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {param_id}")
-        new_node = SelectedFile(result_param_id=param_id)
+            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {schema_create.result_param_id}")
+        new_node = SelectedFile(**schema_create.model_dump())
         db.add(new_node)
         await db.commit()
         await db.refresh(new_node)
@@ -179,7 +182,7 @@ async def add_param_to_selected_file(param_id: int, db: AsyncSession = Depends(g
         raise
     except Exception as e:
         await db.rollback()
-        raise HTTPException(status_code=500, detail=f"Ошибка при добавлении параметра с id: {param_id} в таблицу SelectedFile: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка при добавлении параметра с id: {schema_create.result_param_id} в таблицу SelectedFile: {str(e)}")
 
 @router.delete("/delete_file/{node_id}", description="Удаление файла")  
 async def delete_file(

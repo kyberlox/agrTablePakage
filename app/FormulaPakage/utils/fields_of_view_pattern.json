@@ -186,5 +186,41 @@
                 "desabled": true
             }
         ]
+    },
+    "constants": {
+        "fields": [
+            {
+                "name": "ID",
+                "field": "id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название",
+                "field": "name",
+                "data_type": "str"
+            },
+            {
+                "name": "Описание",
+                "field": "description",
+                "data_type": "str"
+            },
+            {
+                "name": "Параметр ID",
+                "field": "result_param_id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Константа",
+                "field": "value",
+                "data_type": "float"
+            },
+            {
+                "name": "Название параметра",
+                "field": "parameter_schema_name",
+                "data_type": "str"
+            }
+        ]
     }
 }

@@ -3,6 +3,7 @@ from .user_input import UserInput
 from .condition import Conditions
 from .calculated import Calculated
 from .selected_file import SelectedFile
+from .constants import Constants
 
 __all__ = [
     'get_db',
@@ -10,6 +11,7 @@ __all__ = [
     'Conditions', 
     'Calculated', 
     'SelectedFile', 
+    'Constants', 
     'Base'
 ]
 __version__ = "1.0.0"

@@ -18,8 +18,8 @@ OPERATIONS = {
     '<=': operator.le,
     '>': operator.gt,
     '>': operator.ge,
-    '&': operator.and_,
-    '|': operator.or_,
+    # '&': operator.and_,
+    # '|': operator.or_,
     '=': operator.eq,
 } 
 
