@@ -151,16 +151,12 @@ async def process_table_data(
     аргументыЖ id продукта и словарь с параметрами
     """
     if formula_params:
-        # print(formula_params)
+        
         for key, value in formula_params.items():
             parameters[key] = value
-    # print(parameters)
+    
     parameters = await search_formula(db, parameters, table_name)
-    # print(test_res)
-    # if test_res:
-    #     for key, value in test_res.items():
-    #         parameters[key] = value
-    # print(test_res)
+    
 
     return {
         "product_id": product_id,

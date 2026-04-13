@@ -143,7 +143,7 @@ async def import_excel(
 
     dm_table = f"dm_product_{product_id}"
 
-    await mark_datamart_dirty(db, product_id)
+    # await mark_datamart_dirty(db, product_id)
 
     await db.commit()
 
@@ -221,7 +221,7 @@ async def import_excel(
 
     dm_table = f"dm_product_{product_id}"
 
-    await mark_datamart_dirty(db, product_id)
+    # await mark_datamart_dirty(db, product_id)
 
     await db.commit()
 

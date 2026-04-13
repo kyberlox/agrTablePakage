@@ -102,14 +102,17 @@ async def get_condition(id: int, db: AsyncSession = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при получении записи в Conditions с id={id}: {e}")
 
-@router.post("/add_param/{param_id}", description="Создание записи в Conditions") # response_model=ConditionsSchemaResponse, 
-async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_db)):
+@router.post("/add_condition", description="Создание записи в Conditions") # response_model=ConditionsSchemaResponse, 
+async def add_condition(
+    schema_create: ConditionsSchemaCreate, 
+    db: AsyncSession = Depends(get_db)
+):
     try:
-        result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == param_id))
+        result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == schema_create.result_param_id))
         param = result.scalar_one_or_none()
         if not param:
-            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {param_id}")
-        new_node = Conditions(result_param_id=param_id)
+            raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {schema_create.result_param_id}")
+        new_node = Conditions(**schema_create.model_dump())
         db.add(new_node)
         await db.commit()
         await db.refresh(new_node)
@@ -138,7 +141,7 @@ async def add_param_to_condition(param_id: int, db: AsyncSession = Depends(get_d
         raise
     except Exception as e:
         await db.rollback()
-        raise HTTPException(status_code=500, detail=f"Ошибка при добавлении параметра с id: {param_id} в таблицу Conditions: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Ошибка при добавлении параметра с id: {schema_create.result_param_id} в таблицу Conditions: {str(e)}")
 
 @router.put("/update/{node_id}", description="Занесение/обновление данных в таблицу") # response_model=ConditionsSchemaResponse, 
 async def update(

@@ -52,7 +52,7 @@ async def calculated_params(note_params_info, db, user_params):
             return f"Введите значения для параметра {param_start_kir!r}"
 
         result_param = float(param_start_res)
-        
+
         for queue_operation, value in priority_nodes.items(): 
             if not value:
                 continue
@@ -233,7 +233,7 @@ async def search_formula(db, params, table_name_params):
     stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula')
     res = await db.execute(stmt_formula_params)
     all_formula_params = res.scalars().all()
-
+    print(params)
     # Отфильтровываем selected_file, т.к. они не вычисляются, а просто возвращают файл
     formula_params = []
     for param in all_formula_params:
