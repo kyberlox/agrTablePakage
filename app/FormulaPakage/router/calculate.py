@@ -115,14 +115,17 @@ async def add_param_to_condition(
 ):
     try:
         result = await db.execute(select(ParameterSchema).where(ParameterSchema.id == schema_create.result_param_id))
-        param = result.scalar_one_or_none()
-        if not param:
+        result_param = result.scalar_one_or_none()
+        if not result_param:
             raise HTTPException(status_code=404, detail=f"Отсутствует параметр с id: {schema_create.result_param_id}")
         new_node = Calculated(**schema_create.model_dump())
         db.add(new_node)
         await db.commit()
         await db.refresh(new_node)
         
+        first_param = await db.execute(select(ParameterSchema.name).where(ParameterSchema.id == new_node.parameter_id))
+        first_param_res = first_param.scalar_one_or_none()
+
         # Сборка шаблона
         calculated_result = {'fields': []}
         data = {
@@ -131,8 +134,9 @@ async def add_param_to_condition(
             'description': new_node.description,
             'operation': new_node.operation,
             'parameter_id': new_node.parameter_id,
+            'parameter_name': first_param_res,
             'result_param_id': new_node.result_param_id,
-            'result_param_name': param.name
+            'result_param_name': result_param.name
         }
         
         for field in FIELDS_OF_VIEW_PATTERN['calculated']['fields']:

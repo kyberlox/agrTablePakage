@@ -73,7 +73,7 @@ async def get_constant(id: int, db: AsyncSession = Depends(get_db)):
             'result_param_id': constant.result_param_id,
             'parameter_schema_name': constant.parameter_schema_name
         }
-        for field in FIELDS_OF_VIEW_PATTERN['costants']['fields']:
+        for field in FIELDS_OF_VIEW_PATTERN['constants']['fields']:
             if field['field'] in data and data[field['field']] is not None:
                 field['value'] = data[field['field']]
                 constant_result['fields'].append(field)
@@ -112,7 +112,7 @@ async def add__constant(
             'result_param_id': new_node.result_param_id,
             'parameter_schema_name': param.name
         }
-        for field in FIELDS_OF_VIEW_PATTERN['costants']['fields']:
+        for field in FIELDS_OF_VIEW_PATTERN['constants']['fields']:
             if field['field'] in data and data[field['field']] is not None:
                 field['value'] = data[field['field']]
                 constant_result['fields'].append(field)
@@ -161,7 +161,7 @@ async def update(
             'result_param_id': existing_node.result_param_id,
             'parameter_schema_name': param.name
         }
-        for field in FIELDS_OF_VIEW_PATTERN['costants']['fields']:
+        for field in FIELDS_OF_VIEW_PATTERN['constants']['fields']:
             if field['field'] in data and data[field['field']] is not None:
                 field['value'] = data[field['field']]
                 constant_result['fields'].append(field)
