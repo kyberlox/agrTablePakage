@@ -8,7 +8,10 @@ class ParameterSchemaBase(BaseModel):
     name: str
     description: Optional[str] = None
     type: str  # "Table" or "Formula"
+    measuring_unit: Optional[str] = None
     table_name: Optional[str] = None
+    visibility: Optional[bool] = True
+    required_type: Optional[str] = 'list'
     field_of_view: Optional[Dict[str, bool]] = None
     product_id: int
 
@@ -32,6 +35,9 @@ class ParameterSchemaUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
     type: Optional[str] = None
+    measuring_unit: Optional[str] = None
+    visibility: Optional[bool] = True
+    required_type: Optional[str] = 'list'
     table_name: Optional[str] = None
     field_of_view: Optional[Dict[str, bool]] = None
     product_id: Optional[int] = None

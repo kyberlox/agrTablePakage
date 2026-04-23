@@ -1,5 +1,5 @@
 # app/products/model/parameter_schema.py
-from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, ForeignKey, Index, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON, ForeignKey, Index, UniqueConstraint, Boolean
 from sqlalchemy.orm import relationship
 from .database import Base 
 
@@ -11,9 +11,11 @@ class ParameterSchema(Base):
     transliterated_name = Column(String(255), nullable=False)
     description = Column(Text)
     type = Column(String(50), nullable=False)  # "Table" или "Formula"
+    measuring_unit = Column(Text, nullable=True) # Единицы измерения
+    visibility = Column(Boolean, default=True) #Видимость для пользователя
+    required_type = Column(Text, default='list')  # Тип данных для типа "Formula"
     table_name = Column(String(255))  # Имя таблицы для типа "Table"
     field_of_view = Column(JSON, default=dict)  # Хранение JSON: {"admin": true, "user": false}
-
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)  # Связь через внешний ключ
 
     # ORM-связь

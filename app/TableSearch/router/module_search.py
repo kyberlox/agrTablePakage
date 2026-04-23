@@ -12,6 +12,16 @@ from app.TableSearch.utils.formula_search import search_formula
 router = APIRouter(prefix="/module_search", tags=["Module_search"])
 
 
+# {
+#     'id': int,
+#     'name': str,
+#     'description': str,
+#     'all_values': list|str,
+#     'responce_value': str,
+#     'visibility': bool,
+#     'required_type': str ('list'|'input')
+# }
+
 @router.post(
     "/process_table_data",
     response_model=ModuleSearchResponse,
@@ -38,22 +48,34 @@ async def process_table_data(
     table_name = f"{to_sql_name_lat(product_name)}_table"
 
     # Получаем параметры продукции
-    schema_result = await db.execute(
+    # schema_result = await db.execute(
+    #     text("""
+    #         SELECT name
+    #         FROM parameter_schemas
+    #         WHERE product_id = :product_id and type = 'Table'
+    #     """),
+    #     {"product_id": product_id},
+    # )
+    
+    # schema_params = [row[0] for row in schema_result.fetchall()]
+    
+    schema_full_result = await db.execute(
         text("""
-            SELECT name
+            SELECT *
             FROM parameter_schemas
             WHERE product_id = :product_id and type = 'Table'
         """),
         {"product_id": product_id},
     )
+
+    full_info = schema_full_result.mappings().all()
     
-    schema_params = [row[0] for row in schema_result.fetchall()]
-    
+    schema_params = [param_info['name'] for param_info in full_info]
     if not schema_params:
         raise HTTPException(status_code=404, detail="Параметры не найдены")
     
     if not selected_params:
-           
+        
         await ensure_dm_exists(
             db,
             product_id,
@@ -66,13 +88,35 @@ async def process_table_data(
             product_id,
         )
         
+        new_params = list()
+        for item in full_info:
+            name = item['name']
+            value = parameters.get(name, None)
+            responce_value = None
+            if len(value) == 1:
+                value = value[0]
+                responce_value = value
+            param_info = {
+                'id': item.get('id', None),
+                'name': name,
+                'description': item.get('description', None),
+                'all_values': value,
+                'responce_value': responce_value,
+                'visibility': item.get('visibility', None),
+                'required_type': item.get('required_type', None)
+            }
+            new_params.append(param_info)
+        
+
         # тут возвращаются формульные параметры
-        parameters = await search_formula(db, parameters, table_name)
+        # parameters = await search_formula(db, parameters, table_name)
+        parameters = await search_formula(db, new_params, table_name)
 
         return {
             "product_id": product_id,
             "product_name": product_name,
             "parameters": parameters,
+            # "parameters": new_params,
             "matched_rows": matched_rows,
             "request_time": time.perf_counter() - start_time,
         }
@@ -155,13 +199,32 @@ async def process_table_data(
         for key, value in formula_params.items():
             parameters[key] = value
     
-    parameters = await search_formula(db, parameters, table_name)
+    new_params = list()
+    for item in full_info:
+        name = item['name']
+        value = parameters.get(name, None)
+        responce_value = None
+        if isinstance(value, str):
+            responce_value = value
+        param_info = {
+            'id': item.get('id', None),
+            'name': name,
+            'description': item.get('description', None),
+            'all_values': value,
+            'responce_value': responce_value,
+            'visibility': item.get('visibility', None),
+            'required_type': item.get('required_type', None)
+        }
+        new_params.append(param_info)
+
+    parameters = await search_formula(db, new_params, table_name)
     
 
     return {
         "product_id": product_id,
         "product_name": product_name,
         "parameters": parameters,
+        # "parameters": {},
         "matched_rows": row["matched_rows"],
         "request_time": time.perf_counter() - start_time,
     }

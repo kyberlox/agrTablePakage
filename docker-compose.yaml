@@ -32,6 +32,8 @@ services:
       - 5432:5432
     networks:
       - app-network
+  
+
 
   fastapi:
     build: ./app
@@ -46,6 +48,7 @@ services:
       - "8000:8000"
     depends_on:
       - postgres
+      # - elasticsearch
     networks:
       - app-network
 
