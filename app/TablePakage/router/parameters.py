@@ -138,3 +138,4 @@ async def delete_parameter(
     await db.commit()
 
     return param
+
