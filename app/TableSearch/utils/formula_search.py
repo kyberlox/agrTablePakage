@@ -44,7 +44,7 @@ async def calculated_params(note_params_info, db, user_params):
         param_start_stmt =  await db.execute(select(ParameterSchema.name).where(ParameterSchema.id == start_value_id))
         param_start = param_start_stmt.scalar()
 
-        param_start_res = [item['responce_value'] for item in user_params if item['name'] == param_start][0]
+        param_start_res = [item['response_value'] for item in user_params if item['name'] == param_start][0]
         # param_start_res = user_params[param_start] if param_start in user_params and isinstance(user_params[param_start], str) and "Введите" not in user_params[param_start] else None
         
         if not param_start_res or "Введите" in param_start_res:
@@ -60,7 +60,7 @@ async def calculated_params(note_params_info, db, user_params):
                 param_val_stmt =  await db.execute(select(ParameterSchema.name).where(ParameterSchema.id == val['parameter_id']))
                 param_val = param_val_stmt.scalar()
                 # param_val_res = user_params[param_val] if param_start in user_params and isinstance(user_params[param_val], str) and "Введите" not in user_params[param_val] else None
-                param_val_res = [item['responce_value'] for item in user_params if item['name'] == param_val][0]
+                param_val_res = [item['response_value'] for item in user_params if item['name'] == param_val][0]
                 if not param_val_res or "Введите" in param_val_res:
                     param_start_kir = to_sql_name_kir(param_val)
                     return f"Введите значения для параметра {param_start_kir!r}"
@@ -80,7 +80,7 @@ async def condition_params(param_info, db, params):
     param_1_stmt =  await db.execute(select(ParameterSchema.name).where(ParameterSchema.id == param_info['condition_param_id']))
     param_1 = param_1_stmt.scalar()
     # param_1_res = params[param_1] if param_1 in params and isinstance(params[param_1], str) and "Введите" not in params[param_1] else None
-    param_1_res = [item['responce_value'] for item in params if item['name'] == param_1][0]
+    param_1_res = [item['response_value'] for item in params if item['name'] == param_1][0]
 
     if not param_1_res or "Введите" in param_1_res:
         param_1_kir = to_sql_name_kir(param_1)
@@ -172,7 +172,7 @@ async def search_formula(db, params, table_name_params):
                 'name': param.name,
                 'description': param.description,
                 'all_values': str(constant_value),
-                'responce_value': str(constant_value),
+                'response_value': str(constant_value),
                 'visibility': param.visibility,
                 'required_type': param.required_type
             }
@@ -248,7 +248,7 @@ async def search_formula(db, params, table_name_params):
                     'name': param.name,
                     'description': param.description,
                     'all_values': str(res),
-                    'responce_value': str(res),
+                    'response_value': str(res),
                     'visibility': param.visibility,
                     'required_type': param.required_type
                 }
@@ -267,7 +267,7 @@ async def search_formula(db, params, table_name_params):
                             'name': param.name,
                             'description': param.description,
                             'all_values': str(res),
-                            'responce_value': str(res),
+                            'response_value': str(res),
                             'visibility': param.visibility,
                             'required_type': param.required_type
                         }

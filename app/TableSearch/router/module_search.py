@@ -17,7 +17,7 @@ router = APIRouter(prefix="/module_search", tags=["Module_search"])
 #     'name': str,
 #     'description': str,
 #     'all_values': list|str,
-#     'responce_value': str,
+#     'response_value': str,
 #     'visibility': bool,
 #     'required_type': str ('list'|'input')
 # }
@@ -155,16 +155,16 @@ async def process_table_data(
         for item in full_info:
             name = item['name']
             value = parameters.get(name, None)
-            responce_value = None
+            response_value = None
             if len(value) == 1:
                 value = value[0]
-                responce_value = value
+                response_value = value
             param_info = {
                 'id': item.get('id', None),
                 'name': name,
                 'description': item.get('description', None),
                 'all_values': value,
-                'responce_value': responce_value,
+                'response_value': response_value,
                 'visibility': item.get('visibility', None),
                 'required_type': item.get('required_type', None)
             }
@@ -214,22 +214,22 @@ async def process_table_data(
         for item in full_info:
             name = item['name']
             name_lat = to_sql_name_lat(name)
-            responce_value = None
+            response_value = None
             if name in selected_params:
-                responce_value = selected_params[name]
+                response_value = selected_params[name]
             param_info = {
                 'id': item.get('id', None),
                 'name': name,
                 'description': item.get('description', None),
                 'all_values': full_value_parameters[name],
-                'responce_value': responce_value,
+                'response_value': response_value,
                 'visibility': item.get('visibility', None),
                 'required_type': item.get('required_type', None),
                 'filtered_values': req[name_lat]
             }
             is_param_error = [item for item in error_params if item['param_name'] == name]
             if is_param_error:
-                param_info['responce_value'] = None
+                param_info['response_value'] = None
                 param_info["error"] = is_param_error[0]["error"]
             new_params.append(param_info)
 
@@ -278,16 +278,16 @@ async def process_table_data(
     for item in full_info:
         name = item['name']
         value = parameters.get(name, None)
-        responce_value = None
+        response_value = None
         if isinstance(value, str):
-            responce_value = value
+            response_value = value
             value = full_value_parameters[name]
         param_info = {
             'id': item.get('id', None),
             'name': name,
             'description': item.get('description', None),
             'all_values': full_value_parameters[name],
-            'responce_value': responce_value,
+            'response_value': response_value,
             'visibility': item.get('visibility', None),
             'required_type': item.get('required_type', None),
             'filtered_values': parameters.get(name, None)
