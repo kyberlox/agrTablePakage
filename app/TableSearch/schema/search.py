@@ -12,7 +12,7 @@ class ModuleSearchResponse(BaseModel):
     product_id: int
     product_name: str
     # parameters: Dict[str, Union[str, List[str] ]]
-    parameters: List[Dict[str, Any]]
+    parameters: Optional[List[Dict[str, Any]]] = []
     matched_rows: int
     request_time: float
 
