@@ -286,11 +286,11 @@ async def process_table_data(
             'id': item.get('id', None),
             'name': name,
             'description': item.get('description', None),
-            'all_values': parameters.get(name, None),
+            'all_values': full_value_parameters[name],
             'responce_value': responce_value,
             'visibility': item.get('visibility', None),
             'required_type': item.get('required_type', None),
-            'filtered_values': full_value_parameters[name]
+            'filtered_values': parameters.get(name, None)
         }
         new_params.append(param_info)
 
