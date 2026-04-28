@@ -58,16 +58,18 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
     #ищем неверно подобранный параметр
     where_clauses = []
     res = []
+    sql_params[col] = {}
     for param_name, value in selected_params.items():
-        if param_name not in allowed_params:
-            continue
+        # if param_name not in allowed_params:
+        #     continue
 
-        if value is None:
-            continue
+        # if value is None:
+        #     continue
 
         col = to_sql_name_lat(param_name)
         where_clauses.append(f'"{col}" = :{col}')
         sql_params[col] = str(value)
+        
 
         req, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params, allowed_params)
 
