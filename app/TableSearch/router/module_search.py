@@ -58,7 +58,7 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
     #ищем неверно подобранный параметр
     where_clauses = []
     res = []
-    sql_params[col] = {}
+    sql_params = {}
     for param_name, value in selected_params.items():
         # if param_name not in allowed_params:
         #     continue
