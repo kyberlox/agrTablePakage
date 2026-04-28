@@ -83,11 +83,11 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
                 res.append(err_param)
             #если все ок, продолжаем итерацию пока не найдем ошибку
         print(param_name, res)
-        break
+        #break
 
     return res, req
-    
-            
+
+
 
 @router.post(
     "/process_table_data",
