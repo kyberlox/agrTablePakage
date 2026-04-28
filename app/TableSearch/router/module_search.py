@@ -49,7 +49,7 @@ async def get_params_from_sql(db, table_name, schema_params, where_clauses, sql_
 
     result = await db.execute(text(query), sql_params)
     row = result.mappings().first()
-
+    print("что нашлось в БД: ", row, column_to_param)
     return row, column_to_param
 
 async def find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params: dict[str, str | int] | None = dict()):
@@ -211,6 +211,7 @@ async def process_table_data(
             db,
             product_id,
         )
+
     if not row or row["matched_rows"] == 0:
         error_params, req = await find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params)
         new_params = list()
