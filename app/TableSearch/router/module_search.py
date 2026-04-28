@@ -268,7 +268,7 @@ async def process_table_data(
     #вылавливаю ошибку подбора
     if not row or row["matched_rows"] == 0:
         error_params, req = await find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params)
-
+        print("Ошибки: ", error_params)
         for item in new_params:
             is_param_error = [err_item for err_item in error_params if err_item['param_name'] == item["name"]]
             if is_param_error:
