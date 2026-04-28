@@ -79,7 +79,7 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
         # Проверяем на наличие ошибок в выбранных параметрах
         for param_name_next, value_next in selected_params.items():
             name_lat = to_sql_name_lat(param_name_next)
-            if value_next not in req[name_lat]:
+            if value_next is None or value_next not in req[name_lat]:
                 #Ошибка, собираем json из тех что подходят и добавляем в значение ошибочного параметра ошибку
                 err_param = {
                     "param_name" : param_name_next,
