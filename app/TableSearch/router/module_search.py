@@ -95,7 +95,7 @@ async def process_table_data(
         selected_params: dict[str, str | int] | None = Body(None),
         db: AsyncSession = Depends(get_db),
 ):
-    print("На входе: ", )
+    print("На входе: ", selected_params)
     start_time = time.perf_counter()
     selected_params = selected_params or {}
 
@@ -297,8 +297,9 @@ async def process_table_data(
 
     parameters = await search_formula(db, new_params, table_name)
     
-    
-    return {
+    print("На выходе: ", parameters)
+
+    data = {
         "product_id": product_id,
         "product_name": product_name,
         "parameters": parameters,
@@ -306,6 +307,8 @@ async def process_table_data(
         "matched_rows": row["matched_rows"],
         "request_time": time.perf_counter() - start_time,
     }
+
+    return data
 
     # return {
     #     "product_id": product_id,
