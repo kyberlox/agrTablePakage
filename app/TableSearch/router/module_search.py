@@ -296,8 +296,6 @@ async def process_table_data(
         new_params.append(param_info)
 
     parameters = await search_formula(db, new_params, table_name)
-    
-    print("На выходе: ", parameters)
 
     data = {
         "product_id": product_id,
@@ -307,6 +305,8 @@ async def process_table_data(
         "matched_rows": row["matched_rows"],
         "request_time": time.perf_counter() - start_time,
     }
+
+    print("На выходе: ", data)
 
     return data
 
