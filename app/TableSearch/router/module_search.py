@@ -241,7 +241,7 @@ async def process_table_data(
 
         parameters = await search_formula(db, new_params, table_name)
         print("tyt")
-        return parameters
+        # return parameters
 
         # return {
         #     "product_id": product_id,
