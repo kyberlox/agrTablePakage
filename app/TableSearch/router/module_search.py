@@ -214,8 +214,15 @@ async def process_table_data(
             product_id,
         )
 
+    #ФОРМИРУЕМ ОТВЕТ
+    answer = {
+        "product_id": product_id,
+        "product_name": product_name,
+    }
+
     if not row or row["matched_rows"] == 0:
         error_params, req = await find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params)
+
         new_params = list()
         for item in full_info:
             name = item['name']
@@ -257,14 +264,15 @@ async def process_table_data(
         for col, param_name in column_to_param.items()
         if row[col]
     }
+
     # parameters = dict()
-    # ! ???
     
     for col, param_name in column_to_param.items():
         if row[col] and len(row[col]) == 1:
             parameters[param_name] = row[col][0]
         elif row[col] and len(row[col]) > 1:
             parameters[param_name] = sorted(str(v) for v in row[col])
+    # ! ???
 
     #сюда функция формульного поиска
     """
@@ -274,13 +282,6 @@ async def process_table_data(
     if formula_params:
         for key, value in formula_params.items():
             parameters[key] = value
-    
-    # await ensure_dm_exists(
-    #         db,
-    #         product_id,
-    #         table_name,
-    #         schema_params,
-    #     )
     
     new_params = list()
     for item in full_info:
@@ -313,15 +314,11 @@ async def process_table_data(
         "request_time": time.perf_counter() - start_time,
     }
 
-    print("На выходе: ", data["parameters"])
+    
+    answer["parameters"] = parameters
+    answer["matched_rows"] = row["matched_rows"]
+    answer["request_time"] = time.perf_counter() - start_time
 
-    return data
+    print("На выходе: ", answer["parameters"])
 
-    # return {
-    #     "product_id": product_id,
-    #     "product_name": product_name,
-    #     "table_parameters": table_parameters,
-    #     "fromula_parameters": fromula_parameters,
-    #     "matched_rows": row["matched_rows"],
-    #     "request_time": time.perf_counter() - start_time,
-    # }
+    return answer
