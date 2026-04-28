@@ -203,7 +203,7 @@ async def process_table_data(
         where_clauses.append(f'"{col}" = :{col}')
         sql_params[col] = str(value)
 
-    print("Собран такой запрос: ", sql_params)
+    
 
     #шлём собранный запрос
     row, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params, allowed_params)
@@ -247,13 +247,14 @@ async def process_table_data(
         #     'request_time': time.perf_counter() - start_time
         # }
     
-    # Собираем значения параметров
+    # Собираем значения параметров ! ???
     parameters = {
         param_name: sorted(str(v) for v in row[col])
         for col, param_name in column_to_param.items()
         if row[col]
     }
-    parameters = dict()
+    # parameters = dict()
+    # ! ???
     
     for col, param_name in column_to_param.items():
         if row[col] and len(row[col]) == 1:
