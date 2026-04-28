@@ -59,6 +59,7 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
     where_clauses = []
     res = []
     sql_params = {}
+
     for param_name, value in selected_params.items():
         # if param_name not in allowed_params:
         #     continue
@@ -69,7 +70,6 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
         col = to_sql_name_lat(param_name)
         where_clauses.append(f'"{col}" = :{col}')
         sql_params[col] = str(value)
-        
 
         req, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params, allowed_params)
 
@@ -86,9 +86,11 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
                     "error": f"Параметр {param_name_next} выбран не верно! \n Вы выбрали значение: {value_next}."
                 }
                 res.append(err_param)
+                break
             #если все ок, продолжаем итерацию пока не найдем ошибку
+        
         print(param_name, res)
-        break
+        
 
     return res, req
 
