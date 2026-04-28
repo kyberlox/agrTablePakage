@@ -72,6 +72,9 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
         req, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params, allowed_params)
 
         # Проверяем на наличие ошибок в выбранных параметрах
+        if not req or req["matched_rows"] == 0:
+            print("tyt")
+        # Проверяем на наличие ошибок в выбранных параметрах
         for param_name_next, value_next in selected_params.items():
             name_lat = to_sql_name_lat(param_name_next)
             if value_next not in req[name_lat]:
@@ -83,9 +86,10 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
                 res.append(err_param)
             #если все ок, продолжаем итерацию пока не найдем ошибку
         print(param_name, res)
-        #break
+        break
 
     return res, req
+
 
 
 
