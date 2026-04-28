@@ -32,7 +32,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = FastAPI(title=" App API", version="1.0.0")
+app = FastAPI(
+    title="SaveOfConf API",
+    version="1.0.0",
+    docs_url="/api/docs", #None
+    openapi_url="/api/openapi.json"
+    )
 
 
 # Создаём таблицы при старте приложения
