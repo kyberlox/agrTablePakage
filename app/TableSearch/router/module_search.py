@@ -49,7 +49,9 @@ async def get_params_from_sql(db, table_name, schema_params, where_clauses, sql_
 
     result = await db.execute(text(query), sql_params)
     row = result.mappings().first()
-    # print("что нашлось в БД: ", row, column_to_param)
+    print("что нашлось в БД: ", row)
+    print(row['matched_rows'])
+    print(column_to_param)
     return row, column_to_param
 
 async def find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params: dict[str, str | int] | None = dict()):
