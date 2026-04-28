@@ -219,44 +219,6 @@ async def process_table_data(
         "product_id": product_id,
         "product_name": product_name,
     }
-
-    if not row or row["matched_rows"] == 0:
-        error_params, req = await find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params)
-
-        new_params = list()
-        for item in full_info:
-            name = item['name']
-            name_lat = to_sql_name_lat(name)
-            response_value = None
-            if name in selected_params:
-                response_value = selected_params[name]
-            param_info = {
-                'id': item.get('id', None),
-                'name': name,
-                'description': item.get('description', None),
-                'all_values': full_value_parameters[name],
-                'response_value': response_value,
-                'visibility': item.get('visibility', None),
-                'required_type': item.get('required_type', None),
-                'filtered_values': req[name_lat]
-            }
-            is_param_error = [item for item in error_params if item['param_name'] == name]
-            if is_param_error:
-                param_info['response_value'] = None
-                param_info["error"] = is_param_error[0]["error"]
-            new_params.append(param_info)
-
-        parameters = await search_formula(db, new_params, table_name)
-        print("tyt")
-        # return parameters
-
-        # return {
-        #     "product_id": product_id,
-        #     "product_name": product_name,
-        #     "parameters": [],
-        #     "matched_rows": 0,
-        #     'request_time': time.perf_counter() - start_time
-        # }
     
     # Собираем значения параметров ! ???
     parameters = {
@@ -303,16 +265,18 @@ async def process_table_data(
         }
         new_params.append(param_info)
 
-    parameters = await search_formula(db, new_params, table_name)
+    #вылавливаю ошибку подбора
+    if not row or row["matched_rows"] == 0:
+        error_params, req = await find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params)
 
-    data = {
-        "product_id": product_id,
-        "product_name": product_name,
-        "parameters": parameters,
-        # "parameters": {},
-        "matched_rows": row["matched_rows"],
-        "request_time": time.perf_counter() - start_time,
-    }
+        for item in new_params:
+            is_param_error = [err_item for err_item in error_params if err_item['param_name'] == item["name"]
+            if is_param_error:
+                param_info['response_value'] = None
+                param_info["error"] = is_param_error[0]["error"]
+            new_params.append(param_info)
+
+    parameters = await search_formula(db, new_params, table_name)
 
     
     answer["parameters"] = parameters
