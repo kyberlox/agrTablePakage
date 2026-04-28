@@ -99,7 +99,7 @@ async def process_table_data(
         selected_params: dict[str, str | int] | None = Body(None),
         db: AsyncSession = Depends(get_db),
 ):
-    print("На входе: ", selected_params)
+    # print("На входе: ", selected_params)
     start_time = time.perf_counter()
     selected_params = selected_params or {}
 
@@ -284,6 +284,6 @@ async def process_table_data(
     answer["matched_rows"] = row["matched_rows"]
     answer["request_time"] = time.perf_counter() - start_time
 
-    print("На выходе: ", answer["parameters"])
+    # print("На выходе: ", answer["parameters"])
 
     return answer
