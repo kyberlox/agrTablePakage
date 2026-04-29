@@ -77,7 +77,14 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
         if not req or req["matched_rows"] == 0:
             print(param_name, res)
             print("tyt")
-            
+            err_param = {
+                "param_name" : param_name,
+                "error": f"Параметр {param_name} выбран не верно! \n Вы выбрали значение: {value}."
+            }
+            res.append(err_param)
+            break
+
+        '''
         # Проверяем на наличие ошибок в выбранных параметрах
         for param_name_next, value_next in selected_params.items():
             name_lat = to_sql_name_lat(param_name_next)
@@ -90,6 +97,7 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
                 res.append(err_param)
                 break
             #если все ок, продолжаем итерацию пока не найдем ошибку
+        '''
         
         
         
