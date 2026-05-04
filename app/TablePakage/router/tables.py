@@ -46,7 +46,7 @@ async def upload_xlsx(
     await create_table(db, table_name)
 
     # Читаем Excel
-    print("Файл называется: ", file.file)
+    print("Файл называется: ", file.filename)
     print()
     # df = pd.read_excel(file.file)
     # contents = await file.read()
