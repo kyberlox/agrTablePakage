@@ -153,13 +153,9 @@ async def get_dependencies_for_param(param, db):
 
 async def search_formula(db, params, table_name_params):
     # 1. Получаем все формульные параметры (кроме selected_file)
-    # print(table_name_params)
-    stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula', ParameterSchema.table_name == table_name_params )
+    stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula', ParameterSchema.table_name == table_name_params ) #! искать формульные параметры только для этого же продукта
     res = await db.execute(stmt_formula_params)
     all_formula_params = res.scalars().all()
-    # print(all_formula_params[0].name)
-    # if len(all_formula_params) == 0:
-    #     return []
     
     # Отфильтровываем selected_file, т.к. они не вычисляются, а просто возвращают файл
     # Отфильтровываем constants, т.к. они не вычисляются, а просто возвращают константу
