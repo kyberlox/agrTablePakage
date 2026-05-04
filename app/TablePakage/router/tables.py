@@ -44,7 +44,9 @@ async def upload_xlsx(
     await create_table(db, table_name)
 
     # Читаем Excel
-    df = pd.read_excel(file.file)
+    print("Файл называется: ", file.file)
+    print()
+    df = pd.read_excel(file.file, engine='openpyxl')
     df = df.where(pd.notnull(df), None)
 
     # Excel → SQL имена
