@@ -156,6 +156,8 @@ async def search_formula(db, params, table_name_params):
     res = await db.execute(stmt_formula_params)
     all_formula_params = res.scalars().all()
     print(all_formula_params)
+    if len(all_formula_params) == 0:
+        return []
     
     # Отфильтровываем selected_file, т.к. они не вычисляются, а просто возвращают файл
     # Отфильтровываем constants, т.к. они не вычисляются, а просто возвращают константу
