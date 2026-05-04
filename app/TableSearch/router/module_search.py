@@ -12,6 +12,7 @@ from app.TableSearch.utils.formula_search import search_formula
 router = APIRouter(prefix="/module_search", tags=["Module_search"])
 
 
+
 # {
 #     'id': int,
 #     'name': str,
@@ -196,6 +197,7 @@ async def process_table_data(
 
         # тут возвращаются формульные параметры
         # parameters = await search_formula(db, parameters, table_name)
+        print(new_params, table_name)
         parameters = await search_formula(db, new_params, table_name)
 
         return {
