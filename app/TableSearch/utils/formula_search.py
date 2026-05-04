@@ -156,7 +156,7 @@ async def search_formula(db, params, table_name_params):
     stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula')
     res = await db.execute(stmt_formula_params)
     all_formula_params = res.scalars().all()
-    print(all_formula_params, all_formula_params[0], all_formula_params[0].field_of_view.items())
+    
     if len(all_formula_params) == 0:
         return []
     
@@ -184,6 +184,7 @@ async def search_formula(db, params, table_name_params):
             params.append(item)
             continue
         formula_params.append(param)
+    print(formula_params)
 
     # 2. Строим граф зависимостей (имя параметра -> список имён зависимостей)
     graph = {}
