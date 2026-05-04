@@ -49,8 +49,37 @@ async def upload_xlsx(
     print("Файл называется: ", file.file)
     print()
     # df = pd.read_excel(file.file)
+    # contents = await file.read()
+    # df = pd.read_excel(io.BytesIO(contents), engine='openpyxl')
+    # df = df.where(pd.notnull(df), None)
+
+    # Читаем Excel с обработкой ошибок
     contents = await file.read()
-    df = pd.read_excel(io.BytesIO(contents), engine='openpyxl')
+
+    try:
+        # Пробуем прочитать с openpyxl (основной движок)
+        df = pd.read_excel(io.BytesIO(contents), engine='openpyxl')
+    except ValueError as e:
+        if "Value must be one of" in str(e):
+            # Если проблема со стилями — пробуем xlrd (для старых .xls)
+            try:
+                df = pd.read_excel(io.BytesIO(contents), engine='xlrd')
+            except Exception as xlrd_error:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Файл содержит некорректные стили Excel. Не удалось прочитать ни openpyxl, ни xlrd: {xlrd_error}"
+                )
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ошибка чтения Excel файла: {e}"
+            )
+    except Exception as e:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Не удалось прочитать Excel файл: {e}"
+        )
+
     df = df.where(pd.notnull(df), None)
 
     # Excel → SQL имена
