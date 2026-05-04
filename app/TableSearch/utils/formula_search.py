@@ -74,7 +74,7 @@ async def calculated_params(note_params_info, db, user_params):
 
 
 async def condition_params(param_info, db, params):
-    print(param_info, params)
+    print("описание парметра", param_info, "параметры", params)
     if not param_info['condition_param_id'] or not param_info['condition_value']:
         return None
     
@@ -156,6 +156,7 @@ async def search_formula(db, params, table_name_params):
     stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula')
     res = await db.execute(stmt_formula_params)
     all_formula_params = res.scalars().all()
+    print(all_formula_params, all_formula_params[0], all_formula_params[0].field_of_view.items())
     if len(all_formula_params) == 0:
         return []
     
