@@ -1,5 +1,5 @@
 
-ALLOWED_FUNCTIONS =  [method for method in dir(CodeParametr) if callable(getattr(MyClass, method)) and not method.startswith("__")]
+
 
 class CodeParametr:
     def __init__(self, product_id, param_id):
@@ -170,3 +170,5 @@ def mixture(envs : list, climate : str, T : float):
     result["T"] = T
 
     return result
+
+ALLOWED_FUNCTIONS =  [method for method in dir(CodeParametr) if callable(getattr(CodeParametr, method)) and not method.startswith("__")]
