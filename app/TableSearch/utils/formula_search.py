@@ -120,7 +120,7 @@ async def user_input_params(param_info, db, params):
     return [str(param_info['min_value']), str(param_info['max_value'])]
     
 
-FUNCS_FOR_FIELD_OF_VIEW = {"calculated": calculated_params, "conditions": condition_params, "user_input": user_input_params, "code_param" : code_params}
+FUNCS_FOR_FIELD_OF_VIEW = {"calculated": calculated_params, "conditions": condition_params, "user_input": user_input_params, "codeparam" : code_params}
 
 async def get_dependencies_for_param(param, db):
     """
@@ -263,8 +263,10 @@ async def search_formula(db, params, table_name_params):
                 }
                 # params[param.name] = str(constant_value)
                 params.append(item)
+        # elif table_name == "codeparam":
+        #     print("zashel")
         else:
-            print("zashel")
+            
             # Для каждой записи (их обычно одна) вызываем обработчик
             #для conditions и user_input вызываем из словаря
             for formula_param in table_formula_params:
