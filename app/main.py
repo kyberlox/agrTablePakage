@@ -51,7 +51,7 @@ origins = ['*', "http://localhost:5173"]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,  # В продакшене укажите конкретные домены
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
