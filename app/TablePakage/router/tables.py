@@ -88,7 +88,13 @@ async def upload_xlsx(
         for col in df.columns
         if col.lower() != "id"
     }
-    excel_columns = set(excel_map.keys())
+    excel_columns_ordered = [
+        to_sql_name_lat(col)
+        for col in df.columns
+        if col.lower() != "id"
+    ]
+
+    excel_columns_set = set(excel_columns_ordered)
 
     # Получаем колонки БД
     result = await db.execute(
@@ -103,19 +109,33 @@ async def upload_xlsx(
     db_columns = {row[0] for row in result.fetchall()}
 
     # Проверка совпадения
-    columns_match = db_columns == excel_columns
+    columns_match = db_columns == excel_columns_set
 
     if not columns_match:
-        # Добавляем новые колонки
-        missing = excel_columns - db_columns
+        # Удаляем таблицу
+        await db.execute(text(f'DROP TABLE IF EXISTS "{table_name}"'))
 
-        for col in missing:
-            # Колонка в таблицу
-            await db.execute(
-                text(f'ALTER TABLE "{table_name}" ADD COLUMN "{col}" TEXT')
+        # Создаём заново с порядком столбцов как в excel-файле
+        columns_sql = ", ".join(f'"{col}" TEXT' for col in excel_columns_ordered)
+
+        await db.execute(text(f"""
+            CREATE TABLE "{table_name}" (
+                id SERIAL PRIMARY KEY,
+                {columns_sql}
             )
+        """))
 
-            # Добавляем в parameter_schemas
+        # Полностью пересобираем parameter_schemas
+        await db.execute(
+            text("""
+                DELETE FROM parameter_schemas
+                WHERE product_id = :product_id
+            """),
+            {"product_id": product_id}
+        )
+
+        # Добавляем заново в правильном порядке
+        for col in excel_columns_ordered:
             await db.execute(
                 text("""
                     INSERT INTO parameter_schemas (
@@ -132,11 +152,9 @@ async def upload_xlsx(
                         :table_name,
                         :product_id
                     )
-                    ON CONFLICT (transliterated_name, product_id)
-                    DO NOTHING
                 """),
                 {
-                    "name": excel_map[col],  # оригинальное имя из Excel
+                    "name": excel_map[col],
                     "transliterated_name": col,
                     "table_name": table_name,
                     "product_id": product_id
@@ -144,7 +162,7 @@ async def upload_xlsx(
             )
 
         # Удаляем колонки, которые не совпали
-        extra = db_columns - excel_columns
+        extra = db_columns - excel_columns_set
 
         for col in extra:
             # Удаляем из таблицы
@@ -165,14 +183,14 @@ async def upload_xlsx(
                 }
             )
 
-        await db.commit()
-
         # Перезаписываем данные в бд
         await db.execute(text(f'DELETE FROM "{table_name}"'))
 
+    await db.commit()
+
     # Делаем вставку в бд
-    columns_sql = ", ".join(f'"{col}"' for col in excel_columns)
-    values_sql = ", ".join(f":{col}" for col in excel_columns)
+    columns_sql = ", ".join(f'"{col}"' for col in excel_columns_ordered)
+    values_sql = ", ".join(f":{col}" for col in excel_columns_ordered)
 
     insert_sql = text(f"""
         INSERT INTO "{table_name}" ({columns_sql})
@@ -181,10 +199,10 @@ async def upload_xlsx(
 
     rows = [
         {
-            col: str(row[excel_map[col]]) if row[excel_map[col]] is not None else None
-            for col in excel_columns
+            col: str(record[excel_map[col]]) if record[excel_map[col]] is not None else None
+            for col in excel_columns_ordered
         }
-        for _, row in df.iterrows()
+        for record in df.to_dict(orient="records")
     ]
 
     await db.execute(insert_sql, rows)
@@ -198,7 +216,7 @@ async def upload_xlsx(
         "table": table_name,
         "rows": len(df),
         "columns_match": columns_match,
-        "columns": list(excel_columns)
+        "columns": list(excel_columns_ordered)
     }
 
 
