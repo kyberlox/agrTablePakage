@@ -186,6 +186,7 @@ async def search_formula(db, params, table_name_params):
             params.append(item)
             continue
         formula_params.append(param)
+    print(formula_params)
 
     # 2. Строим граф зависимостей (имя параметра -> список имён зависимостей)
     graph = {}
