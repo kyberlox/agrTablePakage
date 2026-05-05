@@ -160,7 +160,6 @@ async def search_formula(db, params, table_name_params):
     stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula', ParameterSchema.table_name == table_name_params ) #! искать формульные параметры только для этого же продукта
     res = await db.execute(stmt_formula_params)
     all_formula_params = res.scalars().all()
-    print(all_formula_params)
     
     # Отфильтровываем selected_file, т.к. они не вычисляются, а просто возвращают файл
     # Отфильтровываем constants, т.к. они не вычисляются, а просто возвращают константу
@@ -186,7 +185,6 @@ async def search_formula(db, params, table_name_params):
             params.append(item)
             continue
         formula_params.append(param)
-    print(formula_params)
 
     # 2. Строим граф зависимостей (имя параметра -> список имён зависимостей)
     graph = {}
@@ -221,6 +219,7 @@ async def search_formula(db, params, table_name_params):
     # print(order, 'order')
     # print(graph, 'graph')
     # print(in_degree, 'in_degree')
+    print(order)
     # 4. Вычисляем параметры в порядке order
     for param_name in order:
         # Находим объект ParameterSchema для этого имени
