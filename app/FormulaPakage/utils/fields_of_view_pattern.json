@@ -222,5 +222,41 @@
                 "data_type": "str"
             }
         ]
+    },
+    "codeparam":{
+        "fields": [
+            {
+                "name": "ID",
+                "field": "id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название",
+                "field": "name",
+                "data_type": "str"
+            },
+            {
+                "name": "Описание",
+                "field": "description",
+                "data_type": "str"
+            },
+            {
+                "name": "Функция",
+                "field": "function_name",
+                "data_type": "str"
+            },
+            {
+                "name": "Подбираемый параметр ID",
+                "field": "result_param_id",
+                "data_type": "int",
+                "desabled": true
+            },
+            {
+                "name": "Название подбираемого параметра",
+                "field": "result_param_name",
+                "data_type": "str"
+            }
+        ]
     }
 }
