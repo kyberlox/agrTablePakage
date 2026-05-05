@@ -8,8 +8,8 @@ from sqlalchemy.orm import aliased
 from app.TablePakage.model.database import get_db
 from app.TablePakage.model.parameter_schema import ParameterSchema
 
-from ..TablePakage.model.code_param import CodeParam
-from ..TablePakage.schema.code_schema import (
+from ..model.code_param import CodeParam
+from ..schema.code_schema import (
     CodeParamCreate,
     CodeParamUpdate,
     CodeParamResponse,
