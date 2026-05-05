@@ -4,6 +4,7 @@ from .condition import Conditions
 from .calculated import Calculated
 from .selected_file import SelectedFile
 from .constants import Constants
+from .code import CodeParam
 
 __all__ = [
     'get_db',
@@ -11,7 +12,8 @@ __all__ = [
     'Conditions', 
     'Calculated', 
     'SelectedFile', 
-    'Constants', 
+    'Constants',
+    'CodeParam',
     'Base'
 ]
 __version__ = "1.0.0"
