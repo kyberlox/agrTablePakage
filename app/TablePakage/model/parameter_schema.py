@@ -77,6 +77,13 @@ class ParameterSchema(Base):
         cascade="all, delete-orphan"
     )
 
+    # Новая связь для CodeParam
+    # Имя должно совпадать с тем, что указано в back_populates модели CodeParam
+    code_as_result = relationship(
+        "CodeParam",
+        back_populates="result_parameter"   # это имя отношения в CodeParam
+    )
+
     __table_args__ = (
         Index("idx_parameter_product_id", "product_id"),
         UniqueConstraint("product_id", "transliterated_name", name="uq_product_parameter"),
