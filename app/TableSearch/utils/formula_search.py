@@ -72,6 +72,10 @@ async def calculated_params(note_params_info, db, user_params):
         print(f'Ошибка в функции calculated_params: ', str(e))
         return None
 
+async def code_params(note_params_info, db, user_params):
+    print("note_params_info", note_params_info)
+    print("user_params", user_params)
+
 
 async def condition_params(param_info, db, params):
     print("описание парметра", param_info, "параметры", params)
@@ -116,7 +120,7 @@ async def user_input_params(param_info, db, params):
     return [str(param_info['min_value']), str(param_info['max_value'])]
     
 
-FUNCS_FOR_FIELD_OF_VIEW = {"calculated": calculated_params, "conditions": condition_params, "user_input": user_input_params}
+FUNCS_FOR_FIELD_OF_VIEW = {"calculated": calculated_params, "conditions": condition_params, "user_input": user_input_params, "code_param" : code_params}
 
 async def get_dependencies_for_param(param, db):
     """
