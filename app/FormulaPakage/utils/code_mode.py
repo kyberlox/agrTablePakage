@@ -1,14 +1,15 @@
 
 
 class CodeParametr:
-    def __init__(self, product_id, param_id):
-        self.product_id = product_id
-        self.param = param_id
+    # def __init__(self, product_id, param_id):
+    #     self.product_id = product_id
+    #     self.param = param_id
     
     def make_mixture(selection_result):
         """
         алгоритм подбора смеси
         """
+        print(selection_result)
 
         # внедрить параметр для смеси на какое-нибудь место
         

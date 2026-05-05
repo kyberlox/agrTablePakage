@@ -4,6 +4,7 @@ from app.FormulaPakage.utils.calculated_utils import OPERATIONS, PRIORITY
 from app.FormulaPakage.model.selected_file import SelectedFile
 from app.FormulaPakage.model.constants import Constants
 from app.TablePakage.utils.router_utils import to_sql_name_kir
+from app.FormulaPakage.utils.code_mode import CodeParametr, ALLOWED_FUNCTIONS
 from fastapi import HTTPException
 
 from collections import deque
@@ -73,8 +74,12 @@ async def calculated_params(note_params_info, db, user_params):
         return None
 
 async def code_params(note_params_info, db, user_params):
-    print("note_params_info", note_params_info)
-    print("user_params", user_params)
+    #тут надо вызвать нужную функцию
+    cp_class = CodeParametr()
+    cp_method_name = note_params_info["function_name"]
+    cp_method = getattr(calc, cp_method_name)
+
+    return cp_method(user_params)
 
 
 async def condition_params(param_info, db, params):
@@ -112,7 +117,6 @@ async def condition_params(param_info, db, params):
         
         return param_info['result_value']
 
-        
 
 async def user_input_params(param_info, db, params):
     if not param_info['min_value'] or not param_info['max_value']:
@@ -121,6 +125,7 @@ async def user_input_params(param_info, db, params):
     
 
 FUNCS_FOR_FIELD_OF_VIEW = {"calculated": calculated_params, "conditions": condition_params, "user_input": user_input_params, "codeparam" : code_params}
+
 
 async def get_dependencies_for_param(param, db):
     """
@@ -244,7 +249,6 @@ async def search_formula(db, params, table_name_params):
             {'result_param_id': param.id}
         )
         table_formula_params = stmt_table_params.mappings().all()
-        print(table_formula_params)
 
         # отловить все calculated параметры, для которых результат - 1 параметр( то есть это одна большая формула )
         if table_name == "calculated":
@@ -263,10 +267,7 @@ async def search_formula(db, params, table_name_params):
                 }
                 # params[param.name] = str(constant_value)
                 params.append(item)
-        # elif table_name == "codeparam":
-        #     print("zashel")
         else:
-            
             # Для каждой записи (их обычно одна) вызываем обработчик
             #для conditions и user_input вызываем из словаря
             for formula_param in table_formula_params:
