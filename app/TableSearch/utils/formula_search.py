@@ -226,6 +226,8 @@ async def search_formula(db, params, table_name_params):
         param = next(p for p in formula_params if p.name == param_name)
         table_name = next(key for key, value in param.field_of_view.items() if value)
 
+        print(param_name, table_name)
+
         # Если это user_input и значение уже есть (строка), пропускаем (как в исходном коде)
         if table_name == 'user_input': #  and param.name in params and isinstance(params[param.name], str)
             param_name_exist = [True for item in params if item['name'] == param.name]
