@@ -13,7 +13,8 @@ class CodeParametr:
 
         # внедрить параметр для смеси на какое-нибудь место
 
-        for param in selection_result:
+        # for param in selection_result:
+
             
             #если температура не задана - ошибка, надо задать
             #если климатика не задана - ошибка, надо задать
