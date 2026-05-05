@@ -263,10 +263,12 @@ async def search_formula(db, params, table_name_params):
                 # params[param.name] = str(constant_value)
                 params.append(item)
         else:
+            print("zashel")
             # Для каждой записи (их обычно одна) вызываем обработчик
             #для conditions и user_input вызываем из словаря
             for formula_param in table_formula_params:
                 func = FUNCS_FOR_FIELD_OF_VIEW.get(table_name)
+                print()
                 if func:
                     res = await func(formula_param, db, params)
                     if res is not None:
