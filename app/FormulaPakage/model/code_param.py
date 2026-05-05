@@ -35,5 +35,5 @@ class CodeParam(Base):
     result_parameter = relationship(
         "ParameterSchema", 
         foreign_keys=[result_param_id],
-        back_populates="calculations_as_result"
+        back_populates="code_as_result"
     )
