@@ -1,7 +1,7 @@
 # app/TablePakage/schema/code_param_schema.py
 from pydantic import BaseModel, field_validator
 from typing import Optional
-from ..utils.code_utils import ALLOWED_FUNCTIONS
+from ..utils.code_mode import ALLOWED_FUNCTIONS
 
 class CodeParamBase(BaseModel):
     name: Optional[str] = None
