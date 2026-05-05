@@ -34,7 +34,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-origins = ['*']
 
 
 app = FastAPI(
@@ -42,12 +41,16 @@ app = FastAPI(
     version="1.0.0",
     docs_url="/api/docs", #None
     openapi_url="/api/openapi.json"
-    )
+)
+
+
 
 # Настройка CORS
+origins = ['*']
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # В продакшене укажите конкретные домены
+    allow_origins=origins,  # В продакшене укажите конкретные домены
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
