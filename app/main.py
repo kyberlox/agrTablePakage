@@ -46,15 +46,15 @@ app = FastAPI(
 
 
 # # Настройка CORS
-# origins = ['*']
+origins = ['*']
 
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=origins,  # В продакшене укажите конкретные домены
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,  # В продакшене укажите конкретные домены
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Создаём таблицы при старте приложения
 @app.on_event("startup")
