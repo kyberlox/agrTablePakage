@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Depends
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 #from .TablePakage.model.product import Product
 from .FormulaPakage.model import *
 
@@ -33,6 +34,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+origins = ['*']
+
+
 app = FastAPI(
     title="SaveOfConf API",
     version="1.0.0",
@@ -40,6 +44,14 @@ app = FastAPI(
     openapi_url="/api/openapi.json"
     )
 
+# Настройка CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # В продакшене укажите конкретные домены
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Создаём таблицы при старте приложения
 @app.on_event("startup")
@@ -70,8 +82,8 @@ app.include_router(code_router, prefix="/api")
 
 
 
-
 # app.include_router(formulas_router, prefix="/api")
+
 
 
 @app.get("/")
