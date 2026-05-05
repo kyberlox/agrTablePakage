@@ -244,6 +244,7 @@ async def search_formula(db, params, table_name_params):
             {'result_param_id': param.id}
         )
         table_formula_params = stmt_table_params.mappings().all()
+        print(table_formula_params)
 
         # отловить все calculated параметры, для которых результат - 1 параметр( то есть это одна большая формула )
         if table_name == "calculated":
