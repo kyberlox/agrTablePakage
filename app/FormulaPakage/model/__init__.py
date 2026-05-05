@@ -4,7 +4,7 @@ from .condition import Conditions
 from .calculated import Calculated
 from .selected_file import SelectedFile
 from .constants import Constants
-from .code_param import CodeParam
+from .code import CodeParam
 
 __all__ = [
     'get_db',
