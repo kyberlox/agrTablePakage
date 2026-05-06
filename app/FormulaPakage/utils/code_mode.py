@@ -1,4 +1,11 @@
 
+#функция выводит значение параметра по названию
+def get_param_value(selection_result):
+    #найти параметр
+    #нет ли ошибки
+    #выбрано ли значение
+    #вывод значения
+    pass
 
 class CodeParametr:
     # def __init__(self, product_id, param_id):
@@ -14,22 +21,27 @@ class CodeParametr:
         # внедрить параметр для смеси на какое-нибудь место
 
         for param in selection_result:
-
             
-            #если температура не задана - ошибка, надо задать
             #если климатика не задана - ошибка, надо задать
             if "Климатическое исполнение" in param["name"]:
                 if "response_value" not in param:
                     return {"error" : "Выберите вариант климатического исполнения"}
                 else:
                     climate = param["response_value"]
-            
-            #if "Смесь"
+            #если температура не задана - ошибка, надо задать
 
-            #если смесь - получить спсиок сред с мольными долями
+            #добавить параметр смеси, если его ещё нет
+            if "Смесь" in param["name"]:
+                if "response_value" not in param:
+                    return {"result" : "Выберите среды и их мольные доли"}
+
+
+            #если смесь - получить список сред с мольными долями
             #если мольные доли в сууме не образуют 100% - ошибка, надо чтобы было 100
 
-            return
+        #########РАСЧЕТ#############################
+
+        return {"total_change" : selection_result}
 
 def mixture(envs : list, climate : str, T : float):
     result = {

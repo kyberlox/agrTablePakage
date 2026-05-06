@@ -224,14 +224,14 @@ async def search_formula(db, params, table_name_params):
     # print(order, 'order')
     # print(graph, 'graph')
     # print(in_degree, 'in_degree')
-    print(order)
+    # print(order)
     # 4. Вычисляем параметры в порядке order
     for param_name in order:
         # Находим объект ParameterSchema для этого имени
         param = next(p for p in formula_params if p.name == param_name)
         table_name = next(key for key, value in param.field_of_view.items() if value)
 
-        print(param_name, table_name)
+        # print(param_name, table_name)
 
         # Если это user_input и значение уже есть (строка), пропускаем (как в исходном коде)
         if table_name == 'user_input': #  and param.name in params and isinstance(params[param.name], str)
@@ -278,13 +278,16 @@ async def search_formula(db, params, table_name_params):
                     'visibility': param.visibility,
                     'required_type': param.required_type
                 }
+                
                 if "error" in res:
                     item['error'] = str(res["error"])
                 if "result" in res:
                     item['all_values'] = str(res["result"])
                     item['response_value'] = str(res["result"])
                 params.append(item)
-            
+
+                if "total_change" in res:
+                    params = res["total_change"]
         else:
             # Для каждой записи (их обычно одна) вызываем обработчик
             #для conditions и user_input вызываем из словаря
