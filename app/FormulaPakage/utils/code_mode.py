@@ -37,7 +37,17 @@ class CodeParametr:
 
         # внедрить параметр для смеси на какое-нибудь место, если её ещё нет
         if not naydeno:
-            return {"result" : ["Да", "Нет"]}
+            selection_result = {
+                    'id': 0,
+                    'name': "Смесь",
+                    'description': "Является ли среда смесью?",
+                    'visibility': True,
+                    'required_type':  "list",
+                    "all_values": [
+                        "Да",
+                        "Нет"
+                    ]
+                }
         
          # если климатика не задана - ошибка, надо задать
         #  if "Климатическое исполнение" in param["name"]:
