@@ -5,7 +5,7 @@ class CodeParametr:
     #     self.product_id = product_id
     #     self.param = param_id
     
-    def make_mixture(selection_result):
+    def make_mixture(self, selection_result):
         """
         алгоритм подбора смеси
         """
