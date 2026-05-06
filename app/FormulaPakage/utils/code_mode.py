@@ -125,7 +125,7 @@ class CodeParametr:
                     selection_result = [debug_param, mixture, envs_values]
 
                 r_sum = sum(list(env.values())[0] for env in envs)
-                elif r_sum != 100:
+                if r_sum != 100:
                     envs_values = {
                         'id': 1,
                         'name': "Состав смеси",
