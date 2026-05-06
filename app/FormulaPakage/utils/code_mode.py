@@ -20,12 +20,16 @@ class CodeParametr:
             #если климатика не задана - ошибка, надо задать
             if "Климатическое исполнение" in param["name"]:
                 if "response_value" not in param:
-                    return "Выберите вариант климатического исполнения"
+                    return {"error" : "Выберите вариант климатического исполнения"}
                 else:
                     climate = param["response_value"]
+            
+            #if "Смесь"
 
             #если смесь - получить спсиок сред с мольными долями
             #если мольные доли в сууме не образуют 100% - ошибка, надо чтобы было 100
+
+            return
 
 def mixture(envs : list, climate : str, T : float):
     result = {

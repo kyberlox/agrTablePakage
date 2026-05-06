@@ -267,12 +267,30 @@ async def search_formula(db, params, table_name_params):
                 }
                 # params[param.name] = str(constant_value)
                 params.append(item)
+        elif table_name == "codeparam":
+            res = await calculated_params(table_formula_params, db, params)
+            if res is not None:
+                # params[param.name] = str(res)
+                item = {
+                    'id': param.id,
+                    'name': param.name,
+                    'description': param.description,
+                    'visibility': param.visibility,
+                    'required_type': param.required_type
+                }
+                if "error" in res:
+                    item['error'] = str(res["error"])
+                if "result" in res:
+                    item['all_values'] = str(res["result"])
+                    item['response_value'] = str(res["result"])
+                params.append(item)
+            
         else:
             # Для каждой записи (их обычно одна) вызываем обработчик
             #для conditions и user_input вызываем из словаря
             for formula_param in table_formula_params:
                 func = FUNCS_FOR_FIELD_OF_VIEW.get(table_name)
-                print()
+                
                 if func:
                     res = await func(formula_param, db, params)
                     if res is not None:
