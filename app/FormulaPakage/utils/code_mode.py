@@ -41,8 +41,8 @@ class CodeParametr:
                             'response_value': 'Нет'
                         }
                         selection_result.append(mixture)
-                        print(selection_result)
-                        return {"total_change" : selection_result}
+
+                        #return {"total_change" : selection_result}
         
         for param in selection_result:
             # добавить параметр смеси, если его ещё нет
