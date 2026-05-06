@@ -27,11 +27,10 @@ class CodeParametr:
                 if param["name"] == "Смесь":
                     naydeno = True
 
-                    "DAAAAAAAAAAAA"
-
                     if param["response_value"] == "Да":
                         return  {"error" : "gbp"}
                     elif param["response_value"] == "Нет":
+                        print("DAAAAAAAAAAAA")
                         mixture = {
                             'id': note_params_info["id"],
                             'name': note_params_info['name'],
@@ -46,20 +45,6 @@ class CodeParametr:
             # добавить параметр смеси, если его ещё нет
             if "Смесь" in param["name"]:
                 naydeno = True
-                if param["response_value"] == "Нет":
-                    mixture = {
-                        'id': note_params_info["id"],
-                        'name': note_params_info['name'],
-                        'description': note_params_info["description"],
-                        'visibility': False,
-                        'response_value': 'Нет'
-                    }
-                    selection_result.append(mixture)
-                    return {"total_change" : selection_result}
-        
-                
-                
-
 
 
             # если смесь - получить список сред с мольными долями
