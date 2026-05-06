@@ -37,6 +37,7 @@ class CodeParametr:
         # внедрить параметр для смеси на какое-нибудь место, если её ещё нет
         if not naydeno:
             selection_result = [{
+                "id" : 0,
                 "debug" : False
             },
             {
