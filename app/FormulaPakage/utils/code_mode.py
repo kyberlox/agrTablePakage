@@ -31,7 +31,7 @@ class CodeParametr:
                         return  {"error" : "gbp"}
                     elif param["response_value"] == "Нет":
                         mixture = {
-                            id': note_params_info["id"],
+                            'id': note_params_info["id"],
                             'name': note_params_info['name'],
                             'description': note_params_info["description"],
                             'visibility': False,
