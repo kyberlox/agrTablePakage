@@ -30,7 +30,15 @@ class CodeParametr:
                     if param["response_value"] == "Да":
                         return  {"error" : "gbp"}
                     elif param["response_value"] == "Нет":
-                        return  {"response_value" : "Нет"}
+                        mixture = {
+                            id': note_params_info["id"],
+                            'name': note_params_info['name'],
+                            'description': note_params_info["description"],
+                            'visibility': False,
+                            'response_value': 'Нет'
+                        }
+                        selection_result.append(mixture)
+                        return {"total_change" : selection_result}
         
         for param in selection_result:
             # добавить параметр смеси, если его ещё нет
