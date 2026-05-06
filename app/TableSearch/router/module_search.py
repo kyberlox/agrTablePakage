@@ -264,10 +264,18 @@ async def process_table_data(
     функция формульного поиска
     аргументы id продукта и словарь с параметрами
     """
+    select_formula_params = []
     if formula_params:
         for key, value in formula_params.items():
             parameters[key] = value
-
+            select_formula_params.append(
+                {
+                    "name" : key,
+                    "response_value" : value
+                }
+            )
+    print("full_info", full_info)
+    print("parameters", parameters)
     new_params = list()
     for item in full_info:
         name = item['name']
@@ -300,8 +308,8 @@ async def process_table_data(
                 if is_param_error:
                     item['response_value'] = None
                     item["error"] = is_param_error[0]["error"]
-    print(formula_params)
-    parameters = await search_formula(db, new_params, table_name, parameters, formula_params)
+    
+    parameters = await search_formula(db, new_params, table_name, parameters, select_formula_params)
     parameters = sorted(parameters, key=lambda param: param['id'])
     
     answer["parameters"] = parameters
