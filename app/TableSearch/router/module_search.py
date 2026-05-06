@@ -156,6 +156,8 @@ async def process_table_data(
 
     full_info = schema_full_result.mappings().all()
     
+    print(full_info)
+    
     schema_params = [param_info['name'] for param_info in full_info]
     if not schema_params:
         raise HTTPException(status_code=404, detail="Параметры не найдены")
@@ -270,6 +272,7 @@ async def process_table_data(
         for key, value in formula_params.items():
             parameters[key] = value
     print(parameters)
+
     new_params = list()
     for item in full_info:
         name = item['name']
