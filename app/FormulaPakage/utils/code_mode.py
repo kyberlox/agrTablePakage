@@ -102,16 +102,48 @@ class CodeParametr:
                 }
 
                 selection_result = [debug_param, mixture, envs_values]
-
-
-            #если ошибка
-            elif envs_param == False:
-                pass#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            
             #если есть
             elif envs_param:
+                #проверить правильность
+                envs = envs_param["response_value"]
                 #выбраны ли среды?
-                print("он есть!")
-                pass#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                print(envs_param)
+                if envs == [] or len(envs) == 1:
+                    envs_values = {
+                        'id': 1,
+                        'name': "Состав смеси",
+                        'description': "Нужно выбрать состав смеси из списка доступных сред и указать их мольные доли (%)",
+                        "code_example" : [{ "Азот" : 50}, {"Воздух" : 50}],
+                        'visibility': True,
+                        'required_type':  "select-input",
+                        "all_values": all_envs_names,
+                        "response_value" : envs,
+                        "error" : "Смесь не может состоять менее чем из двух сред!"
+                    }
+
+                    selection_result = [debug_param, mixture, envs_values]
+
+                r_sum = sum(list(env.values())[0] for env in envs)
+                elif r_sum != 100:
+                    envs_values = {
+                        'id': 1,
+                        'name': "Состав смеси",
+                        'description': "Нужно выбрать состав смеси из списка доступных сред и указать их мольные доли (%)",
+                        "code_example" : [{ "Азот" : 50}, {"Воздух" : 50}],
+                        'visibility': True,
+                        'required_type':  "select-input",
+                        "all_values": all_envs_names,
+                        "response_value" : envs,
+                        "error" : "Сумма мольных долей сред смеси должна составлять 100%"
+                    }
+
+                    selection_result = [debug_param, mixture, envs_values]
+
+
+                #если правильно
+                
+                
 
 
             #если среды не выбраны - предложить
