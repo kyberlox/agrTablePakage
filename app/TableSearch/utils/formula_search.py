@@ -272,7 +272,11 @@ async def search_formula(db, params, table_name_params, select_formula_params=[]
             
             res = await code_params(table_formula_params[0], db, params, select_formula_params) #####!ВОЗМОЖНО ТАК НЕЛЬЗЯ - table_formula_params[0]
             if res is not None:
-                # params[param.name] = str(res)
+                if "total_change" in res:
+                    print(res["total_change"][-1])
+                    params = res["total_change"]
+                    return params
+
                 item = {
                     'id': param.id,
                     'name': param.name,
@@ -282,17 +286,12 @@ async def search_formula(db, params, table_name_params, select_formula_params=[]
                 }
                 
                 if "error" in res:
-                    print("error")
                     item['error'] = res["error"]
                 if "result" in res:
-                    rint("error")
                     item['result'] = res["result"]
-                print("поменял")
                 params.append(item)
 
-                if "total_change" in res:
-                    print(res["total_change"][-1])
-                    params = res["total_change"]
+                
         else:
             # Для каждой записи (их обычно одна) вызываем обработчик
             #для conditions и user_input вызываем из словаря
