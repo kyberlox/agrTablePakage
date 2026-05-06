@@ -270,7 +270,7 @@ async def search_formula(db, params, table_name_params, select_formula_params=[]
                 params.append(item)
         elif table_name == "codeparam":
             
-            res = await code_params(table_formula_params[0], db, params, select_formula_params) #####!ВОЗМОЖНО ТАК НЕЛЬЗЯ - table_formula_params[0]
+            res = await code_params(table_formula_params[0], db, params, param, select_formula_params) #####!ВОЗМОЖНО ТАК НЕЛЬЗЯ - table_formula_params[0]
             if res is not None:
                 if "total_change" in res:
                     print(res["total_change"][-1])

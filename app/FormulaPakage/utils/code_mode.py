@@ -12,7 +12,7 @@ class CodeParametr:
     #     self.product_id = product_id
     #     self.param = param_id
     
-    def make_mixture(self, selection_result, note_params_info, select_formula_params):
+    def make_mixture(self, selection_result, note_params_info, param_info, select_formula_params):
         """
         алгоритм подбора смеси
         """
@@ -41,9 +41,9 @@ class CodeParametr:
                     elif param["response_value"] == "Нет":
                         
                         mixture = {
-                            'id': note_params_info["id"],
-                            'name': note_params_info['name'],
-                            'description': note_params_info["description"],
+                            'id': param_info.id,
+                            'name': param_info.name,
+                            'description': param_info.description,
                             'visibility': False,
                             'response_value': 'Нет'
                         }
@@ -68,9 +68,9 @@ class CodeParametr:
                     "debug" : False
                 },
                 {
-                    'id': 1,
-                    'name': note_params_info["name"],
-                    'description': note_params_info["description"],
+                    'id': param_info.id,
+                    'name': param_info.name,
+                    'description': param_info.description,
                     'visibility': True,
                     'required_type':  "list",
                     "all_values": [
