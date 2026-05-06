@@ -159,7 +159,7 @@ async def process_table_data(
     schema_params = [param_info['name'] for param_info in full_info]
     if not schema_params:
         raise HTTPException(status_code=404, detail="Параметры не найдены")
-    print(selected_params)
+    
     if not selected_params:
         
         await ensure_dm_exists(
@@ -228,7 +228,7 @@ async def process_table_data(
         where_clauses.append(f'"{col}" = :{col}')
         sql_params[col] = str(value)
 
-    
+    print(formula_params)
 
     #шлём собранный запрос
     row, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params, allowed_params)
