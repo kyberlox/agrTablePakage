@@ -1,11 +1,16 @@
 
 #функция выводит значение параметра по названию
-def get_param_value(selection_result):
+def get_param_by_name(param_name, selection_result):
     #найти параметр
-    #нет ли ошибки
-    #выбрано ли значение
-    #вывод значения
-    pass
+    for param in selection_result:
+        if param["name"] == param_name:
+            #нет ли ошибки
+            if "error" in param:
+                return False
+            #вывести
+            return param
+    #или None
+    return None
 
 class CodeParametr:
     # def __init__(self, product_id, param_id):
@@ -19,7 +24,14 @@ class CodeParametr:
         # print(selection_result)
         print(note_params_info)
         print(select_formula_params)
+        #чтобы не падала ошибка табличного подбора
+        debug_param = {
+            "id" : 0,
+            "debug" : False,
+            'visibility': False
+        }
         naydeno = False
+        is_mixture = False
 
         # поиск смеси среди выбранных значений
         if select_formula_params != []:
@@ -37,6 +49,7 @@ class CodeParametr:
                         }
 
                         selection_result.append(mixture)
+                        is_mixture = True
 
                     elif param["response_value"] == "Нет":
                         
@@ -50,24 +63,11 @@ class CodeParametr:
                         selection_result.append(mixture)
 
                         return {"total_change" : selection_result}
-        
-        for param in selection_result:
-            # добавить параметр смеси, если его ещё нет
-            if "Смесь" in param["name"]:
-                naydeno = True
-
-
-            # если смесь - получить список сред с мольными долями
-            # если мольные доли в сууме не образуют 100% - ошибка, надо чтобы было 100
 
         # внедрить параметр для смеси на какое-нибудь место, если её ещё нет
         if not naydeno:
             selection_result = [
-                {
-                    "id" : 0,
-                    "debug" : False,
-                    'visibility': False
-                },
+                debug_param,
                 {
                     'id': param_info.id,
                     'name': param_info.name,
@@ -80,6 +80,43 @@ class CodeParametr:
                     ]
                 }
             ]
+        
+        #заполняем смесь
+        if is_mixture:
+            #есть ли параметр для состава смесей?
+            envs_param = get_param_by_name("Состав смеси", selection_result)
+            #если нет
+            if envs_param is None:
+                #список ВСЕХ сред
+                all_envs_names = get_param_by_name("Название рабочей среды", selection_result)["all_values"]
+
+                #создать
+                envs_values = {
+                    'id': 1,
+                    'name': "Состав смеси",
+                    'description': "Нужно выбрать состав смеси из списка доступных сред и указать их мольные доли (%)",
+                    "code_example" : [{ "Азот" : 50, "Воздух" : 50}],
+                    'visibility': True,
+                    'required_type':  "list",
+                    "all_values": all_envs_names
+                }
+
+            #если ошибка
+            elif envs_param == False:
+                pass#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            #если есть
+            elif envs_param
+                #выбраны ли среды?
+                pass#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+            #если среды не выбраны - предложить
+            #выбраны - собрать смесь
+                
+
+            # если смесь - получить список сред с мольными долями
+
+            # если мольные доли в сууме не образуют 100% - ошибка, надо чтобы было 100
         
          # если климатика не задана - ошибка, надо задать
         #  if "Климатическое исполнение" in param["name"]:
