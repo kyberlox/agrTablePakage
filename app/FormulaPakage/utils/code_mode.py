@@ -101,6 +101,9 @@ class CodeParametr:
                     "all_values": all_envs_names
                 }
 
+                selection_result = [debug_param, mixture, envs_values]
+
+
             #если ошибка
             elif envs_param == False:
                 pass#!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
