@@ -73,14 +73,14 @@ async def calculated_params(note_params_info, db, user_params):
         print(f'Ошибка в функции calculated_params: ', str(e))
         return None
 
-async def code_params(note_params_info, db, user_params):
+async def code_params(note_params_info, db, user_params, select_formula_params):
 
     #тут надо вызвать нужную функцию по её названию из БД
     cp_class = CodeParametr()
     cp_method_name = note_params_info["function_name"]
     cp_method = getattr(cp_class, cp_method_name)
 
-    return cp_method(user_params, note_params_info)
+    return cp_method(user_params, note_params_info, select_formula_params)
 
 
 async def condition_params(param_info, db, params):
@@ -161,7 +161,7 @@ async def get_dependencies_for_param(param, db):
         return param_names.scalars().all()
     return []
 
-async def search_formula(db, params, table_name_params):
+async def search_formula(db, params, table_name_params, select_formula_params=[]):
     # 1. Получаем все формульные параметры (кроме selected_file)
     stmt_formula_params = select(ParameterSchema).where(ParameterSchema.type == 'Formula', ParameterSchema.table_name == table_name_params ) #! искать формульные параметры только для этого же продукта
     res = await db.execute(stmt_formula_params)
@@ -270,7 +270,7 @@ async def search_formula(db, params, table_name_params):
                 params.append(item)
         elif table_name == "codeparam":
             
-            res = await code_params(table_formula_params[0], db, params) #####!ВОЗМОЖНО ТАК НЕЛЬЗЯ - table_formula_params[0]
+            res = await code_params(table_formula_params[0], db, params, select_formula_params) #####!ВОЗМОЖНО ТАК НЕЛЬЗЯ - table_formula_params[0]
             if res is not None:
                 # params[param.name] = str(res)
                 item = {

@@ -12,10 +12,18 @@ class CodeParametr:
     #     self.product_id = product_id
     #     self.param = param_id
     
-    def make_mixture(self, selection_result, note_params_info):
+    def make_mixture(self, selection_result, note_params_info, select_formula_params):
         """
         алгоритм подбора смеси
         """
+        print(select_formula_params)
+        if select_formula_params != []:
+            for param in select_formula_params:
+                selection_result.append({
+                    "name" : "",
+
+                })
+
 
         print(selection_result)
         naydeno = False
