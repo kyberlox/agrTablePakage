@@ -142,21 +142,17 @@ async def process_table_data(
     #     """),
     #     {"product_id": product_id},
     # )
-    
     # schema_params = [row[0] for row in schema_result.fetchall()]
-    
     schema_full_result = await db.execute(
         text("""
             SELECT *
             FROM parameter_schemas
-            WHERE product_id = :product_id and type = 'Table'
+            WHERE product_id = :product_id
         """),
         {"product_id": product_id},
     )
 
     full_info = schema_full_result.mappings().all()
-    
-    print(full_info)
     
     schema_params = [param_info['name'] for param_info in full_info]
     if not schema_params:
@@ -271,7 +267,6 @@ async def process_table_data(
     if formula_params:
         for key, value in formula_params.items():
             parameters[key] = value
-    print(parameters)
 
     new_params = list()
     for item in full_info:
@@ -306,7 +301,7 @@ async def process_table_data(
                     item['response_value'] = None
                     item["error"] = is_param_error[0]["error"]
     
-    parameters = await search_formula(db, new_params, table_name)
+    parameters = await search_formula(db, new_params, table_name, parameters)
     parameters = sorted(parameters, key=lambda param: param['id'])
     
     answer["parameters"] = parameters
