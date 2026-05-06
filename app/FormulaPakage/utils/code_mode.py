@@ -60,7 +60,7 @@ class CodeParametr:
                 },
                 {
                     'id': note_params_info["id"],
-                    'name': note_params_info["id"],
+                    'name': note_params_info["name"],
                     'description': note_params_info["description"],
                     'visibility': True,
                     'required_type':  "list",
