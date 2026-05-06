@@ -21,7 +21,8 @@ class CodeParametr:
 
         if select_formula_params != []:
             for param in select_formula_params:
-                if 
+                if param["name"] == note_params_info['name']:
+                    naydeno = True
 
         
         for param in selection_result:
