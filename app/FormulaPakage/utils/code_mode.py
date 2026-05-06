@@ -16,7 +16,7 @@ class CodeParametr:
         """
         алгоритм подбора смеси
         """
-        print(selection_result)
+        # print(selection_result)
         print(note_params_info)
         print(select_formula_params)
         naydeno = False
