@@ -38,6 +38,9 @@ class CodeParametr:
         # внедрить параметр для смеси на какое-нибудь место, если её ещё нет
         if not naydeno:
             selection_result = [{
+                "debug" : False
+            },
+            {
                     'id': 0.01,
                     'name': "Смесь",
                     'description': "Является ли среда смесью?",
