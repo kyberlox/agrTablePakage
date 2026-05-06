@@ -114,7 +114,7 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
 )
 async def process_table_data(
         product_id: int,
-        selected_params: dict[str, str | int] | None = Body(None),
+        selected_params: dict[str, str | int | list ] | None = Body(None),
         db: AsyncSession = Depends(get_db),
 ):
     # print("На входе: ", selected_params)
