@@ -29,7 +29,7 @@ class CodeParametr:
 
                     if param["response_value"] == "Да":
                         mixture = {
-                            'id': note_params_info["id"],
+                            'id': 0,
                             'name': note_params_info['name'],
                             'description': note_params_info["description"],
                             'visibility': False,
@@ -68,7 +68,7 @@ class CodeParametr:
                     "debug" : False
                 },
                 {
-                    'id': note_params_info["id"],
+                    'id': 1,
                     'name': note_params_info["name"],
                     'description': note_params_info["description"],
                     'visibility': True,
