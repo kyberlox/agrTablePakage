@@ -139,13 +139,14 @@ class CodeParametr:
                         'required_type':  "select-input",
                         "all_values": all_envs_names,
                         "response_value" : envs,
-                        "error" : f"Сумма мольных долей сред смеси должна составлять 100%, а не {r_sum}"
+                        "error" : f"Сумма мольных долей сред смеси должна составлять 100%, а не {r_sum}%"
                     }
 
                     selection_result = [debug_param, mixture, envs_values]
 
-
                 #если правильно
+                else:
+                    print("envs собран!")
                 
                 
 
