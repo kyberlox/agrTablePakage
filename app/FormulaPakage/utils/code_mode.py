@@ -40,11 +40,11 @@ class CodeParametr:
             return {"result" : ["Да", "Нет"]}
         
          # если климатика не задана - ошибка, надо задать
-         if "Климатическое исполнение" in param["name"]:
-                if "response_value" not in param:
-                    return {"error" : "Выберите вариант климатического исполнения"}
-                else:
-                    climate = param["response_value"]
+        #  if "Климатическое исполнение" in param["name"]:
+        #         if "response_value" not in param:
+        #             return {"error" : "Выберите вариант климатического исполнения"}
+        #         else:
+        #             climate = param["response_value"]
          # если температура не задана - ошибка, надо задать
         
 
