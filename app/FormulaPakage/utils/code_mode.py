@@ -27,6 +27,8 @@ class CodeParametr:
                 if param["name"] == "Смесь":
                     naydeno = True
 
+                    "DAAAAAAAAAAAA"
+
                     if param["response_value"] == "Да":
                         return  {"error" : "gbp"}
                     elif param["response_value"] == "Нет":
