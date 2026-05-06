@@ -153,6 +153,8 @@ async def process_table_data(
     )
 
     full_info = schema_full_result.mappings().all()
+
+    print(selected_params)
     
     schema_params = [param_info['name'] for param_info in full_info]
     if not schema_params:
