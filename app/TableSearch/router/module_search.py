@@ -159,7 +159,7 @@ async def process_table_data(
     schema_params = [param_info['name'] for param_info in full_info]
     if not schema_params:
         raise HTTPException(status_code=404, detail="Параметры не найдены")
-    
+    print(selected_params)
     if not selected_params:
         
         await ensure_dm_exists(
