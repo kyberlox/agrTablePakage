@@ -35,22 +35,24 @@ class CodeParametr:
             # если мольные доли в сууме не образуют 100% - ошибка, надо чтобы было 100
 
         # внедрить параметр для смеси на какое-нибудь место, если её ещё нет
-        if not naydeno:
-            selection_result = [{
-                "id" : 0,
-                "debug" : False
-            },
-            {
-                    'id': note_params_info["id"],
-                    'name': note_params_info['name'],
-                    'description': note_params_info["description"],
-                    'visibility': note_params_info["description"],
-                    'required_type':  "list",
-                    "all_values": [
-                        "Да",
-                        "Нет"
-                    ]
-                }]
+        # if not naydeno:
+        #     selection_result = [
+        #         {
+        #             "id" : 0,
+        #             "debug" : False
+        #         },
+        #         {
+        #             'id': note_params_info["id"],
+        #             'name': note_params_info['name'],
+        #             'description': note_params_info["description"],
+        #             'visibility': note_params_info["description"],
+        #             'required_type':  "list",
+        #             "all_values": [
+        #                 "Да",
+        #                 "Нет"
+        #             ]
+        #         }
+        #     ]
         
          # если климатика не задана - ошибка, надо задать
         #  if "Климатическое исполнение" in param["name"]:
