@@ -83,12 +83,14 @@ class CodeParametr:
         
         #заполняем смесь
         if is_mixture:
+             #список ВСЕХ сред
+            all_envs_names = get_param_by_name("Название рабочей среды", selection_result)["all_values"]
+
             #есть ли параметр для состава смесей?
             envs_param = get_param_by_name("Состав смеси", select_formula_params)
+
             #если нет
             if envs_param is None:
-                #список ВСЕХ сред
-                all_envs_names = get_param_by_name("Название рабочей среды", selection_result)["all_values"]
 
                 #создать
                 envs_values = {
