@@ -60,7 +60,7 @@ class CodeParametr:
                 },
                 {
                     'id': note_params_info["id"],
-                    'name': note_params_info['name'],
+                    'name': "Смесь",
                     'description': note_params_info["description"],
                     'visibility': note_params_info["description"],
                     'required_type':  "list",
