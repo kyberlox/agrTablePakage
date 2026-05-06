@@ -147,7 +147,7 @@ async def process_table_data(
         text("""
             SELECT *
             FROM parameter_schemas
-            WHERE product_id = :product_id
+            WHERE product_id = :product_id and type = 'Table' 
         """),
         {"product_id": product_id},
     )
