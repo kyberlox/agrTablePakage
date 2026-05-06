@@ -62,7 +62,7 @@ class CodeParametr:
                     'id': note_params_info["id"],
                     'name': "Смесь",
                     'description': note_params_info["description"],
-                    'visibility': note_params_info["visibility"],
+                    'visibility': True,
                     'required_type':  "list",
                     "all_values": [
                         "Да",
