@@ -241,7 +241,7 @@ async def process_table_data(
         "product_name": product_name,
     }
 
-    print(answer)
+    
     
     # Собираем значения параметров ! ???
     parameters = {
@@ -249,6 +249,8 @@ async def process_table_data(
         for col, param_name in column_to_param.items()
         if row[col]
     }
+
+    print(parameters)
 
     # parameters = dict()
     
