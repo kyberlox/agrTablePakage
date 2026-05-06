@@ -272,7 +272,8 @@ async def search_formula(db, params, table_name_params):
             if res is not None:
                 # params[param.name] = str(res)
                 item = {
-                    'id': param.id,
+                    # 'id': param.id,
+                    'id': 0,
                     'name': param.name,
                     'description': param.description,
                     'visibility': param.visibility,
@@ -282,8 +283,8 @@ async def search_formula(db, params, table_name_params):
                 if "error" in res:
                     item['error'] = str(res["error"])
                 if "result" in res:
-                    item['all_values'] = str(res["result"])
-                    item['response_value'] = str(res["result"])
+                    item['all_values'] = res["result"]
+                    item['response_value'] = res["result"]
                 params.append(item)
 
                 if "total_change" in res:
