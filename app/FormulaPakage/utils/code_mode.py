@@ -26,6 +26,10 @@ class CodeParametr:
             for param in select_formula_params:
                 if param["name"] == "Смесь":
                     naydeno = True
+                    
+                    for sel_param in selection_result:
+                        if sel_param["name"] == param["name"]:
+                            sel_param["response_value"] = param["response_value"]
         
         for param in selection_result:
             # добавить параметр смеси, если его ещё нет
