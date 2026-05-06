@@ -65,7 +65,8 @@ class CodeParametr:
             selection_result = [
                 {
                     "id" : 0,
-                    "debug" : False
+                    "debug" : False,
+                    'visibility': False
                 },
                 {
                     'id': param_info.id,
