@@ -22,16 +22,21 @@ class CodeParametr:
         алгоритм подбора смеси
         """
         # print(selection_result)
-        print(note_params_info)
-        print(select_formula_params)
+        # print(note_params_info)
+        # print(param_info)
+        # print(select_formula_params)
+
         #чтобы не падала ошибка табличного подбора
         debug_param = {
             "id" : -1,
             "debug" : False,
             'visibility': False
         }
+
+        #как понять на каком я этапе?
         naydeno = False
         is_mixture = False
+        got_envs = False
 
         # поиск смеси среди выбранных значений
         if select_formula_params != []:
@@ -83,7 +88,7 @@ class CodeParametr:
         
         #заполняем смесь
         if is_mixture:
-             #список ВСЕХ сред
+            #список ВСЕХ сред
             all_envs_names = get_param_by_name("Название рабочей среды", selection_result)["all_values"]
 
             #есть ли параметр для состава смесей?
@@ -109,10 +114,10 @@ class CodeParametr:
             elif envs_param:
                 #проверить правильность
                 envs = envs_param["response_value"]
-                #выбраны ли среды?
-                print(envs_param)
+                #сумма мольных долей
                 r_sum = sum(list(env.values())[0] for env in envs)
-
+                
+                #хватает ли сред для смеси
                 if envs == [] or len(envs) == 1:
                     envs_values = {
                         'id': 1,
@@ -128,7 +133,7 @@ class CodeParametr:
 
                     selection_result = [debug_param, mixture, envs_values]
 
-                
+                #праивльная ли сумма их долей?
                 elif r_sum != 100:
                     envs_values = {
                         'id': 1,
@@ -144,29 +149,32 @@ class CodeParametr:
 
                     selection_result = [debug_param, mixture, envs_values]
 
-                #если правильно
+                #если всё правильно
                 else:
-                    print("envs собран!")
-                
-                
+                    envs_values = {
+                        'id': 1,
+                        'name': "Состав смеси",
+                        'description': "Нужно выбрать состав смеси из списка доступных сред и указать их мольные доли (%)",
+                        "code_example" : [{ "Азот" : 50}, {"Воздух" : 50}],
+                        'visibility': True,
+                        'required_type':  "select-input",
+                        "all_values": all_envs_names,
+                        "response_value" : envs
+                    }
 
-
-            #если среды не выбраны - предложить
-            #выбраны - собрать смесь
-                
-
-            # если смесь - получить список сред с мольными долями
-
-            # если мольные доли в сууме не образуют 100% - ошибка, надо чтобы было 100
+                    # selection_result = [debug_param, mixture, envs_values]
+                    # print("envs собран!")
+                    got_envs = True
         
-         # если климатика не задана - ошибка, надо задать
-        #  if "Климатическое исполнение" in param["name"]:
-        #         if "response_value" not in param:
-        #             return {"error" : "Выберите вариант климатического исполнения"}
-        #         else:
-        #             climate = param["response_value"]
-         # если температура не задана - ошибка, надо задать
-        
+        #климатика
+        if got_envs:
+            #список ВСЕХ климатик
+            # climate
+            all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
+
+        # если климатика не задана - ошибка, надо задать
+        # если температура не задана - ошибка, надо задать
+
 
         #########РАСЧЕТ###########################
 
