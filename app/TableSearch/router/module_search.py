@@ -200,6 +200,8 @@ async def process_table_data(
         # print(new_params, table_name)
         parameters = await search_formula(db, new_params, table_name)
 
+        parameters = sorted(parameters, key=lambda param: student['id'])
+
         return {
             "product_id": product_id,
             "product_name": product_name,

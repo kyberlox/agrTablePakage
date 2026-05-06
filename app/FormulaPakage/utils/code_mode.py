@@ -16,7 +16,8 @@ class CodeParametr:
         """
         алгоритм подбора смеси
         """
-        print("я тут")
+
+        
         # print(selection_result)
         naydeno = False
         for param in selection_result:

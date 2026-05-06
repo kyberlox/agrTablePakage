@@ -286,7 +286,6 @@ async def search_formula(db, params, table_name_params):
                     item['error'] = str(res["error"])
                 if "result" in res:
                     item['all_values'] = res["result"]
-                    item['response_value'] = res["result"]
                 params.append(item)
 
                 if "total_change" in res:
