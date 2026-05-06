@@ -21,8 +21,6 @@ class CodeParametr:
         print(select_formula_params)
         naydeno = False
 
-        print("DAAAAAAAAAAAA")
-
         # поиск смеси среди выбранных значений
         if select_formula_params != []:
             for param in select_formula_params:
@@ -41,7 +39,7 @@ class CodeParametr:
                             'response_value': 'Нет'
                         }
                         selection_result.append(mixture)
-                        print("DAAAAAAAAAAAA")
+                        print(selection_result[-1])
                         return {"total_change" : selection_result}
         
         for param in selection_result:
