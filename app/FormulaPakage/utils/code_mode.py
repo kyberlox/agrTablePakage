@@ -9,16 +9,20 @@ class CodeParametr:
         """
         алгоритм подбора смеси
         """
-        print(selection_result)
+        # print(selection_result)
 
         # внедрить параметр для смеси на какое-нибудь место
 
-        # for param in selection_result:
+        for param in selection_result:
 
             
             #если температура не задана - ошибка, надо задать
             #если климатика не задана - ошибка, надо задать
-            # if "Климатическое исполнение" in param["name"]:
+            if "Климатическое исполнение" in param["name"]:
+                if "response_value" not in param:
+                    return "Выберите вариант климатического исполнения"
+                else:
+                    climate = param["response_value"]
 
             #если смесь - получить спсиок сред с мольными долями
             #если мольные доли в сууме не образуют 100% - ошибка, надо чтобы было 100
