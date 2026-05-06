@@ -21,11 +21,11 @@ class CodeParametr:
         print(select_formula_params)
         naydeno = False
 
+        # поиск смеси среди выбранных значений
         if select_formula_params != []:
             for param in select_formula_params:
                 if param["name"] == "Смесь":
                     naydeno = True
-
         
         for param in selection_result:
             # добавить параметр смеси, если его ещё нет
