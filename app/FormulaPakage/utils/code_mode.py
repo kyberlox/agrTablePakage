@@ -26,8 +26,7 @@ class CodeParametr:
             for param in select_formula_params:
                 if param["name"] == "Смесь":
                     naydeno = True
-
-                    if "response_value" in param:
+                    
                     if param["response_value"] == "Да":
                         return  {"error" : "gbp"}
                     elif param["response_value"] == "Нет":
