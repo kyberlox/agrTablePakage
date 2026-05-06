@@ -95,7 +95,7 @@ class CodeParametr:
                     'id': 1,
                     'name': "Состав смеси",
                     'description': "Нужно выбрать состав смеси из списка доступных сред и указать их мольные доли (%)",
-                    "code_example" : [{ "Азот" : 50, "Воздух" : 50}],
+                    "code_example" : [{ "Азот" : 50}, {"Воздух" : 50}],
                     'visibility': True,
                     'required_type':  "list",
                     "all_values": all_envs_names
