@@ -26,11 +26,11 @@ class CodeParametr:
             for param in select_formula_params:
                 if param["name"] == "Смесь":
                     naydeno = True
-                    
+
                     if param["response_value"] == "Да":
                         return  {"error" : "gbp"}
                     elif param["response_value"] == "Нет":
-                        return  {"error" : "vb"}
+                        return  {"response_value" : "Нет"}
         
         for param in selection_result:
             # добавить параметр смеси, если его ещё нет
