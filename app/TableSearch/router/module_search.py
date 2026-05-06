@@ -228,8 +228,6 @@ async def process_table_data(
         where_clauses.append(f'"{col}" = :{col}')
         sql_params[col] = str(value)
 
-    print(formula_params)
-
     #шлём собранный запрос
     row, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params, allowed_params)
     full_value_parameters, matched_rows_1 = await get_full_search_from_dm(
@@ -242,6 +240,8 @@ async def process_table_data(
         "product_id": product_id,
         "product_name": product_name,
     }
+
+    print(answer)
     
     # Собираем значения параметров ! ???
     parameters = {
