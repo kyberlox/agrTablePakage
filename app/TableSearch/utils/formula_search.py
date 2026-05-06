@@ -74,6 +74,7 @@ async def calculated_params(note_params_info, db, user_params):
         return None
 
 async def code_params(note_params_info, db, user_params):
+    print(note_params_info)
 
     #тут надо вызвать нужную функцию по её названию из БД
     cp_class = CodeParametr()
@@ -274,8 +275,7 @@ async def search_formula(db, params, table_name_params):
             if res is not None:
                 # params[param.name] = str(res)
                 item = {
-                    # 'id': param.id,
-                    'id': 0,
+                    'id': param.id,
                     'name': param.name,
                     'description': param.description,
                     'visibility': param.visibility,
