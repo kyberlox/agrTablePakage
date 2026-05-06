@@ -28,7 +28,16 @@ class CodeParametr:
                     naydeno = True
 
                     if param["response_value"] == "Да":
-                        return  {"error" : "gbp"}
+                        mixture = {
+                            'id': note_params_info["id"],
+                            'name': note_params_info['name'],
+                            'description': note_params_info["description"],
+                            'visibility': False,
+                            'response_value': 'Да'
+                        }
+
+                        selection_result.append(mixture)
+
                     elif param["response_value"] == "Нет":
                         
                         mixture = {
@@ -39,7 +48,7 @@ class CodeParametr:
                             'response_value': 'Нет'
                         }
                         selection_result.append(mixture)
-                        print(selection_result[-1])
+
                         return {"total_change" : selection_result}
         
         for param in selection_result:
