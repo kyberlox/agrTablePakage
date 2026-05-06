@@ -109,6 +109,8 @@ class CodeParametr:
                 envs = envs_param["response_value"]
                 #выбраны ли среды?
                 print(envs_param)
+                r_sum = sum(list(env.values())[0] for env in envs)
+
                 if envs == [] or len(envs) == 1:
                     envs_values = {
                         'id': 1,
@@ -124,8 +126,8 @@ class CodeParametr:
 
                     selection_result = [debug_param, mixture, envs_values]
 
-                r_sum = sum(list(env.values())[0] for env in envs)
-                if r_sum != 100:
+                
+                elif r_sum != 100:
                     envs_values = {
                         'id': 1,
                         'name': "Состав смеси",
@@ -135,7 +137,7 @@ class CodeParametr:
                         'required_type':  "select-input",
                         "all_values": all_envs_names,
                         "response_value" : envs,
-                        "error" : "Сумма мольных долей сред смеси должна составлять 100%"
+                        "error" : f"Сумма мольных долей сред смеси должна составлять 100%, а не {r_sum}"
                     }
 
                     selection_result = [debug_param, mixture, envs_values]
