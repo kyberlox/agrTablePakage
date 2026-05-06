@@ -26,7 +26,7 @@ class CodeParametr:
         print(select_formula_params)
         #чтобы не падала ошибка табличного подбора
         debug_param = {
-            "id" : 0,
+            "id" : -1,
             "debug" : False,
             'visibility': False
         }
