@@ -288,6 +288,7 @@ async def search_formula(db, params, table_name_params, select_formula_params=[]
                 params.append(item)
 
                 if "total_change" in res:
+                    print(res["total_change"])
                     params = res["total_change"]
         else:
             # Для каждой записи (их обычно одна) вызываем обработчик
