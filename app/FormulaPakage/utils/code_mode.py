@@ -16,17 +16,14 @@ class CodeParametr:
         """
         алгоритм подбора смеси
         """
-        print(select_formula_params)
-        if select_formula_params != dict():
-            for param in select_formula_params:
-                selection_result.append({
-                    "name" : "",
-
-                })
-
-
-        print(selection_result)
+        print(selection_result, note_params_info, select_formula_params)
         naydeno = False
+
+        if select_formula_params != []:
+            for param in select_formula_params:
+                if 
+
+        
         for param in selection_result:
             # добавить параметр смеси, если его ещё нет
             if "Смесь" in param["name"]:

@@ -274,8 +274,6 @@ async def process_table_data(
                     "response_value" : value
                 }
             )
-    print("full_info", full_info)
-    print("parameters", parameters)
     new_params = list()
     for item in full_info:
         name = item['name']
