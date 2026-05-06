@@ -17,7 +17,7 @@ class CodeParametr:
         алгоритм подбора смеси
         """
         print(select_formula_params)
-        if select_formula_params != []:
+        if select_formula_params != dict():
             for param in select_formula_params:
                 selection_result.append({
                     "name" : "",
