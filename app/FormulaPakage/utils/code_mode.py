@@ -44,6 +44,17 @@ class CodeParametr:
             # добавить параметр смеси, если его ещё нет
             if "Смесь" in param["name"]:
                 naydeno = True
+                if param["response_value"] == "Нет":
+                    mixture = {
+                        'id': note_params_info["id"],
+                        'name': note_params_info['name'],
+                        'description': note_params_info["description"],
+                        'visibility': False,
+                        'response_value': 'Нет'
+                    }
+                    selection_result.append(mixture)
+                    return {"total_change" : selection_result}
+        
                 
                 
 
