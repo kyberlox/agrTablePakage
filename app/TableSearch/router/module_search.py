@@ -269,7 +269,7 @@ async def process_table_data(
     if formula_params:
         for key, value in formula_params.items():
             parameters[key] = value
-    
+    print(parameters)
     new_params = list()
     for item in full_info:
         name = item['name']
@@ -302,7 +302,7 @@ async def process_table_data(
                 if is_param_error:
                     item['response_value'] = None
                     item["error"] = is_param_error[0]["error"]
-    print(new_params)
+    
     parameters = await search_formula(db, new_params, table_name)
     parameters = sorted(parameters, key=lambda param: param['id'])
     
