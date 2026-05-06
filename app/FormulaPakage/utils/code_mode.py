@@ -18,7 +18,7 @@ class CodeParametr:
         """
 
 
-        # print(selection_result)
+        print(selection_result)
         naydeno = False
         for param in selection_result:
             # добавить параметр смеси, если его ещё нет
