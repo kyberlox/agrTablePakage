@@ -268,7 +268,7 @@ async def search_formula(db, params, table_name_params):
                 # params[param.name] = str(constant_value)
                 params.append(item)
         elif table_name == "codeparam":
-            res = await calculated_params(table_formula_params, db, params)
+            res = await code_params(formula_param, db, params)
             if res is not None:
                 # params[param.name] = str(res)
                 item = {
