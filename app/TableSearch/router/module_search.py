@@ -121,8 +121,6 @@ async def process_table_data(
     start_time = time.perf_counter()
     selected_params = selected_params or {}
 
-    print(selected_params)
-
     # Получаем продукцию
     product_result = await db.execute(
         text("SELECT name FROM products WHERE id = :id"),
@@ -155,14 +153,11 @@ async def process_table_data(
     )
 
     full_info = schema_full_result.mappings().all()
-
-    print(selected_params)
     
     schema_params = [param_info['name'] for param_info in full_info]
     if not schema_params:
         raise HTTPException(status_code=404, detail="Параметры не найдены")
     
-    print(selected_params)
     if not selected_params:
         
         await ensure_dm_exists(
