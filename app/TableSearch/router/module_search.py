@@ -121,6 +121,8 @@ async def process_table_data(
     start_time = time.perf_counter()
     selected_params = selected_params or {}
 
+    print(selected_params)
+
     # Получаем продукцию
     product_result = await db.execute(
         text("SELECT name FROM products WHERE id = :id"),
