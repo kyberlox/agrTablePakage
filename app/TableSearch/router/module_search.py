@@ -309,7 +309,7 @@ async def process_table_data(
                     item['response_value'] = None
                     item["error"] = is_param_error[0]["error"]
     
-    parameters = await search_formula(db, new_params, table_name, parameters, select_formula_params)
+    parameters = await search_formula(db, new_params, table_name, select_formula_params)
     parameters = sorted(parameters, key=lambda param: param['id'])
     
     answer["parameters"] = parameters
