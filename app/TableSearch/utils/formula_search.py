@@ -282,9 +282,12 @@ async def search_formula(db, params, table_name_params, select_formula_params=[]
                 }
                 
                 if "error" in res:
+                    print("error")
                     item['error'] = res["error"]
                 if "result" in res:
-                    item['all_values'] = res["result"]
+                    rint("error")
+                    item['result'] = res["result"]
+                print("поменял")
                 params.append(item)
 
                 if "total_change" in res:
