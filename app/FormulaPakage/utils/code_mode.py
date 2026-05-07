@@ -190,35 +190,35 @@ class CodeParametr:
 
                 selection_result = [debug_param, mixture, envs_values, climate_values]
 
-            elif climate not in all_climate_names:
-                #
-                climate_values = {
-                    'id': 2,
-                    'name': "Климатическое исполнение по ГОСТ 15150-69",
-                    'description': "",
-                    'visibility': True,
-                    'required_type':  "list",
-                    "all_values": all_climate_names,
-                    "response_value" : climate,
-                    "error" : "Надо выбрать один из предложеннных вариантов"
-                }
+            # elif climate not in all_climate_names:
+            #     #
+            #     climate_values = {
+            #         'id': 2,
+            #         'name': "Климатическое исполнение по ГОСТ 15150-69",
+            #         'description': "",
+            #         'visibility': True,
+            #         'required_type':  "list",
+            #         "all_values": all_climate_names,
+            #         "response_value" : climate,
+            #         "error" : "Надо выбрать один из предложеннных вариантов"
+            #     }
 
-                selection_result = [debug_param, mixture, envs_values, climate_values]
+            #     selection_result = [debug_param, mixture, envs_values, climate_values]
             
-            else:
-                #
-                climate_values = {
-                    'id': 2,
-                    'name': "Климатическое исполнение по ГОСТ 15150-69",
-                    'description': "",
-                    'visibility': True,
-                    'required_type':  "list",
-                    "all_values": all_climate_names,
-                    "response_value" : climate,
-                    "error" : "Надо выбрать один из предложеннных вариантов"
-                }
+            # else:
+            #     #
+            #     climate_values = {
+            #         'id': 2,
+            #         'name': "Климатическое исполнение по ГОСТ 15150-69",
+            #         'description': "",
+            #         'visibility': True,
+            #         'required_type':  "list",
+            #         "all_values": all_climate_names,
+            #         "response_value" : climate,
+            #         "error" : "Надо выбрать один из предложеннных вариантов"
+            #     }
 
-                got_climate = True
+            #     got_climate = True
 
 
 
