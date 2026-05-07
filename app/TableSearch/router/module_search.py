@@ -117,7 +117,7 @@ async def process_table_data(
         selected_params: dict[str, str | int | list ] | None = Body(None),
         db: AsyncSession = Depends(get_db),
 ):
-    print("На входе: ", selected_params)
+    # print("На входе: ", selected_params)
     start_time = time.perf_counter()
     selected_params = selected_params or {}
 
@@ -126,7 +126,9 @@ async def process_table_data(
         text("SELECT name FROM products WHERE id = :id"),
         {"id": product_id},
     )
+    
     product_name = product_result.scalar_one_or_none()
+    print("Таблица продукта", product_name)
 
     if not product_name:
         raise HTTPException(status_code=404, detail="Продукция не найдена")
