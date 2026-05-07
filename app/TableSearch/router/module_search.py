@@ -227,11 +227,11 @@ async def process_table_data(
     allowed_params = set(schema_params)
     formula_params = dict() # добавляю формульные параметры
     for param_name, value in selected_params.items():
-        print(param_name, value)
+        # print(param_name, value)
 
         if param_name not in allowed_params:
             formula_params[param_name] = value
-            print("формульный")
+            # print("формульный")
             continue
 
         if value is None:
@@ -240,7 +240,7 @@ async def process_table_data(
         col = to_sql_name_lat(param_name)
         where_clauses.append(f'"{col}" = :{col}')
         sql_params[col] = str(value)
-        print("вписан в запрос")
+        # print("вписан в запрос")
 
     #шлём собранный запрос
     row, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params, allowed_params)

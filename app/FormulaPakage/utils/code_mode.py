@@ -188,7 +188,7 @@ class CodeParametr:
                 #создать
                 climate_values = {
                     'id': 2,
-                    'name': "Климатическое исполнение (ГОСТ 15150-69)",
+                    'name': "Климатическое исполнение по ГОСТ 15150-69",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
@@ -203,7 +203,7 @@ class CodeParametr:
                 
             #     climate_values = {
             #         'id': 2,
-            #         'name': "Климатическое исполнение (ГОСТ 15150-69)",
+            #         'name': "Климатическое исполнение по ГОСТ 15150-69",
             #         'description': "",
             #         'visibility': True,
             #         'required_type':  "list",
@@ -218,7 +218,7 @@ class CodeParametr:
                 #собрал климатику
                 climate_values = {
                     'id': 2,
-                    'name': "Климатическое исполнение (ГОСТ 15150-69)",
+                    'name': "Климатическое исполнение по ГОСТ 15150-69",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
