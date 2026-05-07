@@ -223,8 +223,7 @@ class CodeParametr:
                     'visibility': True,
                     'required_type':  "list",
                     "all_values": all_climate_names,
-                    "response_value" : climate,
-                    "error" : "Надо выбрать один из предложеннных вариантов"
+                    "response_value" : climate
                 }
 
                 got_climate = True
