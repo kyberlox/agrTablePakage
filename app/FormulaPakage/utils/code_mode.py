@@ -169,26 +169,26 @@ class CodeParametr:
                     got_envs = True
         
         #климатика
-        if got_envs:
-            #список ВСЕХ климатик
-            # climate
-            climate_param = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", select_formula_params)
-            all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
-            climate = climate_param["response_value"]
+        # if got_envs:
+        #     #список ВСЕХ климатик
+        #     # climate
+        #     climate_param = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", select_formula_params)
+        #     all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
+        #     climate = climate_param["response_value"]
 
-            #если нет
-            if climate_param is None:
-                #создать
-                climate_values = {
-                    'id': 2,
-                    'name': "Климатическое исполнение по ГОСТ 15150-69",
-                    'description': "",
-                    'visibility': True,
-                    'required_type':  "list",
-                    "all_values": all_climate_names
-                }
+        #     #если нет
+        #     if climate_param is None:
+        #         #создать
+        #         climate_values = {
+        #             'id': 2,
+        #             'name': "Климатическое исполнение по ГОСТ 15150-69",
+        #             'description': "",
+        #             'visibility': True,
+        #             'required_type':  "list",
+        #             "all_values": all_climate_names
+        #         }
 
-                selection_result = [debug_param, mixture, envs_values, climate_values]
+        #         selection_result = [debug_param, mixture, envs_values, climate_values]
 
             # elif climate not in all_climate_names:
             #     #
