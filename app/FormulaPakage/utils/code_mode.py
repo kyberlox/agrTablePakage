@@ -326,30 +326,32 @@ class CodeParametr:
                 selection_result = [debug_param, mixture, envs_values, climate_values, type_values, T_values]
 
         ################# РАСЧЕТ #################
-
+        #ключи === названия колонок БД
+        env_keys = {
+            "name" : "",
+            "environment" : "",
+            "molecular_weight" : "",
+            "density" : "",
+            "density_ns": "",
+            "material" : "",
+            "viscosity" : "",
+            "isobaric_capacity" : "",
+            "molar_mass" : "",
+            "isochoric_capacity" : "",
+            "adiabatic_index" : "",
+            "compressibility_factor" : "",
+        }
         #собрать список параметров сред
         envs_json = []
         for env in envs:
-            #получить парметры среды
-            env_json = {
-                "name" : env,
-                "environment" : "",
-                "molecular_weight" : 0,
-                "density" : 0,
-                "density_ns": 0,
-                "material" : "",
-                "viscosity" : 0,
-                "isobaric_capacity" : 0,
-                "molar_mass" : 0,
-                "isochoric_capacity" : 0,
-                "adiabatic_index" : 0,
-                "compressibility_factor" : 1,
-            }
+            for keys in env_keys.keys():
+                colunm_name = env_keys[keys]
+                ####################################################
+
+            #значения для ключей среды
             envs_json.append(env_json)
         print(envs_json)
         # selection_result.append(envs_json)
-
-
 
         ########### ЗАПОЛНИТЬ ПАРАМЕТРЫ ##########
 
