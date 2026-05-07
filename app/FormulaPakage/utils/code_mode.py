@@ -174,6 +174,7 @@ class CodeParametr:
             # climate
             climate_param = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", select_formula_params)
             all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
+            print(climate_param)
 
             #если нет
             if climate_param is None:
