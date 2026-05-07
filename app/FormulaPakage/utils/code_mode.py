@@ -249,19 +249,33 @@ class CodeParametr:
 
                 selection_result = [debug_param, mixture, envs_values, climate_values, type_values]
 
-            #валидация не нужна для табличного параметра
+            #валидация нужна
+            elif type_val not in all_climate_names:
+            
+                
+                type_values = {
+                    'id': 3,
+                    'name': "Тип клапана",
+                    'description': "",
+                    'visibility': True,
+                    'required_type':  "list",
+                    "all_values": all_type_names
+                    "response_value" : type_val,
+                    "error" : "Надо выбрать один из предложеннных вариантов"
+                }
+
+                selection_result = [debug_param, mixture, envs_values, climate_values, type_values]
 
             #собрал тип клапана
             else:
-                climate_values = {
+                type_values = {
                     'id': 3,
                     'name': "Тип клапана",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
                     "all_values": all_type_names,
-                    "response_value" : type_val,
-                    "error" : "Надо выбрать один из предложеннных вариантов"
+                    "response_value" : type_val
                 }
 
                 got_type = True
