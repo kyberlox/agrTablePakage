@@ -300,7 +300,7 @@ class CodeParametr:
                 selection_result = [debug_param, mixture, envs_values, climate_values, type_values, T_values]
             
             #валидировать:
-            elif (type_val == "Пружинный (В)" and (T <= -60 or T >= 600) ) or (type_val == "Пилотный (П)" and (T <= -60 or T >= 250) ):
+            elif (type_val == "Пружинный (В)" and (T < -60 or T > 600) ) or (type_val == "Пилотный (П)" and (T < -60 or T > 250) ):
                 T_values = {
                     'id': 4,
                     'name': "Температура рабочей среды",
@@ -346,7 +346,7 @@ class CodeParametr:
                 "compressibility_factor" : 1,
             }
             envs_json.append(env_json)
-            print(envs_json)
+        print(envs_json)
         # selection_result.append(envs_json)
 
 
