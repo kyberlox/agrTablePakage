@@ -128,7 +128,7 @@ async def process_table_data(
     )
     
     product_name = product_result.scalar_one_or_none()
-    print("Таблица продукта", product_name)
+    # print("Продукт: ", product_name)
 
     if not product_name:
         raise HTTPException(status_code=404, detail="Продукция не найдена")
@@ -145,7 +145,7 @@ async def process_table_data(
     #     {"product_id": product_id},
     # )
     # schema_params = [row[0] for row in schema_result.fetchall()]
-    print("tyt")
+    
     schema_full_result = await db.execute(
         text("""
             SELECT *
@@ -154,6 +154,8 @@ async def process_table_data(
         """),
         {"product_id": product_id},
     )
+
+    print("Список табличных параметров по схеме: ", schema_full_result)
 
     full_info = schema_full_result.mappings().all()
     
