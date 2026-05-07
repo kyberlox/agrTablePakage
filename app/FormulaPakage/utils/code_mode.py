@@ -259,7 +259,7 @@ class CodeParametr:
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
-                    "all_values": all_type_names
+                    "all_values": all_type_names,
                     "response_value" : type_val,
                     "error" : "Надо выбрать один из предложеннных вариантов"
                 }
