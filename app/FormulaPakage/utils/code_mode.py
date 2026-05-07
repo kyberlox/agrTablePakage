@@ -345,7 +345,7 @@ class CodeParametr:
                 "adiabatic_index" : 0,
                 "compressibility_factor" : 1,
             }
-            envs_json.append(env_json)
+            # envs_json.append(env_json)
         selection_result.append(envs_json)
 
 
