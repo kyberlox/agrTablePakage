@@ -38,6 +38,7 @@ class CodeParametr:
         is_mixture = False
         got_envs = False
         got_climate = False
+        got_type = False
         got_T = False
 
         # поиск смеси среди выбранных значений
@@ -172,14 +173,14 @@ class CodeParametr:
         if got_envs:
             #список ВСЕХ климатик
             all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
-            print("all_climate_names", all_climate_names)
+            # print("all_climate_names", all_climate_names)
             
 
             climate_param = get_param_by_name("Климатическое исполнение (ГОСТ 15150-69)", select_formula_params)
-            print("climate_param", climate_param)
+            # print("climate_param", climate_param)
 
             climate = climate_param["response_value"] if climate_param is not None else None
-            print("climate", climate)
+            # print("climate", climate)
             
 
             #если нет
@@ -195,7 +196,7 @@ class CodeParametr:
                 }
 
                 selection_result = [debug_param, mixture, envs_values, climate_values]
-                
+
             #валидация не нужна для табличного параметра
             # elif climate not in all_climate_names:
             
@@ -228,14 +229,88 @@ class CodeParametr:
 
                 got_climate = True
 
-
-        #температура
+        #Тип клапана
         if got_climate:
-            pass
+            #список ВСЕХ климатик
+            all_type_names = get_param_by_name("Тип клапана", selection_result)["all_values"]
+            type_param = get_param_by_name("Тип клапана", select_formula_params)
+            type_val = type_param["response_value"] if type_param is not None else None
 
-        # если климатика не задана - ошибка, надо задать
-        # если температура не задана - ошибка, надо задать
+            #если нет
+            if type_val is None:
+                #создать
+                type_values = {
+                    'id': 3,
+                    'name': "Тип клапана",
+                    'description': "",
+                    'visibility': True,
+                    'required_type':  "list",
+                    "all_values": all_type_names
+                }
 
+                selection_result = [debug_param, mixture, envs_values, climate_values, type_values]
+
+            #валидация не нужна для табличного параметра
+
+            #собрал тип клапана
+            else:
+                climate_values = {
+                    'id': 3,
+                    'name': "Тип клапана",
+                    'description': "",
+                    'visibility': True,
+                    'required_type':  "list",
+                    "all_values": all_type_names,
+                    "response_value" : type_val,
+                    "error" : "Надо выбрать один из предложеннных вариантов"
+                }
+
+                got_type = True
+
+        #Температура
+        if got_type
+            # задана пользователем?
+            T_param  = get_param_by_name("Температура рабочей среды", select_formula_params)
+            T = T_param["response_value"] if T_param is not None else None
+
+            #если нет
+            if T is None:
+                #создать
+                T_values = {
+                    'id': 4,
+                    'name': "Температура рабочей среды",
+                    'description': "Ввведите значение температуры рабочей среды (°C)",
+                    'visibility': True,
+                    'required_type':  "user_input"
+                }
+
+                selection_result = [debug_param, mixture, envs_values, climate_values, type_values, T_values]
+            
+            #валидировать:
+            elif (type_val == "Пружинный (В)" and (T <= -60 or T >= 600) ) or (type_val == "Пилотный (П)" and (T <= -60 or T >= 250) ):
+                T_values = {
+                    'id': 4,
+                    'name': "Температура рабочей среды",
+                    'description': "Ввведите значение температуры рабочей среды (°C)",
+                    'visibility': True,
+                    'required_type':  "user_input",
+                    "response_value" : T,
+                    "error" : "Температура должна быть в диапазоне от -60°С до 600°С для пружинных и от -60°С до 250°С для пилотных клапанов"
+                }
+
+                selection_result = [debug_param, mixture, envs_values, climate_values, type_values, T_values]
+            
+            else:
+                T_values = {
+                    'id': 4,
+                    'name': "Температура рабочей среды",
+                    'description': "Ввведите значение температуры рабочей среды (°C)",
+                    'visibility': True,
+                    'required_type':  "user_input",
+                    "response_value" : T
+                }
+
+                selection_result = [debug_param, mixture, envs_values, climate_values, type_values, T_values]
 
         ################# РАСЧЕТ #################
 
@@ -338,8 +413,6 @@ def mixture(envs : list, climate : str, T : float):
 
             print()
 
-
-
     else:
         result["environment"] = "Смесь"
         density_ch = 0
@@ -372,7 +445,6 @@ def mixture(envs : list, climate : str, T : float):
         result["density"] = density_ch / density_zn
         result["viscosity"] = pre_u
         # result["viscosity"] = 10**(pre_viscosity)
-
 
     material = []
     for env in envs:
