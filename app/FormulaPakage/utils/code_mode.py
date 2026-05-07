@@ -195,7 +195,7 @@ class CodeParametr:
                 selection_result = [debug_param, mixture, envs_values, climate_values]
 
             elif climate not in all_climate_names:
-                #
+                #валидация выбора
                 climate = climate_param["response_value"]
                 climate_values = {
                     'id': 2,
