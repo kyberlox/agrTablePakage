@@ -155,9 +155,9 @@ async def process_table_data(
         {"product_id": product_id},
     )
 
-    print("Список табличных параметров по схеме: ", schema_full_result)
-
     full_info = schema_full_result.mappings().all()
+
+    print("Список табличных параметров по схеме: ", full_info)
     
     schema_params = [param_info['name'] for param_info in full_info]
     if not schema_params:
