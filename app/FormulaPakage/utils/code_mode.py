@@ -171,13 +171,12 @@ class CodeParametr:
         #климатика
         if got_envs:
             #список ВСЕХ климатик
-            
-
-            climate_param = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", select_formula_params)
-            print("climate_param", climate_param)
-            #варианты значений климатики
             all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
             print("all_climate_names", all_climate_names)
+            
+
+            climate_param = get_param_by_name("Климатическое исполнение (ГОСТ 15150-69)", select_formula_params)
+            print("climate_param", climate_param)
 
             climate = climate_param["response_value"] if climate_param is not None else None
             print("climate", climate)
@@ -188,7 +187,7 @@ class CodeParametr:
                 #создать
                 climate_values = {
                     'id': 2,
-                    'name': "Климатическое исполнение по ГОСТ 15150-69",
+                    'name': "Климатическое исполнение (ГОСТ 15150-69)",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
@@ -202,7 +201,7 @@ class CodeParametr:
                 
                 climate_values = {
                     'id': 2,
-                    'name': "Климатическое исполнение по ГОСТ 15150-69",
+                    'name': "Климатическое исполнение (ГОСТ 15150-69)",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
@@ -217,7 +216,7 @@ class CodeParametr:
                 #собрал климатику
                 climate_values = {
                     'id': 2,
-                    'name': "Климатическое исполнение по ГОСТ 15150-69",
+                    'name': "Климатическое исполнение (ГОСТ 15150-69)",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
