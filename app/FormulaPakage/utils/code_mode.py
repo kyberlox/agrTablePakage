@@ -178,10 +178,13 @@ class CodeParametr:
             #варианты значений климатики
             all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
             print("all_climate_names", all_climate_names)
+
+            climate = climate_param["response_value"] if climate_param is not None else None
+            print("climate", climate)
             
 
             #если нет
-            if climate_param is None:
+            if climate is None:
                 #создать
                 climate_values = {
                     'id': 2,
@@ -196,7 +199,7 @@ class CodeParametr:
 
             elif climate not in all_climate_names:
                 #валидация выбора
-                climate = climate_param["response_value"]
+                
                 climate_values = {
                     'id': 2,
                     'name': "Климатическое исполнение по ГОСТ 15150-69",
@@ -211,8 +214,7 @@ class CodeParametr:
                 selection_result = [debug_param, mixture, envs_values, climate_values]
             
             else:
-                #
-                climate = climate_param["response_value"]
+                #собрал климатику
                 climate_values = {
                     'id': 2,
                     'name': "Климатическое исполнение по ГОСТ 15150-69",
