@@ -250,7 +250,7 @@ class CodeParametr:
                 selection_result = [debug_param, mixture, envs_values, climate_values, type_values]
 
             #валидация нужна
-            elif type_val not in all_climate_names:
+            elif type_val not in all_type_names:
             
                 
                 type_values = {
