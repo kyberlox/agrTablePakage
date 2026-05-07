@@ -58,7 +58,7 @@ async def get_params_from_sql(db, table_name, schema_params, where_clauses, sql_
         raise
     except Exception as e:
         await db.rollback()
-        raise HTTPException(status_code=404, detail=f"Проверьте провильность значений баличных запросов: {e}")
+        raise HTTPException(status_code=404, detail=f"Проверьте провильность значений табличных параметров: {e}")
 
 async def find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params: dict[str, str | int] | None = dict()):
     #ищем неверно подобранный параметр
