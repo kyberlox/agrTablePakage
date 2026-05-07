@@ -47,13 +47,18 @@ async def get_params_from_sql(db, table_name, schema_params, where_clauses, sql_
             FROM "{table_name}"
             {where_sql}
         """
-
-    result = await db.execute(text(query), sql_params)
-    row = result.mappings().first()
-    # print("что нашлось в БД: ", row)
-    # print(row['matched_rows'])
-    # print(column_to_param)
-    return row, column_to_param
+    try:
+        result = await db.execute(text(query), sql_params)
+        row = result.mappings().first()
+        # print("что нашлось в БД: ", row)
+        # print(row['matched_rows'])
+        # print(column_to_param)
+        return row, column_to_param
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=404, detail=f"Проверьте провильность значений баличных запросов: {e}")
 
 async def find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params: dict[str, str | int] | None = dict()):
     #ищем неверно подобранный параметр
