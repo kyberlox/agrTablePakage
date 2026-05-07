@@ -268,7 +268,7 @@ class CodeParametr:
                 got_type = True
 
         #Температура
-        if got_type
+        if got_type:
             # задана пользователем?
             T_param  = get_param_by_name("Температура рабочей среды", select_formula_params)
             T = T_param["response_value"] if T_param is not None else None
