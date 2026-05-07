@@ -327,6 +327,29 @@ class CodeParametr:
 
         ################# РАСЧЕТ #################
 
+        #собрать список параметров сред
+        envs_json = []
+        for env in envs:
+            #получить парметры среды
+            env_json = {
+                "name" : env,
+                "environment" : "",
+                "molecular_weight" : 0,
+                "density" : 0,
+                "density_ns": 0,
+                "material" : "",
+                "viscosity" : 0,
+                "isobaric_capacity" : 0,
+                "molar_mass" : 0,
+                "isochoric_capacity" : 0,
+                "adiabatic_index" : 0,
+                "compressibility_factor" : 1,
+            }
+            envs_json.append(env_json)
+        selection_result.append(envs_json)
+
+
+
         ########### ЗАПОЛНИТЬ ПАРАМЕТРЫ ##########
 
         return {"total_change" : selection_result}
