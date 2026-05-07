@@ -231,7 +231,7 @@ class CodeParametr:
         #Тип клапана
         if got_climate:
             #список ВСЕХ климатик
-            all_type_names = get_param_by_name("Тип клапана", selection_result)["all_values"]
+            all_type_names = get_param_by_name("Тип предохранительного клапана", selection_result)["all_values"]
             type_param = get_param_by_name("Тип клапана", select_formula_params)
             type_val = type_param["response_value"] if type_param is not None else None
 
@@ -240,7 +240,7 @@ class CodeParametr:
                 #создать
                 type_values = {
                     'id': 3,
-                    'name': "Тип клапана",
+                    'name':"Тип предохранительного клапана",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
@@ -255,7 +255,7 @@ class CodeParametr:
                 
                 type_values = {
                     'id': 3,
-                    'name': "Тип клапана",
+                    'name': "Тип предохранительного клапана",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
