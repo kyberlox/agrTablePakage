@@ -346,6 +346,7 @@ class CodeParametr:
                 "compressibility_factor" : 1,
             }
             envs_json.append(env_json)
+            print(envs_json)
         # selection_result.append(envs_json)
 
 
