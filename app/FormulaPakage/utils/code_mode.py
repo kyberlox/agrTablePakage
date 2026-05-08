@@ -1,3 +1,4 @@
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.TablePakage.model.database import get_db
 
 #функция выводит значение параметра по названию
