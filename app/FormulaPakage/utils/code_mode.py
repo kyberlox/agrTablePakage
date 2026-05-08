@@ -332,8 +332,12 @@ class CodeParametr:
         if got_T:
             #ключи === названия колонок БД
             searching_table_name = "predohranitel_nyj_klapan_table"
+
+            #чтобы проще было заполнять
+            all_columns_names = await db.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name = \'{searching_table_name}\';"))
+            print(all_columns_names..mappings())
             env_keys = {
-                "name" : "",
+                "name" : "nazvanie_rabochej_sredy",
                 "environment" : "",
                 "molecular_weight" : "",
                 "density" : "",
@@ -355,8 +359,8 @@ class CodeParametr:
                 env_params_sql = "SELECT "
                 for keys in env_keys.keys():
                     colunm_name = env_keys[keys]
-                    env_params_sql += colunm_name + " "
-                    
+                    env_params_sql += colunm_name + ", "
+                
                 env_params_sql += f" FROM {searching_table_name} WHERE {env_name_colunm} = \'{env_name}\' "
                 sql_result = await db.execute(text(env_params_sql) )
                 env_result = sql_result.mappings().first()
