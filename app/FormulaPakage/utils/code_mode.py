@@ -343,16 +343,16 @@ class CodeParametr:
             env_keys = {
                 "name" : "nazvanie_rabochej_sredy",
                 "environment" : "agregatnoe_sostojanie",
-                "molecular_weight" : "",
-                "density" : "",
-                "density_ns": "",
-                "material" : "",
-                "viscosity" : "",
-                "isobaric_capacity" : "",
-                "molar_mass" : "",
-                "isochoric_capacity" : "",
-                "adiabatic_index" : "",
-                "compressibility_factor" : "",
+                "molecular_weight" : "molekuljarnaja_massa",
+                "density" : "plotnost_zhidkosti",
+                # "density_ns": "",
+                "material" : "material",
+                "viscosity" : "vjazkost_pa_s",
+                "isobaric_capacity" : "udel_naja_izobarnaja_teploemkost_kdzh_kg_k",
+                "molar_mass" : "moljarnaja_massa",
+                "isochoric_capacity" : "udel_naja_izohornaja_teploemkost_kdzh_kg_k",
+                "adiabatic_index" : "pokazatel_adiabaty",
+                "compressibility_factor" : "faktor_szhimaemosti",
             }
             #собрать список параметров сред
             envs_json = []
