@@ -1,3 +1,4 @@
+from app.TablePakage.model.database import get_db
 
 #функция выводит значение параметра по названию
 def get_param_by_name(param_name, selection_result):
@@ -17,7 +18,7 @@ class CodeParametr:
     #     self.product_id = product_id
     #     self.param = param_id
     
-    def make_mixture(self, selection_result, note_params_info, param_info, select_formula_params):
+    def make_mixture(self, selection_result, note_params_info, param_info, select_formula_params, db: AsyncSession = Depends(get_db)):
         """
         алгоритм подбора смеси
         """
@@ -345,14 +346,18 @@ class CodeParametr:
             }
             #собрать список параметров сред
             envs_json = []
+            env_name_colunm = env_keys["name"]
             for env in envs:
+                env_name = env.keys()[0]
                 ###################### собрать sql запрос ##############################
                 env_params_sql = "SELECT "
                 for keys in env_keys.keys():
                     colunm_name = env_keys[keys]
                     env_params_sql += colunm_name + " "
                     
-                env_params_sql += f" FROM {searching_table_name} WHERE "
+                env_params_sql += f" FROM {searching_table_name} WHERE {env_name_colunm} = \'{env_name}\' "
+                sql_result = await db.execute(env_params_sql)
+                env_result = sql_result.scalar_one_or_none()
                 ###################### обработать его в json ###########################
                 env_json = {}
 
