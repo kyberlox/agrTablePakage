@@ -336,10 +336,10 @@ class CodeParametr:
             searching_table_name = "predohranitel_nyj_klapan_table"
 
             #чтобы проще было заполнять
-            all_columns_names = await db.execute(text(f"SELECT column_name FROM information_schema.columns WHERE table_name = \'{searching_table_name}\';"))
+            # all_columns_names = await db.execute(text(f"SELECT column_name FROM information_schema.columns WHERE table_name = \'{searching_table_name}\';"))
+            # rows_all_columns_names = [row.column_name for row in all_columns_names]
+            # print("Список колонок таблицы: ", rows_all_columns_names)
 
-            rows_all_columns_names = [row.column_name for row in all_columns_names]
-            print("Список колонок таблицы: ", rows_all_columns_names)
             env_keys = {
                 "name" : "nazvanie_rabochej_sredy",
                 "environment" : "agregatnoe_sostojanie",
@@ -366,8 +366,8 @@ class CodeParametr:
                     env_params_sql += colunm_name + ", "
                 
                 env_params_sql += f" FROM {searching_table_name} WHERE {env_name_colunm} = \'{env_name}\' "
-                # sql_result = await db.execute(text(env_params_sql) )
-                # env_result = sql_result.mappings().first()
+                sql_result = await db.execute(text(env_params_sql) )
+                env_result = sql_result.mappings().first()
                 ###################### обработать его в json ###########################
                 env_json = {}
 
