@@ -336,11 +336,11 @@ class CodeParametr:
             searching_table_name = "predohranitel_nyj_klapan_table"
 
             #чтобы проще было заполнять
-            all_columns_names = await db.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name = \'{searching_table_name}\';"))
+            all_columns_names = await db.execute(text(f"SELECT column_name FROM information_schema.columns WHERE table_name = \'{searching_table_name}\';"))
             for row in all_columns_names:
                 print(row.column_name )
-            rews_all_columns_names = [row.column_name for row in all_columns_names]
-            print("Список колонок таблицы: ", rews_all_columns_names)
+            rows_all_columns_names = [row.column_name for row in all_columns_names]
+            print("Список колонок таблицы: ", rows_all_columns_names)
             env_keys = {
                 "name" : "nazvanie_rabochej_sredy",
                 "environment" : "",
