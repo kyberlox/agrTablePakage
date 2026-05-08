@@ -22,9 +22,9 @@ class CodeParametr:
         алгоритм подбора смеси
         """
         # print(selection_result)
-        print(note_params_info)
-        print(param_info)
-        print(select_formula_params)
+        # print(note_params_info)
+        # print(param_info)
+        # print(select_formula_params)
 
         #чтобы не падала ошибка табличного подбора
         debug_param = {
@@ -323,43 +323,44 @@ class CodeParametr:
                     "response_value" : T
                 }
 
-                selection_result = [debug_param, mixture, envs_values, climate_values, type_values, T_values]
+                got_T = True
 
         ################# РАСЧЕТ #################
-        #ключи === названия колонок БД
-        env_keys = {
-            "name" : "",
-            "environment" : "",
-            "molecular_weight" : "",
-            "density" : "",
-            "density_ns": "",
-            "material" : "",
-            "viscosity" : "",
-            "isobaric_capacity" : "",
-            "molar_mass" : "",
-            "isochoric_capacity" : "",
-            "adiabatic_index" : "",
-            "compressibility_factor" : "",
-        }
-        #собрать список параметров сред
-        envs_json = []
-        for env in envs:
-            ###################### собрать sql запрос ##############################
-            env_params_sql = "SELECT "
-            for keys in env_keys.keys():
-                colunm_name = env_keys[keys]
-                env_params_sql += colunm_name + " "
-                
-            env_params_sql += f" FROM products WHERE "
-            ###################### обработать его в json ###########################
-            env_json = {}
+        if got_T:
+            #ключи === названия колонок БД
+            env_keys = {
+                "name" : "",
+                "environment" : "",
+                "molecular_weight" : "",
+                "density" : "",
+                "density_ns": "",
+                "material" : "",
+                "viscosity" : "",
+                "isobaric_capacity" : "",
+                "molar_mass" : "",
+                "isochoric_capacity" : "",
+                "adiabatic_index" : "",
+                "compressibility_factor" : "",
+            }
+            #собрать список параметров сред
+            envs_json = []
+            for env in envs:
+                ###################### собрать sql запрос ##############################
+                env_params_sql = "SELECT "
+                for keys in env_keys.keys():
+                    colunm_name = env_keys[keys]
+                    env_params_sql += colunm_name + " "
+                    
+                env_params_sql += f" FROM products WHERE "
+                ###################### обработать его в json ###########################
+                env_json = {}
 
-            #значения для ключей среды
-            envs_json.append(env_json)
-        print(envs_json)
-        # selection_result.append(envs_json)
+                #значения для ключей среды
+                envs_json.append(env_json)
+            print(envs_json)
+            # selection_result.append(envs_json)
 
-        ########### ЗАПОЛНИТЬ ПАРАМЕТРЫ ##########
+            ########### ЗАПОЛНИТЬ ПАРАМЕТРЫ ##########
 
         return {"total_change" : selection_result}
 
