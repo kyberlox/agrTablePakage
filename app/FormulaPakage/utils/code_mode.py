@@ -18,7 +18,7 @@ class CodeParametr:
     #     self.product_id = product_id
     #     self.param = param_id
     
-    async def make_mixture(self, selection_result, note_params_info, param_info, select_formula_params, db: AsyncSession = Depends(get_db)):
+    async def make_mixture(self, selection_result, note_params_info, param_info, select_formula_params, db: AsyncSession = get_db()):
         """
         алгоритм подбора смеси
         """
