@@ -352,7 +352,7 @@ class CodeParametr:
                     colunm_name = env_keys[keys]
                     env_params_sql += colunm_name + " "
                     
-                env_params_sql += f" FROM  WHERE "
+                env_params_sql += f" FROM {searching_table_name} WHERE "
                 ###################### обработать его в json ###########################
                 env_json = {}
 
