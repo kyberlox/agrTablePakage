@@ -349,7 +349,7 @@ class CodeParametr:
             envs_json = []
             env_name_colunm = env_keys["name"]
             for env in envs:
-                env_name = env.keys()[0]
+                env_name = list(env.keys())[0]
                 ###################### собрать sql запрос ##############################
                 env_params_sql = "SELECT "
                 for keys in env_keys.keys():
