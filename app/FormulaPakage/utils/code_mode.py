@@ -273,7 +273,7 @@ class CodeParametr:
             else:
                 type_values = {
                     'id': 3,
-                    'name': "Тип клапана",
+                    'name': "Тип предохранительного клапана",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
