@@ -337,7 +337,9 @@ class CodeParametr:
 
             #чтобы проще было заполнять
             all_columns_names = await db.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name = \'{searching_table_name}\';"))
-            rews_all_columns_names = [row.column_name for row in all_columns_names]
+            for row in all_columns_names:
+                print(row.column_name )
+            rews_all_columns_names = [row.column_name ]
             print("Список колонок таблицы: ", rews_all_columns_names)
             env_keys = {
                 "name" : "nazvanie_rabochej_sredy",
