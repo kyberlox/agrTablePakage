@@ -21,10 +21,10 @@ class CodeParametr:
         """
         алгоритм подбора смеси
         """
-        # print(selection_result)
-        # print(note_params_info)
-        # print(param_info)
-        # print(select_formula_params)
+        print(selection_result)
+        print(note_params_info)
+        print(param_info)
+        print(select_formula_params)
 
         #чтобы не падала ошибка табличного подбора
         debug_param = {
@@ -344,9 +344,15 @@ class CodeParametr:
         #собрать список параметров сред
         envs_json = []
         for env in envs:
+            ###################### собрать sql запрос ##############################
+            env_params_sql = "SELECT "
             for keys in env_keys.keys():
                 colunm_name = env_keys[keys]
-                ####################################################
+                env_params_sql += colunm_name + " "
+                
+            env_params_sql += f" FROM products WHERE "
+            ###################### обработать его в json ###########################
+            env_json {}
 
             #значения для ключей среды
             envs_json.append(env_json)
