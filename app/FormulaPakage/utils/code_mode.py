@@ -337,7 +337,7 @@ class CodeParametr:
 
             #чтобы проще было заполнять
             all_columns_names = await db.execute(text("SELECT column_name FROM information_schema.columns WHERE table_name = \'{searching_table_name}\';"))
-            print(all_columns_names..mappings())
+            print(all_columns_names.mappings())
             env_keys = {
                 "name" : "nazvanie_rabochej_sredy",
                 "environment" : "",
