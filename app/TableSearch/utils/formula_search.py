@@ -80,7 +80,7 @@ async def code_params(note_params_info, db, user_params, param_info, select_form
     cp_method_name = note_params_info["function_name"]
     cp_method = getattr(cp_class, cp_method_name)
 
-    return cp_method(user_params, note_params_info, param_info, select_formula_params)
+    return await cp_method(user_params, note_params_info, param_info, select_formula_params)
 
 
 async def condition_params(param_info, db, params):
