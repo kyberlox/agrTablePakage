@@ -352,7 +352,7 @@ class CodeParametr:
                 
             env_params_sql += f" FROM products WHERE "
             ###################### обработать его в json ###########################
-            env_json {}
+            env_json = {}
 
             #значения для ключей среды
             envs_json.append(env_json)
