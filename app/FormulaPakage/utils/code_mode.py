@@ -328,6 +328,7 @@ class CodeParametr:
         ################# РАСЧЕТ #################
         if got_T:
             #ключи === названия колонок БД
+            searching_table_name = "predohranitel_nyj_klapan_table"
             env_keys = {
                 "name" : "",
                 "environment" : "",
@@ -351,7 +352,7 @@ class CodeParametr:
                     colunm_name = env_keys[keys]
                     env_params_sql += colunm_name + " "
                     
-                env_params_sql += f" FROM products WHERE "
+                env_params_sql += f" FROM  WHERE "
                 ###################### обработать его в json ###########################
                 env_json = {}
 
