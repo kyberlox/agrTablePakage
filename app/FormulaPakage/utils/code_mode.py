@@ -327,6 +327,8 @@ class CodeParametr:
                 }
 
                 got_T = True
+                #ПОТОМ УДАЛИ
+                selection_result = [debug_param, mixture, envs_values, climate_values, type_values, T_values]
 
         ################# РАСЧЕТ #################
         if got_T:
