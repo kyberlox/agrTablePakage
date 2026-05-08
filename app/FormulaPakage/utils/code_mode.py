@@ -1,4 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import text
 from app.TablePakage.model.database import get_db
 
 #функция выводит значение параметра по названию
@@ -19,7 +20,7 @@ class CodeParametr:
     #     self.product_id = product_id
     #     self.param = param_id
     
-    async def make_mixture(self, selection_result, note_params_info, param_info, select_formula_params, db: AsyncSession = get_db()):
+    async def make_mixture(self, selection_result, note_params_info, param_info, select_formula_params, db):
         """
         алгоритм подбора смеси
         """
@@ -357,8 +358,8 @@ class CodeParametr:
                     env_params_sql += colunm_name + " "
                     
                 env_params_sql += f" FROM {searching_table_name} WHERE {env_name_colunm} = \'{env_name}\' "
-                sql_result = await db.execute(env_params_sql)
-                env_result = sql_result.scalar_one_or_none()
+                sql_result = await db.execute(text(env_params_sql) )
+                env_result = sql_result.mappings().first()
                 ###################### обработать его в json ###########################
                 env_json = {}
 
