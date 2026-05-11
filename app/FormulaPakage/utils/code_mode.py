@@ -368,6 +368,7 @@ class CodeParametr:
                 env_params_sql += f" FROM {searching_table_name} WHERE {env_name_colunm} = \'{env_name}\' "
                 sql_result = await db.execute(text(env_params_sql) )
                 env_result = sql_result.mappings().first()
+                # print(env_result.name)
                 ###################### обработать его в json ###########################
                 env_json = {}
 
