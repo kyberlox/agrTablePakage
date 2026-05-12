@@ -177,7 +177,7 @@ class CodeParametr:
             print("tyt")
             #список ВСЕХ климатик
             climate = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)
-            pront(climate)
+            print(climate)
             if "response_value" not in climate:
                 climate["id"] = 2
                 climate_values = climate
