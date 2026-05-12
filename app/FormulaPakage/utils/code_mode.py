@@ -175,6 +175,7 @@ class CodeParametr:
         #климатика
         if got_envs:
             #список ВСЕХ климатик
+            climate = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)
             all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
             print("all_climate_names", all_climate_names)
             
