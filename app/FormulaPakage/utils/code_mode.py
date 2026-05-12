@@ -46,7 +46,7 @@ class CodeParametr:
 
         # поиск смеси среди выбранных значений
         if select_formula_params != []:
-            param = get_param_by_name("Смесь")
+            param = get_param_by_name("Смесь", selection_result)
             if param:
                 naydeno = True
 
