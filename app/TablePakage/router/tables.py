@@ -284,5 +284,6 @@ async def download_xlsx(
     return FileResponse(
         path=file_path,
         filename=f"{table_name}_params.xlsx",
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Access-Control-Expose-Headers": "Content-Disposition"}
     )
