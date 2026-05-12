@@ -509,7 +509,7 @@ class CodeParametr:
                     result["material"] = "12Х18Н9ТЛ"
 
             ########### ЗАПОЛНИТЬ ПАРАМЕТРЫ ##########
-            for i, param_key in enumerate(result.keys):
+            for i, param_key in enumerate(result.keys()):
                 param = {
                     'id': i+3,
                     'name': "Тип предохранительного клапана",
