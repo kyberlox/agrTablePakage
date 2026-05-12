@@ -512,7 +512,7 @@ class CodeParametr:
             for i, param_key in enumerate(result.keys()):
                 param = {
                     'id': i+3,
-                    'name': "Тип предохранительного клапана",
+                    'name': param_key,
                     'description': "",
                     'visibility': False,
                     'required_type':  "list",
