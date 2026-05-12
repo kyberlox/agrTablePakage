@@ -46,34 +46,34 @@ class CodeParametr:
 
         # поиск смеси среди выбранных значений
         if select_formula_params != []:
-            for param in select_formula_params:
-                if param["name"] == "Смесь":
-                    naydeno = True
+            param = get_param_by_name("Смесь")
+            if param:
+                naydeno = True
 
-                    if param["response_value"] == "Да":
-                        mixture = {
-                            'id': 0,
-                            'name': note_params_info['name'],
-                            'description': note_params_info["description"],
-                            'visibility': False,
-                            'response_value': 'Да'
-                        }
+                if param["response_value"] == "Да":
+                    mixture = {
+                        'id': 0,
+                        'name': note_params_info['name'],
+                        'description': note_params_info["description"],
+                        'visibility': False,
+                        'response_value': 'Да'
+                    }
 
-                        selection_result.append(mixture)
-                        is_mixture = True
+                    selection_result.append(mixture)
+                    is_mixture = True
 
-                    elif param["response_value"] == "Нет":
-                        
-                        mixture = {
-                            'id': param_info.id,
-                            'name': param_info.name,
-                            'description': param_info.description,
-                            'visibility': False,
-                            'response_value': 'Нет'
-                        }
-                        selection_result.append(mixture)
+                elif param["response_value"] == "Нет":
+                    
+                    mixture = {
+                        'id': param_info.id,
+                        'name': param_info.name,
+                        'description': param_info.description,
+                        'visibility': False,
+                        'response_value': 'Нет'
+                    }
+                    selection_result.append(mixture)
 
-                        return {"total_change" : selection_result}
+                    return {"total_change" : selection_result}
 
         # внедрить параметр для смеси на какое-нибудь место, если её ещё нет
         if not naydeno:
