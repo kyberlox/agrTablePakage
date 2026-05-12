@@ -188,6 +188,7 @@ class CodeParametr:
 
                 selection_result = [debug_param, mixture, envs_values, climate_values]
 
+            '''
             all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
             print("climate", climate)
             
@@ -533,7 +534,7 @@ class CodeParametr:
                 }
                 selection_result.append(param)
 
-
+        '''
         return {"total_change" : selection_result}
 
 def mixture(envs : list, climate : str, T : float):
