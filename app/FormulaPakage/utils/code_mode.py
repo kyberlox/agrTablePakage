@@ -422,7 +422,7 @@ class CodeParametr:
                 "adiabatic_index" : 0,
                 "compressibility_factor" : 1,
             }
-
+            r_max = 0
             if len(env_type) == 1:
                 env_type = f"Однородная смесь - {list(env_type)[0]}"
                 result["environment"] = env_type
