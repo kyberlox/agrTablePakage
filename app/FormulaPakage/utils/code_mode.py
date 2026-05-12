@@ -481,7 +481,7 @@ class CodeParametr:
                     # pre_viscosity += log10(env["viscosity"]) * r
 
                     if env["environment"] == "Газ":
-                        M = env["molar_mass"]
+                        M = float(env["molar_mass"])
                         density_ch += (float(env["molar_mass"]) / 22.4) * r
                         density_zn += r
                     elif env["environment"] == "Жидкость":
