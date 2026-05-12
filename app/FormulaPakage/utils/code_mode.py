@@ -518,7 +518,7 @@ class CodeParametr:
                     'required_type':  "list",
                     "response_value" : result[param_key]
                 }
-            selection_result.append(param)
+                selection_result.append(param)
 
 
         return {"total_change" : selection_result}
