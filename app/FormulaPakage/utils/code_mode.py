@@ -420,6 +420,7 @@ class CodeParametr:
                 "adiabatic_index" : 0,
                 "compressibility_factor" : 1,
             }
+
             if len(env_type) == 1:
                 env_type = f"Однородная смесь - {list(env_type)[0]}"
                 result["environment"] = env_type
@@ -522,7 +523,7 @@ class CodeParametr:
             ########### ЗАПОЛНИТЬ ПАРАМЕТРЫ ##########
             for i, param_key in enumerate(result.keys()):
                 param = {
-                    'id': i+3,
+                    'id': i+4,
                     'name': param_key,
                     'description': "",
                     'visibility': False,
