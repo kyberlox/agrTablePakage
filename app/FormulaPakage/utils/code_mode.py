@@ -11,6 +11,7 @@ def get_param_by_name(param_name, selection_result):
             if "error" in param:
                 return False
             #вывести
+            print(param)
             return param
     #или None
     return None
@@ -24,7 +25,7 @@ class CodeParametr:
         """
         алгоритм подбора смеси
         """
-        print(selection_result)
+        # print(selection_result)
         # print(note_params_info)
         # print(param_info)
         # print(select_formula_params)
