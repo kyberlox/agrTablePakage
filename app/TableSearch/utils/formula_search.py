@@ -74,7 +74,6 @@ async def calculated_params(note_params_info, db, user_params):
         return None
 
 async def code_params(note_params_info, db, user_params, param_info, select_formula_params):
-
     #тут надо вызвать нужную функцию по её названию из БД
     cp_class = CodeParametr()
     cp_method_name = note_params_info["function_name"]

@@ -359,6 +359,7 @@ class CodeParametr:
             env_name_colunm = env_keys["name"]
             for env in envs:
                 env_name = list(env.keys())[0]
+                r = env[env_name]
                 ###################### собрать sql запрос ##############################
                 env_params_sql = "SELECT "
                 for keys in env_keys.keys():
@@ -373,6 +374,7 @@ class CodeParametr:
                 ###################### обработать его в json ###########################
                 env_json = {
                     "name" : env_result.nazvanie_rabochej_sredy,
+                    "r" : r,
                     "environment" : env_result.agregatnoe_sostojanie,
                     "molecular_weight" : env_result.molekuljarnaja_massa,
                     "density" : env_result.plotnost_zhidkosti,
