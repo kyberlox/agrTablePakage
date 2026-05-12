@@ -174,8 +174,10 @@ class CodeParametr:
         
         #климатика
         if got_envs:
+            print("tyt")
             #список ВСЕХ климатик
             climate = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)
+            pront(climate)
             if "response_value" not in climate:
                 climate["id"] = 2
                 climate_values = climate
@@ -529,6 +531,7 @@ class CodeParametr:
                 selection_result.append(param)
 
         '''
+
         return {"total_change" : selection_result}
 
 def mixture(envs : list, climate : str, T : float):
