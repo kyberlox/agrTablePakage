@@ -174,6 +174,7 @@ class CodeParametr:
         
         #климатика
         if got_envs:
+            '''
             print("tyt")
             #список ВСЕХ климатик
             climate = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)
@@ -186,7 +187,7 @@ class CodeParametr:
 
             '''
             all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
-            print("climate", climate)
+            # print("climate", all_climate_names)
             
 
             climate_param = get_param_by_name("Климатическое исполнение (ГОСТ 15150-69)", select_formula_params)
@@ -530,7 +531,7 @@ class CodeParametr:
                 }
                 selection_result.append(param)
 
-        '''
+        
 
         return {"total_change" : selection_result}
 
