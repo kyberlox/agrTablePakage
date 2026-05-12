@@ -177,14 +177,8 @@ class CodeParametr:
             #список ВСЕХ климатик
             climate = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)
             if "response_value" not in climate:
-                climate_values = {
-                    'id': 2,
-                    'name': "Климатическое исполнение по ГОСТ 15150-69",
-                    'description': "",
-                    'visibility': True,
-                    'required_type':  "list",
-                    "all_values": all_climate_names
-                }
+                climate["id"] = 2
+                climate_values = climate
 
                 selection_result = [debug_param, mixture, envs_values, climate_values]
 
