@@ -452,7 +452,7 @@ class CodeParametr:
                     adiabatic_index_zn = 0
                     for env in envs_json:
                         r = env["r"]
-                        result["name"] += f"{env['name']}:{r*100}% "
+                        result["name"] += f"{env['name']}:{r}% "
                         M_i = float(env["molar_mass"])
                         u_i = float(env["viscosity"])
                         pre_M += M_i * r
@@ -476,7 +476,7 @@ class CodeParametr:
                 for env in envs_json:
 
                     r = env["r"]
-                    result["name"] += f"{env['name']}:{r*100}% "
+                    result["name"] += f"{env['name']}:{r}% "
 
                     # pre_viscosity += log10(env["viscosity"]) * r
 
