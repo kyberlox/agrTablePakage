@@ -410,7 +410,7 @@ class CodeParametr:
                 "compressibility_factor" : 1,
             }
             if len(env_type) == 1:
-                env_type = f"Однородная смесь - {env_type[0]}"
+                env_type = f"Однородная смесь - {list(env_type)[0]}"
                 result["environment"] = env_type
 
                 if env_type[0]["environment"] == "Жидкость":
