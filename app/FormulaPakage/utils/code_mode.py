@@ -413,7 +413,7 @@ class CodeParametr:
                 env_type = f"Однородная смесь - {list(env_type)[0]}"
                 result["environment"] = env_type
 
-                if env_type[0]["environment"] == "Жидкость":
+                if list(env_type)[0] == "Жидкость":
                     ch_den = 0
                     zn_den = 0
                     pre_viscosity = 0
@@ -430,7 +430,7 @@ class CodeParametr:
                     result["density_ns"] = result["density"]
                     result["viscosity"] = 10**(pre_viscosity)
 
-                elif result["environment"] == "Газ": #если среда - газ
+                elif list(env_type)[0] == "Газ": #если среда - газ
                     viscosity_сh = 0
                     viscosity_zn = 0
                     pre_M = 0
