@@ -433,7 +433,7 @@ class CodeParametr:
                     pre_viscosity = 0
                     for env in envs_json:
                         r = env["r"]
-                        result["name"] += f"{env['name']}:{r*100}% "
+                        result["name"] += f"{env['name']}:{r}% "
                         result["molecular_weight"] += float(env["molecular_weight"]) * r
                         ch_den += float(env["density"]) * r
                         zn_den += r
