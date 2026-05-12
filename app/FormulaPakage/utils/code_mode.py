@@ -11,7 +11,6 @@ def get_param_by_name(param_name, selection_result):
             if "error" in param:
                 return False
             #вывести
-            print(param)
             return param
     #или None
     return None
@@ -177,7 +176,7 @@ class CodeParametr:
         if got_envs:
             #список ВСЕХ климатик
             all_climate_names = get_param_by_name("Климатическое исполнение по ГОСТ 15150-69", selection_result)["all_values"]
-            # print("all_climate_names", all_climate_names)
+            print("all_climate_names", all_climate_names)
             
 
             climate_param = get_param_by_name("Климатическое исполнение (ГОСТ 15150-69)", select_formula_params)
@@ -236,17 +235,15 @@ class CodeParametr:
         if got_climate:
             #список ВСЕХ климатик
             all_type_names = get_param_by_name("Тип клапана", selection_result)["all_values"]
-            type_param = get_param_by_name("Тип клапана", select_formula_params)
-            # all_type_names = type_param["all_values"]
+            type_param = get_param_by_name("Тип предохранительного клапана", select_formula_params)
             type_val = type_param["response_value"] if type_param is not None else None
-            print(type_val)
 
             #если нет
             if type_val is None:
                 #создать
                 type_values = {
                     'id': 3,
-                    'name':"Тип клапана",
+                    'name':"Тип предохранительного клапана",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
@@ -261,7 +258,7 @@ class CodeParametr:
                 
                 type_values = {
                     'id': 3,
-                    'name': "Тип клапана",
+                    'name': "Тип предохранительного клапана",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
@@ -276,7 +273,7 @@ class CodeParametr:
             else:
                 type_values = {
                     'id': 3,
-                    'name': "Тип клапана",
+                    'name': "Тип предохранительного клапана",
                     'description': "",
                     'visibility': True,
                     'required_type':  "list",
