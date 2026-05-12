@@ -436,7 +436,7 @@ class CodeParametr:
                     pre_M = 0
                     adiabatic_index = 0
                     adiabatic_index_zn = 0
-                    for env in envs:
+                    for env in envs_json:
                         r = env["r"]
                         result["name"] += f"{env['name']}:{r*100}% "
                         M_i = float(env["molar_mass"])
@@ -459,7 +459,7 @@ class CodeParametr:
                 density_ch = 0
                 density_zn = 0
                 pre_u = 0
-                for env in envs:
+                for env in envs_json:
 
                     r = env["r"]
                     result["name"] += f"{env['name']}:{r*100}% "
@@ -489,7 +489,7 @@ class CodeParametr:
                 material = []
             
             material = []
-            for env in envs:
+            for env in envs_json:
                 if ( env['name'] == 'Сероводород' and env["r"] < 0.06 ) and result["environment"] == "Смесь":
                     material.append(f"25Л")
                 else:
@@ -500,7 +500,6 @@ class CodeParametr:
                 if len(mat) > ln:
                     ln = len(mat)
                     result["material"] = mat
-            # selection_result.append(envs_json)
 
             #если климатика => то материал
             if ((climate == "ХЛ1") or (climate == "УХЛ1")) and (result["material"] == "25Л"):
