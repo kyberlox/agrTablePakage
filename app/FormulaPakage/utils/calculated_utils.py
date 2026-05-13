@@ -17,7 +17,7 @@ OPERATIONS = {
     '<': operator.lt,
     '<=': operator.le,
     '>': operator.gt,
-    '>': operator.ge,
+    '=>': operator.ge,
     # '&': operator.and_,
     # '|': operator.or_,
     '=': operator.eq,

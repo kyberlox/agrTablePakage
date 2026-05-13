@@ -95,7 +95,7 @@ async def get_user_input(id: int, db: AsyncSession = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ошибка при получении записи в UserInputs с id = {id}: {e}")
 
-@router.post("/add_param/{param_id}", description="Создание записи в UserInputs") # response_model=UserInputSchemaResponse, 
+@router.post("/add_param", description="Создание записи в UserInputs") # response_model=UserInputSchemaResponse, 
 async def add_param_to_condition(
     schema_create: UserInputSchemaCreate, 
     db: AsyncSession = Depends(get_db)

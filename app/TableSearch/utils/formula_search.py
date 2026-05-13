@@ -3,6 +3,7 @@ from app.TablePakage.model.parameter_schema import ParameterSchema
 from app.FormulaPakage.utils.calculated_utils import OPERATIONS, PRIORITY
 from app.FormulaPakage.model.selected_file import SelectedFile
 from app.FormulaPakage.model.constants import Constants
+from app.FormulaPakage.model.user_input import UserInput
 from app.TablePakage.utils.router_utils import to_sql_name_kir
 from app.FormulaPakage.utils.code_mode import CodeParametr, ALLOWED_FUNCTIONS
 from fastapi import HTTPException
@@ -81,9 +82,7 @@ async def code_params(note_params_info, db, user_params, param_info, select_form
 
     return await cp_method(user_params, note_params_info, param_info, select_formula_params, db)
 
-
 async def condition_params(param_info, db, params):
-    print("описание парметра", param_info, "параметры", params)
     if not param_info['condition_param_id'] or not param_info['condition_value']:
         return None
     
@@ -91,7 +90,7 @@ async def condition_params(param_info, db, params):
     param_1 = param_1_stmt.scalar()
     # param_1_res = params[param_1] if param_1 in params and isinstance(params[param_1], str) and "Введите" not in params[param_1] else None
     param_1_res = [item['response_value'] for item in params if item['name'] == param_1][0]
-
+    
     if not param_1_res or "Введите" in param_1_res:
         param_1_kir = to_sql_name_kir(param_1)
         return f"Введите значения для параметра {param_1_kir!r}"
@@ -102,13 +101,19 @@ async def condition_params(param_info, db, params):
         if not the_resulting_param:
             return None
         
+        is_confirm = await check_operation(condition_param=param_1_res, condition_value=param_info['condition_value'], condition_operator=param_info['condition_operator'])
+        if not is_confirm:
+            return None
         if the_resulting_param.field_of_view['selected_file']:
-            is_confirm = await check_operation(condition_param=param_1_res, condition_value=param_info['condition_value'], condition_operator=param_info['condition_operator'])
-            if not is_confirm:
-                return None
-            the_resulting_param_value_stmt = await db.execute(select(SelectedFile.file_url).where(SelectedFile.result_param_id == int(param_info['result_value'])))
-            the_resulting_param = the_resulting_param_value_stmt.scalar()
-            return the_resulting_param
+            the_resulting_param_value_stmt = await db.execute(select(SelectedFile.file_url).whsere(SelectedFile.result_param_id == int(param_info['result_value'])))
+            the_resulting_param_value = the_resulting_param_value_stmt.scalar()
+            return the_resulting_param_value
+        elif the_resulting_param.field_of_view['user_input']:
+            the_resulting_param_value_stmt = await db.execute(select(UserInput.min_value, UserInput.max_value).where(UserInput.result_param_id == int(param_info['result_value'])))
+            the_resulting_param_value = the_resulting_param_value_stmt.fetchall()
+            min_value, max_value = the_resulting_param_value[0]
+            return [min_value, max_value]
+
     else:
         is_confirm = await check_operation(condition_param=param_1_res, condition_value=param_info['condition_value'], condition_operator=param_info['condition_operator'])
         
@@ -117,9 +122,8 @@ async def condition_params(param_info, db, params):
         
         return param_info['result_value']
 
-
 async def user_input_params(param_info, db, params):
-    if not param_info['min_value'] or not param_info['max_value']:
+    if param_info['min_value'] is None or param_info['max_value'] is None:
         return None
     return [str(param_info['min_value']), str(param_info['max_value'])]
     
@@ -299,13 +303,26 @@ async def search_formula(db, params, table_name_params, select_formula_params=[]
                 
                 if func:
                     res = await func(formula_param, db, params)
+                    print(param.name, res)  
+                    all_values = str(res)
+                    response_value = str(res)
+                    if isinstance(res, list):
+                        #Смотрим выбирал ли пользователь уже значения
+                        response_value = None
+                        if select_formula_params:
+                            user_choice = [value['response_value'] for value in select_formula_params if value['name'] == param.name]
+                            if user_choice:
+                                response_value = user_choice[0]
+                                # Валидируем пользовательские значения ПОТОМ ДОДЕЛАТЬ
+                        # print(param.name, res)        
+                        all_values = res
                     if res is not None:
                         item = {
                             'id': param.id,
                             'name': param.name,
                             'description': param.description,
-                            'all_values': str(res),
-                            'response_value': str(res),
+                            'all_values': all_values,
+                            'response_value': response_value,
                             'visibility': param.visibility,
                             'required_type': param.required_type
                         }
