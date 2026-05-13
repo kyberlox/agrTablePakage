@@ -162,29 +162,29 @@ async def upload_xlsx(
             )
 
         # Удаляем колонки, которые не совпали
-        extra = db_columns - excel_columns_set
-
-        for col in extra:
-            # Удаляем из таблицы
-            await db.execute(
-                text(f'ALTER TABLE "{table_name}" DROP COLUMN "{col}"')
-            )
-
-            # Удаляем из parameter_schemas
-            await db.execute(
-                text("""
-                    DELETE FROM parameter_schemas
-                    WHERE transliterated_name = :col
-                      AND product_id = :product_id
-                """),
-                {
-                    "col": col,
-                    "product_id": product_id
-                }
-            )
+        # extra = db_columns - excel_columns_set
+        #
+        # for col in extra:
+        #     # Удаляем из таблицы
+        #     await db.execute(
+        #         text(f'ALTER TABLE "{table_name}" DROP COLUMN "{col}"')
+        #     )
+        #
+        #     # Удаляем из parameter_schemas
+        #     await db.execute(
+        #         text("""
+        #             DELETE FROM parameter_schemas
+        #             WHERE transliterated_name = :col
+        #               AND product_id = :product_id
+        #         """),
+        #         {
+        #             "col": col,
+        #             "product_id": product_id
+        #         }
+        #     )
 
         # Перезаписываем данные в бд
-        await db.execute(text(f'DELETE FROM "{table_name}"'))
+        # await db.execute(text(f'DELETE FROM "{table_name}"'))
 
     await db.commit()
 
