@@ -12,7 +12,6 @@ from app.TableSearch.utils.formula_search import search_formula
 router = APIRouter(prefix="/module_search", tags=["Module_search"])
 
 
-
 # {
 #     'id': int,
 #     'name': str,
@@ -60,8 +59,10 @@ async def get_params_from_sql(db, table_name, schema_params, where_clauses, sql_
         await db.rollback()
         raise HTTPException(status_code=404, detail=f"Проверьте провильность значений табличных параметров: {e}")
 
-async def find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params: dict[str, str | int] | None = dict()):
-    #ищем неверно подобранный параметр
+
+async def find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params,
+                          selected_params: dict[str, str | int] | None = dict()):
+    # ищем неверно подобранный параметр
     where_clauses = []
     res = []
     sql_params = {}
@@ -77,13 +78,14 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
         where_clauses.append(f'"{col}" = :{col}')
         sql_params[col] = str(value)
 
-        req, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params, allowed_params)
+        req, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params,
+                                                         allowed_params)
 
         # Проверяем на наличие ошибок в выбранных параметрах
         if not req or req["matched_rows"] == 0:
             print(f"Параметр {param_name} выбран не верно! \n Вы выбрали значение: {value}.")
             err_param = {
-                "param_name" : param_name,
+                "param_name": param_name,
                 "error": f"Параметр {param_name} выбран не верно! \n Вы выбрали значение: {value}."
             }
             res.append(err_param)
@@ -103,13 +105,8 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
                 break
             #если все ок, продолжаем итерацию пока не найдем ошибку
         '''
-        
-        
-        
 
     return res, req
-
-
 
 
 @router.post(
@@ -149,8 +146,9 @@ async def process_table_data(
     #     """),
     #     {"product_id": product_id},
     # )
+
     # schema_params = [row[0] for row in schema_result.fetchall()]
-    
+
     schema_full_result = await db.execute(
         text("""
             SELECT *
@@ -171,19 +169,19 @@ async def process_table_data(
     # print("Список имен параметров по схеме: ", schema_params)
 
     if not selected_params:
-        
+
         await ensure_dm_exists(
             db,
             product_id,
             table_name,
             schema_params,
         )
-        
+
         parameters, matched_rows = await get_full_search_from_dm(
             db,
             product_id,
         )
-        
+
         new_params = list()
         for item in full_info:
             name = item['name']
@@ -202,7 +200,6 @@ async def process_table_data(
                 'required_type': item.get('required_type', None)
             }
             new_params.append(param_info)
-        
 
         # тут возвращаются формульные параметры
         # parameters = await search_formula(db, parameters, table_name)
@@ -225,7 +222,7 @@ async def process_table_data(
     sql_params = {}
 
     allowed_params = set(schema_params)
-    formula_params = dict() # добавляю формульные параметры
+    formula_params = dict()  # добавляю формульные параметры
     for param_name, value in selected_params.items():
         # print(param_name, value)
 
@@ -242,21 +239,20 @@ async def process_table_data(
         sql_params[col] = str(value)
         # print("вписан в запрос")
 
-    #шлём собранный запрос
-    row, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params, allowed_params)
+    # шлём собранный запрос
+    row, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params,
+                                                     allowed_params)
     full_value_parameters, matched_rows_1 = await get_full_search_from_dm(
-            db,
-            product_id,
-        )
+        db,
+        product_id,
+    )
 
-    #ФОРМИРУЕМ ОТВЕТ
+    # ФОРМИРУЕМ ОТВЕТ
     answer = {
         "product_id": product_id,
         "product_name": product_name,
     }
 
-    
-    
     # Собираем значения параметров ! ???
     parameters = {
         param_name: sorted(str(v) for v in row[col])
@@ -264,10 +260,8 @@ async def process_table_data(
         if row[col]
     }
 
-    
-
     # parameters = dict()
-    
+
     for col, param_name in column_to_param.items():
         if row[col] and len(row[col]) == 1:
             parameters[param_name] = row[col][0]
@@ -275,7 +269,7 @@ async def process_table_data(
             parameters[param_name] = sorted(str(v) for v in row[col])
     # ! ???
 
-    #сюда функция формульного поиска
+    # сюда функция формульного поиска
     """
     функция формульного поиска
     аргументы id продукта и словарь с параметрами
@@ -310,22 +304,23 @@ async def process_table_data(
         }
         new_params.append(param_info)
 
-    #вылавливаю ошибку подбора
+    # вылавливаю ошибку подбора
     if "debug" in parameters and parameters["debug"] == False:
         answer["debug"] = False
     else:
         if not row or row["matched_rows"] == 0:
-            error_params, req = await find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params, selected_params)
+            error_params, req = await find_search_err(db, table_name, schema_params, where_clauses, sql_params,
+                                                      allowed_params, selected_params)
             print("Ошибки: ", error_params)
             for item in new_params:
                 is_param_error = [err_item for err_item in error_params if err_item['param_name'] == item["name"]]
                 if is_param_error:
                     item['response_value'] = None
                     item["error"] = is_param_error[0]["error"]
-    
-    parameters = await search_formula(db, new_params, table_name, select_formula_params)
-    parameters = sorted(parameters, key=lambda param: param['id'])
-    
+
+    parameters = await search_formula(db, new_params, table_name)
+    parameters = sorted(parameters, key=lambda param: param.get('sort') or param['id'])
+
     answer["parameters"] = parameters
     answer["matched_rows"] = row["matched_rows"]
     answer["request_time"] = time.perf_counter() - start_time

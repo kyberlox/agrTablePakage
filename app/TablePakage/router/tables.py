@@ -160,6 +160,12 @@ async def upload_xlsx(
                     "product_id": product_id
                 }
             )
+        await db.execute(text("""
+            UPDATE parameter_schemas
+            SET sort = id
+            WHERE product_id = :product_id
+              AND sort IS NULL
+        """), {"product_id": product_id})
 
         # Удаляем колонки, которые не совпали
         # extra = db_columns - excel_columns_set

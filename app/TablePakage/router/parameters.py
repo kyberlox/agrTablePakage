@@ -44,6 +44,11 @@ async def create_parameter_schema(
 
     db.add(db_schema)
 
+    await db.flush()
+
+    if db_schema.sort is None:
+        db_schema.sort = float(db_schema.id)
+
     # Если тип Table — создаём или изменяем таблицу
     if schema.type == "Table":
         if not schema.table_name:
@@ -138,4 +143,3 @@ async def delete_parameter(
     await db.commit()
 
     return param
-
