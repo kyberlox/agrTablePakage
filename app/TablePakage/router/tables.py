@@ -116,11 +116,17 @@ async def upload_xlsx(
         await db.execute(text(f'DROP TABLE IF EXISTS "{table_name}"'))
 
         # Создаём заново с порядком столбцов как в excel-файле
-        columns_sql = ", ".join(f'"{col}" TEXT' for col in excel_columns_ordered)
+        all_columns = ['id SERIAL PRIMARY KEY']
+
+        all_columns.extend(
+            f'"{col}" TEXT'
+            for col in excel_columns_ordered
+        )
+
+        columns_sql = ",\n".join(all_columns)
 
         await db.execute(text(f"""
             CREATE TABLE "{table_name}" (
-                id SERIAL PRIMARY KEY,
                 {columns_sql}
             )
         """))
@@ -160,12 +166,6 @@ async def upload_xlsx(
                     "product_id": product_id
                 }
             )
-        await db.execute(text("""
-            UPDATE parameter_schemas
-            SET sort = id
-            WHERE product_id = :product_id
-              AND sort IS NULL
-        """), {"product_id": product_id})
 
         # Удаляем колонки, которые не совпали
         # extra = db_columns - excel_columns_set
@@ -195,23 +195,25 @@ async def upload_xlsx(
     await db.commit()
 
     # Делаем вставку в бд
-    columns_sql = ", ".join(f'"{col}"' for col in excel_columns_ordered)
-    values_sql = ", ".join(f":{col}" for col in excel_columns_ordered)
+    if excel_columns_ordered:
+        columns_sql = ", ".join(f'"{col}"' for col in excel_columns_ordered)
+        values_sql = ", ".join(f":{col}" for col in excel_columns_ordered)
 
-    insert_sql = text(f"""
-        INSERT INTO "{table_name}" ({columns_sql})
-        VALUES ({values_sql})
-    """)
+        insert_sql = text(f"""
+            INSERT INTO "{table_name}" ({columns_sql})
+            VALUES ({values_sql})
+        """)
 
-    rows = [
-        {
-            col: str(record[excel_map[col]]) if record[excel_map[col]] is not None else None
-            for col in excel_columns_ordered
-        }
-        for record in df.to_dict(orient="records")
-    ]
+        rows = [
+            {
+                col: str(record[excel_map[col]]) if record[excel_map[col]] is not None else None
+                for col in excel_columns_ordered
+            }
+            for record in df.to_dict(orient="records")
+        ]
 
-    await db.execute(insert_sql, rows)
+        if rows:
+            await db.execute(insert_sql, rows)
 
     # Обновляем витрину datamart
     await mark_datamart_dirty(db, product_id)
