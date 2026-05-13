@@ -46,13 +46,18 @@ async def get_params_from_sql(db, table_name, schema_params, where_clauses, sql_
             FROM "{table_name}"
             {where_sql}
         """
-
-    result = await db.execute(text(query), sql_params)
-    row = result.mappings().first()
-    # print("что нашлось в БД: ", row)
-    # print(row['matched_rows'])
-    # print(column_to_param)
-    return row, column_to_param
+    try:
+        result = await db.execute(text(query), sql_params)
+        row = result.mappings().first()
+        # print("что нашлось в БД: ", row)
+        # print(row['matched_rows'])
+        # print(column_to_param)
+        return row, column_to_param
+    except HTTPException:
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=404, detail=f"Проверьте провильность значений табличных параметров: {e}")
 
 
 async def find_search_err(db, table_name, schema_params, where_clauses, sql_params, allowed_params,
@@ -111,7 +116,7 @@ async def find_search_err(db, table_name, schema_params, where_clauses, sql_para
 )
 async def process_table_data(
         product_id: int,
-        selected_params: dict[str, str | int] | None = Body(None),
+        selected_params: dict[str, str | int | list ] | None = Body(None),
         db: AsyncSession = Depends(get_db),
 ):
     # print("На входе: ", selected_params)
@@ -123,7 +128,9 @@ async def process_table_data(
         text("SELECT name FROM products WHERE id = :id"),
         {"id": product_id},
     )
+    
     product_name = product_result.scalar_one_or_none()
+    # print("Продукт: ", product_name)
 
     if not product_name:
         raise HTTPException(status_code=404, detail="Продукция не найдена")
@@ -146,18 +153,20 @@ async def process_table_data(
         text("""
             SELECT *
             FROM parameter_schemas
-            WHERE product_id = :product_id and type = 'Table'
+            WHERE product_id = :product_id and type = 'Table' 
         """),
         {"product_id": product_id},
     )
 
     full_info = schema_full_result.mappings().all()
 
-    print(full_info)
-
+    # print("Список табличных параметров по схеме: ", full_info)
+    
     schema_params = [param_info['name'] for param_info in full_info]
     if not schema_params:
         raise HTTPException(status_code=404, detail="Параметры не найдены")
+    
+    # print("Список имен параметров по схеме: ", schema_params)
 
     if not selected_params:
 
@@ -215,8 +224,11 @@ async def process_table_data(
     allowed_params = set(schema_params)
     formula_params = dict()  # добавляю формульные параметры
     for param_name, value in selected_params.items():
+        # print(param_name, value)
+
         if param_name not in allowed_params:
             formula_params[param_name] = value
+            # print("формульный")
             continue
 
         if value is None:
@@ -225,6 +237,7 @@ async def process_table_data(
         col = to_sql_name_lat(param_name)
         where_clauses.append(f'"{col}" = :{col}')
         sql_params[col] = str(value)
+        # print("вписан в запрос")
 
     # шлём собранный запрос
     row, column_to_param = await get_params_from_sql(db, table_name, schema_params, where_clauses, sql_params,
@@ -261,11 +274,16 @@ async def process_table_data(
     функция формульного поиска
     аргументы id продукта и словарь с параметрами
     """
+    select_formula_params = []
     if formula_params:
         for key, value in formula_params.items():
             parameters[key] = value
-    print(parameters)
-
+            select_formula_params.append(
+                {
+                    "name" : key,
+                    "response_value" : value
+                }
+            )
     new_params = list()
     for item in full_info:
         name = item['name']
