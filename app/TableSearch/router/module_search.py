@@ -254,7 +254,6 @@ async def process_table_data(
     }
 
     # Собираем значения параметров ! ???
-    print("ngfhgfhg", row, row[col], col)
     parameters = {
         param_name: sorted(str(v) for v in row[col])
         for col, param_name in column_to_param.items()
