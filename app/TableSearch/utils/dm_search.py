@@ -1,7 +1,17 @@
+import re
+
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 from app.TablePakage.utils.router_utils import to_sql_name_lat
 
+
+def natural_sort_key(value):
+    value = str(value)
+
+    return [
+        int(part) if part.isdigit() else part.lower()
+        for part in re.split(r"(\d+)", value)
+    ]
 
 async def rebuild_dm(
     db: AsyncSession,
@@ -31,6 +41,7 @@ async def rebuild_dm(
                 FROM "{table_name}"
             """)
         
+
         final_sql = f"""
             CREATE TABLE "{dm_table}" AS
             {" UNION ALL ".join(union_queries)}
@@ -131,7 +142,8 @@ async def get_full_search_from_dm(
     rows = result.mappings().all()
 
     parameters = {
-        row["param_name"]: sorted(map(str, row["values"]))
+        row["param_name"]: sorted(map(str, row["values"]),
+        key=natural_sort_key)
         for row in rows
         if row["values"]
     }

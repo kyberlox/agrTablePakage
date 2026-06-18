@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Body, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import text
 import time
+import re
 
 from app.TablePakage.model.database import get_db
 from app.TablePakage.utils.router_utils import to_sql_name_lat
@@ -11,6 +12,13 @@ from app.TableSearch.utils.formula_search import search_formula
 
 router = APIRouter(prefix="/module_search", tags=["Module_search"])
 
+def natural_sort_key(value):
+    value = str(value)
+
+    return [
+        int(part) if part.isdigit() else part.lower()
+        for part in re.split(r"(\d+)", value)
+    ]
 
 # {
 #     'id': int,
@@ -255,7 +263,7 @@ async def process_table_data(
 
     # Собираем значения параметров ! ???
     parameters = {
-        param_name: sorted(str(v) for v in row[col])
+        param_name: sorted((str(v) for v in row[col]), key=natural_sort_key)
         for col, param_name in column_to_param.items()
         if row[col]
     }
@@ -266,7 +274,7 @@ async def process_table_data(
         if row[col] and len(row[col]) == 1:
             parameters[param_name] = row[col][0]
         elif row[col] and len(row[col]) > 1:
-            parameters[param_name] = sorted(str(v) for v in row[col])
+            parameters[param_name] = sorted((str(v) for v in row[col]), key=natural_sort_key)
     # ! ???
 
     # сюда функция формульного поиска
